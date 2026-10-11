@@ -408,7 +408,7 @@ function note(fr,t,d,type,v,cut){
 function kick(t){
   const o=AC.createOscillator(),g=AC.createGain();o.type='sine';
   o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
-  g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+  g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.0001,t+.18);
   o.connect(g);g.connect(mGain);o.start(t);o.stop(t+.2);
 }
 function hiss(t,d,v,type,fq){
@@ -418,21 +418,22 @@ function hiss(t,d,v,type,fq){
   s.connect(f);f.connect(g);g.connect(mGain);s.start(t);s.stop(t+d+.02);
 }
 function sched(){
-  if(!AC)return;const sp=60/108/4;
+  if(!AC)return;const sp=60/86/4;
   while(mNext<AC.currentTime+.3){
     const bar=Math.floor(mStep/16)%16,i=mStep%16,t=mNext+(i%2?sp*.14:0),B=SONG[bar],ch=B[0];
     /* drums */
-    if(i===0||i===8||(i===10&&bar%2===1))kick(t);
-    if(i===4||i===12){hiss(t,.14,.22,'bandpass',1800);note(190,t,.08,'triangle',.12,900)}
-    if(i%2===0)hiss(t,.035,.07,'highpass',7000);
-    if(i===14)hiss(t,.16,.06,'highpass',6000);
+    if(i===0||i===8)kick(t);
+    if(i===4||i===12)hiss(t,.12,.1,'bandpass',1500);
+    if(i%4===2)hiss(t,.03,.04,'highpass',7000);
+    
     /* bass */
-    const bs={0:0,3:0,6:12,8:0,11:7,14:12}[i];
-    if(bs!==undefined)note(hz(ch.r+bs),t,sp*(i===0||i===8?2.6:1.5),'sawtooth',.2,480);
+    const bs={0:0,6:12,8:0,11:7}[i];
+    if(bs!==undefined)note(hz(ch.r+bs),t,sp*(i===0||i===8?2.6:1.5),'triangle',.24,520);
     /* chord stabs */
-    if(i===2||i===7||i===10)ch.c.forEach(m=>note(hz(m),t,sp*1.7,'sawtooth',.028,1700));
+    if(i===0)ch.c.forEach(m=>note(hz(m),t,sp*15,'sine',.045,1800));
+    if(i===6)ch.c.forEach(m=>note(hz(m),t,sp*3,'triangle',.02,1500));
     /* lead */
-    for(const n of B[1])if(n[0]===i){note(hz(n[1]),t,sp*n[2]*1.05+.06,'square',.06,2600);note(hz(n[1])*1.005,t,sp*n[2]*1.05+.06,'triangle',.05,3000)}
+    for(const n of B[1])if(n[0]===i){note(hz(n[1]-12),t,sp*n[2]*1.2+.15,'triangle',.11,2200);note(hz(n[1]-12)*1.004,t,sp*n[2]*1.2+.15,'sine',.05,2200)}
     mNext+=sp;mStep++;
   }
 }
