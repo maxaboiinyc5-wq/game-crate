@@ -112,7 +112,7 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
     <div class="brand"><span class="led" aria-hidden="true"></span><h1>GAME CRATE</h1></div>
     <div class="vents" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="clock" id="clock"></div>
-    <button id="mus" type="button" aria-pressed="true">Music on</button>
+    <button id="mus" type="button" aria-pressed="false">Music off</button>
     <p class="sub">Every game we built, on one console. Tap a cartridge to play. In a game, tap the <b>house button</b> on the right side to come back here. You can drag it out of the way.<span class="pc"> On a computer, the keyboard tab on the left side lists each game's controls.</span></p>
     <button id="cont" type="button" hidden><span id="contname"></span><em>CONTINUE</em></button>
   </header>
@@ -443,11 +443,12 @@ function musicStart(){
     nBuf=AC.createBuffer(1,AC.sampleRate*.3|0,AC.sampleRate);{const d=nBuf.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=Math.random()*2-1}
     if(AC.state!=='running'){try{AC.resume()}catch(e){}}
     mNext=AC.currentTime+.08;mStep=0;mTimer=setInterval(sched,80);sched()}catch(e){AC=null}
+  musLabel();
 }
-function musicStop(){clearInterval(mTimer);if(AC){try{AC.close()}catch(e){}AC=null}}
-function musLabel(){$('mus').textContent=mOn?'Music on':'Music off';$('mus').setAttribute('aria-pressed',mOn)}
+function musicStop(){clearInterval(mTimer);if(AC){try{AC.close()}catch(e){}AC=null}if($('mus'))musLabel()}
+function musLabel(){const on=!!AC&&mOn;$('mus').textContent=on?'Music on':'Music off';$('mus').setAttribute('aria-pressed',on)}
 musLabel();
-$('mus').addEventListener('click',e=>{mOn=!mOn;try{localStorage.setItem('maxcade.music',mOn?'1':'0')}catch(_){}musLabel();if(mOn)musicStart();else musicStop()});
+$('mus').addEventListener('click',e=>{mOn=!mOn;try{localStorage.setItem('maxcade.music',mOn?'1':'0')}catch(_){}if(mOn)musicStart();else musicStop();musLabel()});
 /* browsers only allow sound after a tap or key press */
 ['pointerup','touchend','click','keydown'].forEach(n=>addEventListener(n,musicStart,true));
 document.addEventListener('visibilitychange',()=>{if(AC){try{document.hidden?AC.suspend():AC.resume()}catch(e){}}});
