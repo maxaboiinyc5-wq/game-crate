@@ -42,6 +42,8 @@ h1{margin:0;font-family:var(--display);font-weight:900;font-size:clamp(1.55rem,7
 .vents i{width:5px;height:26px;border-radius:3px;background:var(--ground)}
 .clock{flex:none;font-family:var(--display);font-weight:600;font-size:.8rem;letter-spacing:.06em;color:var(--mute);
   font-variant-numeric:tabular-nums}
+#mus{flex:none;font:700 .8rem var(--body);color:var(--text);background:var(--ground);border:2px solid var(--seam);border-radius:8px;padding:7px 11px;cursor:pointer}
+#mus[aria-pressed="false"]{color:var(--mute)}
 .sub{flex-basis:100%;margin:0;color:var(--mute);font-size:.95rem;text-wrap:pretty}
 .sub b{color:var(--text);font-weight:700}
 .sub .pc{display:none}
@@ -110,6 +112,7 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
     <div class="brand"><span class="led" aria-hidden="true"></span><h1>GAME CRATE</h1></div>
     <div class="vents" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="clock" id="clock"></div>
+    <button id="mus" type="button" aria-pressed="true">Music on</button>
     <p class="sub">Every game we built, on one console. Tap a cartridge to play. In a game, tap the <b>house button</b> on the right side to come back here. You can drag it out of the way.<span class="pc"> On a computer, the keyboard tab on the left side lists each game's controls.</span></p>
     <button id="cont" type="button" hidden><span id="contname"></span><em>CONTINUE</em></button>
   </header>
@@ -380,6 +383,42 @@ if(lastGame){
   $('cont').addEventListener('click',()=>launch(lastGame,$('cart-'+lastGame.id)));
 }
 
+/* ---- main menu music: a small synth loop made in the browser, no sound files ---- */
+let AC=null,mTimer=0,mOn=true,mStep=0,mNext=0,mGain=null;
+try{mOn=localStorage.getItem('maxcade.music')!=='0'}catch(e){}
+const CH=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]];
+const MEL=[[76,0,74,0,72,0,69,0],[72,0,0,69,0,65,0,0],[67,0,72,0,76,0,79,0],[74,0,0,71,0,67,0,0]];
+const hz=m=>440*Math.pow(2,(m-69)/12);
+function note(fr,t,d,type,v,cut){
+  const o=AC.createOscillator(),g=AC.createGain(),l=AC.createBiquadFilter();
+  l.type='lowpass';l.frequency.value=cut;o.type=type;o.frequency.value=fr;
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(l);l.connect(g);g.connect(mGain);o.start(t);o.stop(t+d+.03);
+}
+function sched(){
+  if(!AC)return;const sp=60/92/2;
+  while(mNext<AC.currentTime+.3){
+    const bar=Math.floor(mStep/8)%8,c=CH[bar%4],i=mStep%8,t=mNext;
+    if(i===0){note(hz(c[0]-24),t,sp*7,'triangle',.22,600);c.forEach(m=>note(hz(m),t,sp*8,'sine',.05,2000))}
+    if(i===4)note(hz(c[0]-12),t,sp*3,'triangle',.14,600);
+    note(hz(c[[0,1,2,1,0,2,1,2][i]]),t,sp*1.6,'square',.04,1400);
+    if(bar>=4&&MEL[bar%4][i])note(hz(MEL[bar%4][i]),t,sp*2.2,'triangle',.09,2400);
+    mNext+=sp;mStep++;
+  }
+}
+function musicStart(){
+  if(!mOn||AC||busy)return;
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();mGain=AC.createGain();mGain.gain.value=.6;mGain.connect(AC.destination);
+    mNext=AC.currentTime+.08;mStep=0;mTimer=setInterval(sched,80);sched()}catch(e){AC=null}
+}
+function musicStop(){clearInterval(mTimer);if(AC){try{AC.close()}catch(e){}AC=null}}
+function musLabel(){$('mus').textContent=mOn?'Music on':'Music off';$('mus').setAttribute('aria-pressed',mOn)}
+musLabel();
+$('mus').addEventListener('click',e=>{mOn=!mOn;try{localStorage.setItem('maxcade.music',mOn?'1':'0')}catch(_){}musLabel();if(mOn)musicStart();else musicStop()});
+/* browsers only allow sound after a tap or key press */
+addEventListener('pointerdown',musicStart);addEventListener('keydown',musicStart);
+document.addEventListener('visibilitychange',()=>{if(AC){try{document.hidden?AC.suspend():AC.resume()}catch(e){}}});
+
 function tick(){
   try{$('clock').textContent=new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}catch(e){}
 }
@@ -412,7 +451,7 @@ $('bootback').addEventListener('click',()=>{
 });
 
 function launch(g,cart){
-  if(busy)return;busy=true;
+  if(busy)return;busy=true;musicStop();
   if(cart)cart.classList.add('in');
   skin(boot,g);$('bootname').textContent=g.name;boot.hidden=false;
   try{localStorage.setItem(LAST,g.id)}catch(e){}
