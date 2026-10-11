@@ -407,8 +407,10 @@ function sched(){
   }
 }
 function musicStart(){
-  if(!mOn||AC||busy)return;
+  if(!mOn||busy)return;
+  if(AC){if(AC.state!=='running'){try{AC.resume()}catch(e){}}return}
   try{AC=new (window.AudioContext||window.webkitAudioContext)();mGain=AC.createGain();mGain.gain.value=.6;mGain.connect(AC.destination);
+    if(AC.state!=='running'){try{AC.resume()}catch(e){}}
     mNext=AC.currentTime+.08;mStep=0;mTimer=setInterval(sched,80);sched()}catch(e){AC=null}
 }
 function musicStop(){clearInterval(mTimer);if(AC){try{AC.close()}catch(e){}AC=null}}
@@ -416,7 +418,7 @@ function musLabel(){$('mus').textContent=mOn?'Music on':'Music off';$('mus').set
 musLabel();
 $('mus').addEventListener('click',e=>{mOn=!mOn;try{localStorage.setItem('maxcade.music',mOn?'1':'0')}catch(_){}musLabel();if(mOn)musicStart();else musicStop()});
 /* browsers only allow sound after a tap or key press */
-addEventListener('pointerdown',musicStart);addEventListener('keydown',musicStart);
+['pointerup','touchend','click','keydown'].forEach(n=>addEventListener(n,musicStart,true));
 document.addEventListener('visibilitychange',()=>{if(AC){try{document.hidden?AC.suspend():AC.resume()}catch(e){}}});
 
 function tick(){
