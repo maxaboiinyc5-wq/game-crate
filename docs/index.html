@@ -448,9 +448,9 @@ function musicStart(){
 function musicStop(){clearInterval(mTimer);if(AC){try{AC.close()}catch(e){}AC=null}if($('mus'))musLabel()}
 function musLabel(){const on=!!AC&&mOn;$('mus').textContent=on?'Music on':'Music off';$('mus').setAttribute('aria-pressed',on)}
 musLabel();
-$('mus').addEventListener('click',e=>{mOn=!mOn;try{localStorage.setItem('maxcade.music',mOn?'1':'0')}catch(_){}if(mOn)musicStart();else musicStop();musLabel()});
+$('mus').addEventListener('click',e=>{mOn=!(AC&&mOn);try{localStorage.setItem('maxcade.music',mOn?'1':'0')}catch(_){}if(mOn)musicStart();else musicStop();musLabel()});
 /* browsers only allow sound after a tap or key press */
-['pointerup','touchend','click','keydown'].forEach(n=>addEventListener(n,musicStart,true));
+['pointerup','touchend','click','keydown'].forEach(n=>addEventListener(n,e=>{if(e.target&&e.target.id==='mus')return;musicStart()},true));
 document.addEventListener('visibilitychange',()=>{if(AC){try{document.hidden?AC.suspend():AC.resume()}catch(e){}}});
 
 function tick(){
