@@ -1,0 +1,443 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Game Crate"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#191629"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-180.png"><link rel="manifest" href="manifest.json"></head><body>
+<title>Game Crate</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;900&amp;family=Onest:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&amp;family=Saira+Stencil+One&amp;family=Bowlby+One&amp;family=Barlow+Condensed:ital,wght@0,700;1,800&amp;family=Bungee&amp;family=Lilita+One&amp;family=Graduate&amp;family=Russo+One&amp;display=swap&amp;text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20">
+<link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/fflate.min.js">
+<style>
+/* Layout: the top deck of a home-made console, then a shelf of grey plastic cartridges.
+   Every cartridge label is set in its own game's typeface and colors. Single dark look by choice. */
+:root{
+  color-scheme:dark;
+  --ground:#191629;      /* room behind the console */
+  --deck:#241f3d;        /* console plastic */
+  --seam:#373055;        /* seams, slots */
+  --plastic:#d9d3c7;     /* cartridge shell */
+  --plastic-lo:#b0a999;  /* cartridge shading, embossed marks */
+  --text:#f3efe6;
+  --mute:#aaa4c6;
+  --led:#ffb020;         /* power light, focus, last played */
+  --display:"Unbounded","Arial Black",Impact,sans-serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.45;
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:1120px;margin-inline:auto;padding-inline:16px;padding-block:16px 28px;display:flex;flex-direction:column;gap:18px}
+
+/* ---- top deck ---- */
+.deck{background:var(--deck);border:2px solid var(--seam);border-radius:18px;padding:16px 18px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 220px}
+.led{flex:none;width:12px;height:12px;border-radius:50%;background:var(--led);box-shadow:0 0 0 3px #0003,0 0 14px var(--led);
+  animation:glow 3.2s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 3px #0003,0 0 5px var(--led)}}
+h1{margin:0;font-family:var(--display);font-weight:900;font-size:clamp(1.55rem,7vw,2.3rem);line-height:1;letter-spacing:.02em}
+.vents{flex:none;display:flex;gap:5px;margin-left:auto}
+.vents i{width:5px;height:26px;border-radius:3px;background:var(--ground)}
+.clock{flex:none;font-family:var(--display);font-weight:600;font-size:.8rem;letter-spacing:.06em;color:var(--mute);
+  font-variant-numeric:tabular-nums}
+.sub{flex-basis:100%;margin:0;color:var(--mute);font-size:.95rem;text-wrap:pretty}
+.sub b{color:var(--text);font-weight:700}
+.sub .pc{display:none}
+@media (hover:hover) and (pointer:fine){.sub .pc{display:inline}}
+#cont{flex-basis:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  font:700 1rem var(--body);color:var(--ground);background:var(--led);border:0;border-radius:12px;padding:13px 16px;
+  cursor:pointer;text-align:left}
+#cont span{min-width:0;overflow-wrap:anywhere;line-height:1.25}
+#cont em{font-style:normal;font-family:var(--display);font-size:.75rem;letter-spacing:.08em;flex:none}
+
+/* ---- shelf ---- */
+.shelfhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 2px -6px}
+h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.count{font-size:.85rem;color:var(--mute);font-variant-numeric:tabular-nums}
+#shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+
+.cart{position:relative;display:flex;flex-direction:column;min-width:0;min-height:236px;margin:0;padding:0 9px 0;
+  border:0;border-radius:12px 12px 7px 7px;background:var(--plastic);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  box-shadow:inset 0 -7px 0 var(--plastic-lo),0 6px 0 #0d0b18;transition:transform .12s ease,box-shadow .12s ease}
+.grip{height:17px;margin:0 16px;flex:none;
+  background:repeating-linear-gradient(90deg,var(--plastic-lo) 0 3px,transparent 3px 8px);
+  background-size:100% 9px;background-repeat:no-repeat;background-position:0 5px}
+.label{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;padding:10px 10px 12px;border-radius:6px;
+  background:var(--bg);color:var(--tx);border-bottom:6px solid var(--ac);overflow:hidden}
+.kind{align-self:flex-start;max-width:100%;padding:3px 7px;border-radius:4px;background:var(--ac);color:var(--ci);
+  font-weight:700;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;line-height:1.3}
+.name{font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);
+  font-size:calc(1.28rem * var(--sz,1));line-height:1.02;color:var(--fg);overflow-wrap:anywhere;text-wrap:balance}
+.blurb{margin-top:auto;font-size:.8rem;line-height:1.3;font-weight:500}
+.badge{position:absolute;top:-7px;right:-5px;z-index:1;padding:4px 8px;border-radius:5px;background:var(--led);color:var(--ground);
+  font-family:var(--display);font-weight:900;font-size:.56rem;letter-spacing:.08em;box-shadow:0 2px 0 #0d0b18;transform:rotate(3deg)}
+.badge.upd{background:var(--text)}
+.badge.both{left:-5px;right:-5px;text-align:center;letter-spacing:.04em;white-space:nowrap;transform:rotate(-1.5deg)}
+.foot{flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 4px 15px;
+  font-family:var(--display);font-weight:900;font-size:.66rem;letter-spacing:.14em;color:#6f6858}
+.foot i{width:8px;height:8px;border-radius:50%;background:var(--plastic-lo)}
+.cart.last .foot i{background:var(--led);box-shadow:0 0 0 2px #6f6858}
+.cart:hover{transform:translateY(-3px);box-shadow:inset 0 -7px 0 var(--plastic-lo),0 9px 0 #0d0b18}
+.cart:active,.cart.in{transform:translateY(5px);box-shadow:inset 0 -7px 0 var(--plastic-lo),0 1px 0 #0d0b18}
+:focus-visible{outline:3px solid var(--led);outline-offset:3px}
+
+.tools{display:flex;flex-direction:column;gap:10px}
+#q{width:100%;font:500 1rem var(--body);color:var(--text);background:var(--deck);border:2px solid var(--seam);border-radius:12px;padding:12px 14px}
+#q::placeholder{color:var(--mute)}
+#chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:700 .85rem var(--body);color:var(--text);background:var(--deck);border:2px solid var(--seam);border-radius:8px;padding:8px 13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--led);border-color:var(--led);color:var(--ground)}
+#none{margin:0;color:var(--mute)}
+.note{margin:0;color:var(--mute);font-size:.85rem;max-width:62ch;text-wrap:pretty}
+
+/* ---- boot screen ---- */
+#boot{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  padding:24px;background:var(--bg,var(--ground));color:var(--tx,var(--text));text-align:center}
+#bootname{font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);
+  font-size:clamp(2.2rem,11vw,4.5rem);line-height:1;color:var(--fg);text-wrap:balance;max-width:100%;overflow-wrap:anywhere}
+.bar{width:min(240px,70%);height:8px;border-radius:4px;background:#0005;overflow:hidden}
+.bar b{display:block;height:100%;width:40%;border-radius:4px;background:var(--ac);animation:slide 1s ease-in-out infinite alternate}
+@keyframes slide{from{transform:translateX(-40%)}to{transform:translateX(190%)}}
+#bootmsg{margin:0;font-weight:500;max-width:34ch}
+#bootback{font:700 1rem var(--body);color:var(--ground);background:var(--led);border:0;border-radius:12px;padding:12px 22px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.led,.bar b{animation:none}.bar b{width:100%}.cart{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="deck">
+    <div class="brand"><span class="led" aria-hidden="true"></span><h1>GAME CRATE</h1></div>
+    <div class="vents" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="clock" id="clock"></div>
+    <p class="sub">Every game we built, on one console. Tap a cartridge to play. In a game, tap the <b>house button</b> on the right side to come back here. You can drag it out of the way.<span class="pc"> On a computer, the keyboard tab on the left side lists each game's controls.</span></p>
+    <button id="cont" type="button" hidden><span id="contname"></span><em>CONTINUE</em></button>
+  </header>
+
+  <div class="shelfhead"><h2>Cartridges</h2><span class="count" id="count"></span></div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search games" aria-label="Search games" autocomplete="off">
+    <div id="chips" role="group" aria-label="Filter games"></div>
+  </div>
+  <main id="shelf"></main>
+  <p id="none" hidden>No games match. Try another word or tap All.</p>
+
+  <p class="note">Saves stay on this console, on this device. Progress from the old separate game links does not carry over, so each game starts fresh here.</p>
+</div>
+
+<div id="boot" role="status" hidden>
+  <div id="bootname"></div>
+  <div class="bar" id="bootbar"><b></b></div>
+  <p id="bootmsg">Loading</p>
+  <button id="bootback" type="button" hidden>Back to the shelf</button>
+</div>
+
+<script type="text/plain" id="mxdesk">
+/* Game Crate desktop layer. The console adds this to a game when it is launched on a computer
+   (mouse + keyboard). It hides thumb controls, adds missing keyboard shortcuts and a controls list.
+   Nothing here runs on phones. */
+(function(){
+  var G=window.__mxGame;
+  if(window.__mxDeskOn||!window.matchMedia||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  var CFG={
+    'aisle-nine-market':{hide:['#joy'],
+      css:'.mx-desk #actBtn::after{content:"  [E]";opacity:.7}.mx-desk #dropBtn::after{content:"  [Q]";opacity:.7}.mx-desk #phoneBtn::after{content:"  [P]";opacity:.7}',
+      list:[['W A S D','Walk'],['Hold mouse + drag','Look around'],['E','Use / pick up'],['Q','Drop box'],['P','Manager phone'],['Backspace','Undo change at the register']]},
+    'bad-goat-day':{hide:['#btns','#stick'],
+      list:[['W A S D','Move'],['Hold mouse + drag','Look around'],['Space','Jump'],['J or Shift','Headbutt'],['K or E','Lick'],['L or R','Flop']]},
+    'brokebox':{list:[['Arrows or W A S D','Move'],['Space or Z','A button'],['X','B button'],['P or Esc','Pause / back'],['M','Mute']]},
+    'curb-cut':{list:[['Space or Up','Ollie (hold = higher)'],['X or Right','Flip trick in the air']]},
+    'five-star-getaway':{hide:['.pad'],
+      list:[['A D or Left Right','Steer'],['S or Down','Brake'],['Space, W or Up','Nitro']]},
+    'jetway-tycoon':{list:[['Drag','Move the camera'],['Right-drag or Shift + drag','Rotate'],['Scroll wheel','Zoom'],['Click a plane','Do its next step']]},
+    'kickflip-island':{hide:['#joy','#btns'],
+      list:[['W','Push'],['A D','Steer'],['S','Brake'],['Space','Ollie'],['X or K','Flip in the air'],['E or Enter','Start mission']]},
+    'last-gate':{list:[['Mouse','Click the buttons and people']]},
+    'lawn-guard':{keys:{Digit1:['c#k-sun'],Digit2:['c#k-pea'],Digit3:['c#k-nut'],KeyX:['c#shovel']},
+      list:[['Click','Plant, or collect a sun'],['1 2 3','Pick a plant'],['X','Shovel']]},
+    'midnight-motorway':{list:[['A D or Left Right','Change lane'],['Hold mouse + drag','Steer'],['Enter','Start']]},
+    'puck-havoc':{list:[['Click, pull back, let go','Fling the puck']]},
+    'short-hop-air':{hide:['#joy'],fly:true,
+      alias:{KeyW:'ArrowUp',KeyS:'ArrowDown',KeyA:'ArrowLeft',KeyD:'ArrowRight'},
+      block:'.sheet:not([hidden])',
+      keys:{Enter:['c#main','c#fMain','c#gMain'],KeyB:['c#belt','c#fBelt'],KeyP:['c#pa'],KeyG:['c#gear'],KeyF:['c#flaps'],KeyV:['c#cam','c#fView'],
+        Digit1:['c#g_jetway','c#sId'],Digit2:['c#g_stairs','c#sXray'],Digit3:['c#g_gpu','c#sBody'],Digit4:['c#g_fuel'],Digit5:['c#g_cater'],Digit6:['c#g_lav'],
+        Escape:['c#paClose','c#gpX','c#rulesClose','c#hangarClose']},
+      list:[['Arrows or W A S D','Pilot: bank and climb. Attendant: walk'],['Enter','The big action button'],['B','Seat belt sign'],['P','PA announcements'],['G','Gear'],['F','Flaps'],['V','Change view'],['1 to 6','Ground crew vehicles'],['1 2 3','Security checks'],['Esc','Close a panel']]},
+    'stormline-royale':{lock:true,
+      list:[['Click the game','Grab the mouse to aim'],['Esc','Free the mouse and open the menu'],['W A S D','Move'],['Mouse','Aim'],['Click','Fire'],['Space','Jump'],['Q  F  C','Build wall, floor, ramp'],['R','Reload'],['1 to 5','Switch weapon'],['H  G','Medkit, shield'],['E','Drive a cart'],['B','Dance']]},
+    'two-minute-drill':{hide:['#joy'],
+      css:'.mx-desk #hike::after,.mx-desk #juke::after,.mx-desk #kick::after{content:"  [Space]";font-size:.6em;opacity:.75}.mx-desk #tA::after{content:" [1]";font-size:.6em;opacity:.75}.mx-desk #tB::after{content:" [2]";font-size:.6em;opacity:.75}.mx-desk #tC::after{content:" [3]";font-size:.6em;opacity:.75}',
+      list:[['W A S D or Arrows','Move'],['Space','Hike, juke or kick'],['1 2 3 4','Pick a play'],['1 2 3','Throw to A, B or C']]},
+    'wisp-hollow':{hide:['#dashBtn','#stickBase'],
+      list:[['W A S D or Arrows','Move'],['Space or Shift','Dash'],['P or Esc','Pause'],['Enter','Start']]},
+    'zip-riot':{list:[['Click','Dash toward the pointer'],['Click and drag','Aim a longer dash']]}
+  };
+  var c=CFG[G];if(!c)return;
+  window.__mxDeskOn=1;
+  var de=document.documentElement;de.classList.add('mx-desk');
+  var st=document.createElement('style');
+  st.textContent=(c.hide&&c.hide.length?c.hide.map(function(s){return '.mx-desk '+s}).join(',')+'{display:none!important}':'')+(c.css||'');
+  (document.head||de).appendChild(st);
+  /* a real touch means this is a touch screen after all: give the thumb controls back */
+  var touched=false;
+  window.addEventListener('touchstart',function(){touched=true;de.classList.remove('mx-desk')},{capture:true,passive:true,once:true});
+
+  function shown(el){return !!el&&!el.disabled&&el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden'}
+  function q(s){try{return document.querySelector(s)}catch(e){return null}}
+  function typing(e){var t=e.target;return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)}
+
+  /* ---- extra keyboard shortcuts: press the game's own on-screen button ---- */
+  function press(spec){
+    var el=q(spec.slice(1));if(!shown(el))return false;
+    if(spec.charAt(0)==='p'){
+      var o={bubbles:true,cancelable:true,pointerId:992,pointerType:'mouse',isPrimary:true,button:0,buttons:1};
+      el.dispatchEvent(new PointerEvent('pointerdown',o));o.buttons=0;el.dispatchEvent(new PointerEvent('pointerup',o));
+    }else el.click();
+    return true;
+  }
+  var held={},vd=false;
+  function flyOK(){var d=q('#pdeck');return c.fly&&shown(d)&&!q(c.block)}
+  function flyUpdate(){
+    var cv=q('#c');if(!cv)return;
+    var x=(held.ArrowRight?1:0)-(held.ArrowLeft?1:0),y=(held.ArrowUp?1:0)-(held.ArrowDown?1:0),on=(x||y)&&flyOK();
+    var r=cv.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    function ev(t,px,py){cv.dispatchEvent(new PointerEvent(t,{bubbles:true,cancelable:true,pointerId:991,pointerType:'mouse',isPrimary:true,clientX:px,clientY:py,buttons:t==='pointerup'?0:1}))}
+    if(on){if(!vd){vd=true;ev('pointerdown',cx,cy)}ev('pointermove',cx+x*90,cy-y*90)}
+    else if(vd){vd=false;ev('pointerup',cx,cy)}
+  }
+  function key(e,down){
+    if(!e.isTrusted||touched||typing(e))return;
+    var code=e.code;
+    if(c.alias&&c.alias[code]){
+      var a=c.alias[code];
+      window.dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{key:a,code:a,bubbles:true,cancelable:true,repeat:e.repeat}));
+      code=a;
+    }
+    if(c.fly&&/^Arrow/.test(code)){held[code]=down;if(flyOK()||vd){flyUpdate();e.preventDefault()}}
+    if(!down||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+    var b=c.keys&&c.keys[code];if(!b)return;
+    if(c.block&&code!=='Escape'&&q(c.block))return;
+    for(var i=0;i<b.length;i++)if(press(b[i])){e.preventDefault();return}
+  }
+  window.addEventListener('keydown',function(e){key(e,true)},true);
+  window.addEventListener('keyup',function(e){key(e,false)},true);
+  window.addEventListener('blur',function(){held={};if(vd)flyUpdate()});
+
+  /* ---- mouse-aim games: never leave the pointer trapped ---- */
+  if(c.lock){
+    var menuUp=function(){return shown(q('#menu'))||shown(q('#settingsP'))||!shown(q('#hud'))||(q('#hud')&&q('#hud').classList.contains('over'))};
+    setInterval(function(){if(document.pointerLockElement&&menuUp()){try{document.exitPointerLock()}catch(e){}}},200);
+    document.addEventListener('pointerlockchange',function(){
+      if(document.pointerLockElement||menuUp())return;
+      var b=q('#settings');if(shown(b))b.click();   /* losing the mouse (Esc, alt-tab) pauses and shows Resume / Back to title */
+    });
+  }
+
+  /* ---- controls list: a tab on the left edge, the mirror of the house tab ---- */
+  function build(){
+    if(!document.body){setTimeout(build,30);return}
+    var host=document.createElement('div');host.id='mx-keys';
+    host.style.cssText='position:fixed;z-index:2147483646;left:0;top:50%;margin:0;padding:0;border:0;width:0;height:0';
+    var root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+    var rows=c.list.map(function(r){return '<tr><th></th><td></td></tr>'}).join('');
+    root.innerHTML='<style>:host{all:initial}'
+      +'.w{position:absolute;left:0;top:0;font:500 13px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;color:#f3efe6}'
+      +'.t{display:block;position:absolute;left:0;top:-23px;width:30px;height:46px;box-sizing:border-box;padding:0;border:2px solid rgba(255,255,255,.75);border-left:0;border-radius:0 5px 5px 0;background:rgba(18,16,34,.6);cursor:pointer;opacity:.65}'
+      +'.t svg{display:block;width:20px;height:20px;margin:0 auto;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}'
+      +'.t:hover,.open .t{opacity:1;background:#191629}.t:focus-visible{outline:3px solid #ffb020;outline-offset:2px;opacity:1}'
+      +'.p{display:none;position:absolute;left:38px;top:0;transform:translateY(-50%);width:max-content;max-width:min(330px,calc(100vw - 60px));max-height:80vh;overflow:auto;box-sizing:border-box;padding:12px 14px;border-radius:8px;background:#191629;border:2px solid #373055;box-shadow:0 8px 24px rgba(0,0,0,.5)}'
+      +'.open .p{display:block}'
+      +'h2{margin:0 0 8px;font:700 12px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffb020}'
+      +'table{border-collapse:collapse}th,td{padding:3px 0;vertical-align:top;text-align:left;font-weight:500}'
+      +'th{padding-right:14px;color:#ffb020;font-weight:700;white-space:nowrap}'
+      +'</style><div class="w"><button class="t" type="button" aria-label="Controls" title="Controls">'
+      +'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.500" y="6" width="19" height="12" rx="2"/><path d="M6.500 10h.01M10 10h.01M13.500 10h.01M17 10h.01M7.500 14.200h9"/></svg></button>'
+      +'<div class="p" role="region" aria-label="Controls"><h2>Controls</h2><table>'+rows+'</table></div></div>';
+    var w=root.querySelector('.w'),trs=root.querySelectorAll('tr');
+    for(var i=0;i<trs.length;i++){trs[i].children[0].textContent=c.list[i][0];trs[i].children[1].textContent=c.list[i][1]}
+    var t=root.querySelector('.t'),auto=setTimeout(function(){w.classList.remove('open')},9000);
+    w.classList.add('open');
+    t.addEventListener('click',function(){clearTimeout(auto);w.classList.toggle('open')});
+    ['pointerdown','pointerup','pointermove','mousedown','mouseup','click','keydown','keyup','wheel'].forEach(function(n){host.addEventListener(n,function(e){e.stopPropagation()})});
+    window.addEventListener('touchstart',function(){host.style.display='none'},{capture:true,passive:true,once:true});
+    de.appendChild(host);
+  }
+  build();
+})();
+</script>
+
+<script>
+(()=>{
+const GAMES=[
+ {id:'aisle-nine-market',name:'Aisle Nine Market',kind:'3D · store sim',blurb:'Stock the shelves and fridges, then run the register.',
+  font:"'Paytone One','Arial Black',sans-serif",bg:'#fff8e8',fg:'#1b2333',tx:'#1b2333',ac:'#e63946',ci:'#ffffff'},
+ {id:'last-gate',name:'Last Gate',kind:'2D · base sim',blurb:'Decide who gets in, survive the nights, beat the boss on day 30.',
+  font:"'Saira Stencil One',Impact,sans-serif",bg:'#1c1f15',fg:'#f0a81e',tx:'#e8e3cd',ac:'#dc5a34',ci:'#13150e',sz:1.12},
+ {id:'stormline-royale',name:'Stormline Royale',kind:'3D · battle royale',blurb:'25 drop onto the island. Everyone fights everyone.',
+  font:"'Bowlby One','Arial Black',sans-serif",bg:'linear-gradient(160deg,#2c1b63,#0d0f22)',fg:'#ffd23f',tx:'#f4f1ff',ac:'#8a4dff',ci:'#ffffff',sz:.9},
+ {id:'short-hop-air',name:'Short Hop Air',kind:'3D · pilot sim',blurb:'Captain quick hops all day. Three minutes, tops.',
+  font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:800,fs:'italic',tt:'uppercase',bg:'#121519',fg:'#eef1f4',tx:'#c3ccd6',ac:'#ffb547',ci:'#121519',sz:1.3},
+ {id:'bad-goat-day',name:'Bad Goat Day',kind:'3D · sandbox',blurb:'You are a goat. The town did nothing to deserve you.',
+  font:"'Bowlby One','Arial Black',sans-serif",bg:'#9ad7f0',fg:'#2b2118',tx:'#2b2118',ac:'#ff5d8f',ci:'#2b2118',sz:.95},
+ {id:'brokebox',name:'Brokebox',kind:'25-game pack',blurb:'The whole Brokebox library on one cartridge.',
+  font:"'Bungee','Arial Black',sans-serif",bg:'#1e1b45',fg:'#ff5f45',tx:'#f4f1ff',ac:'#ffd43a',ci:'#12102a',sz:.9},
+ {id:'jetway-tycoon',name:'Jetway Tycoon',kind:'3D · tycoon',blurb:'Land planes, turn the gates, grow the airport.',
+  font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:700,tt:'uppercase',bg:'#14161a',fg:'#ffcf1a',tx:'#f4f1e6',ac:'#3ddc84',ci:'#14161a',sz:1.3},
+ {id:'five-star-getaway',name:'Five Star Getaway',kind:'3D · police chase',blurb:'Grab the cash and juke the cops into walls.',
+  font:"'Bungee','Arial Black',sans-serif",bg:'linear-gradient(160deg,#2f1d5c,#1b1233)',fg:'#ffc21a',tx:'#fff4dc',ac:'#ff2f4f',ci:'#1b1233',sz:.86},
+ {id:'lawn-guard',name:'Lawn Guard',kind:'2D · lane defense',blurb:'Sunflowers and pea shooters against 30 zombies.',
+  font:"'Lilita One','Arial Rounded MT Bold',sans-serif",bg:'#356f1c',fg:'#ffd23c',tx:'#f2f7e6',ac:'#7a4a24',ci:'#f3e6ba',sz:1.12},
+ {id:'two-minute-drill',name:'Two Minute Drill',kind:'3D · football',blurb:'Two minutes on the clock. Call it, hike it, throw it.',
+  font:"'Graduate',Rockwell,Georgia,serif",bg:'#22602d',fg:'#f5f2e8',tx:'#f5f2e8',ac:'#ff7a1a',ci:'#0b1220',sz:.92},
+ {id:'kickflip-island',name:'Kickflip Island',kind:'3D · open world',blurb:'Free-roam skate island with mission spots.',
+  font:"'Bungee','Arial Black',sans-serif",bg:'#8ec9e6',fg:'#14161c',tx:'#14161c',ac:'#ff3d7f',ci:'#14161c',sz:.9},
+ {id:'curb-cut',name:'Curb Cut',kind:'2D · skate runner',blurb:'Ollie, flip and grind through the schoolyard.',
+  font:"'Bungee','Arial Black',sans-serif",bg:'linear-gradient(180deg,#23395b 45%,#6b4a4f)',fg:'#ffe45c',tx:'#f4f1de',ac:'#ff3d7f',ci:'#14161c'},
+ {id:'puck-havoc',name:'Puck Havoc',kind:'2D · slingshot',blurb:"You're the puck. Fling yourself at the goons.",
+  font:"'Bungee','Arial Black',sans-serif",bg:'#e9f2f6',fg:'#14202b',tx:'#14202b',ac:'#d8323c',ci:'#ffffff',sz:.95},
+ {id:'midnight-motorway',name:'Midnight Motorway',kind:'2D · endless racer',blurb:'Dodge traffic and mines. PIT cars off the road.',
+  font:"'Russo One',Impact,sans-serif",bg:'#14171a',fg:'#eef0f2',tx:'#c9ced4',ac:'#ff6a1a',ci:'#14171a',sz:.95},
+ {id:'zip-riot',name:'Zip Riot',kind:'2D · arena',blurb:'Dash through the baddies to pop them.',
+  font:"'Bungee','Arial Black',sans-serif",bg:'linear-gradient(160deg,#2b1b63,#1b1140)',fg:'#ffd23f',tx:'#fff4e0',ac:'#ff5d73',ci:'#1b1140'},
+ {id:'wisp-hollow',name:'Wisp Hollow',kind:'3D · survival',blurb:'Keep your lantern lit. Beat the Hollow King.',
+  font:"'Lilita One','Arial Rounded MT Bold',sans-serif",bg:'#14163a',fg:'#ffd670',tx:'#f3eeff',ac:'#ff8a3d',ci:'#14163a',sz:1.12}
+];
+/* [first made, last updated]. Badges work themselves out from these and drop off after 7 days. */
+const DATES={
+ 'aisle-nine-market':['2026-10-10','2026-10-10'],'last-gate':['2026-10-10','2026-10-11'],'stormline-royale':['2026-10-10','2026-10-10'],
+ 'short-hop-air':['2026-10-08','2026-10-10'],'bad-goat-day':['2026-10-09','2026-10-09'],'brokebox':['2026-10-09','2026-10-09'],
+ 'jetway-tycoon':['2026-10-09','2026-10-11'],'five-star-getaway':['2026-10-09','2026-10-09'],'lawn-guard':['2026-10-09','2026-10-09'],
+ 'two-minute-drill':['2026-10-08','2026-10-08'],'kickflip-island':['2026-10-08','2026-10-08'],'curb-cut':['2026-10-08','2026-10-08'],
+ 'puck-havoc':['2026-10-08','2026-10-08'],'midnight-motorway':['2026-10-07','2026-10-07'],'zip-riot':['2026-10-07','2026-10-07'],
+ 'wisp-hollow':['2026-09-20','2026-10-04T15:57:37Z']};
+const $=id=>document.getElementById(id);
+const shelf=$('shelf'),boot=$('boot');
+const LAST='maxcade.last';
+let busy=false,clockTimer=0;
+
+function skin(el,g){
+  const s=el.style;
+  s.setProperty('--bg',g.bg);s.setProperty('--fg',g.fg);s.setProperty('--tx',g.tx);
+  s.setProperty('--ac',g.ac);s.setProperty('--ci',g.ci);s.setProperty('--font',g.font);
+  s.setProperty('--fw',g.fw||400);s.setProperty('--fs',g.fs||'normal');s.setProperty('--tt',g.tt||'none');
+  s.setProperty('--sz',g.sz||1);
+}
+function span(cls,text){const e=document.createElement('span');e.className=cls;if(text!=null)e.textContent=text;return e}
+
+let last=null;try{last=localStorage.getItem(LAST)}catch(e){}
+for(const g of GAMES){
+  const b=document.createElement('button');
+  b.type='button';b.className='cart'+(g.id===last?' last':'');b.id='cart-'+g.id;
+  b.setAttribute('aria-label','Play '+g.name+(g.id===last?', last played':''));
+  skin(b,g);
+  const label=span('label');
+  label.append(span('kind',g.kind),span('name',g.name),span('blurb',g.blurb));
+  const foot=span('foot');foot.setAttribute('aria-hidden','true');
+  foot.append(span('',g.id===last?'LAST PLAYED':'PLAY'),document.createElement('i'));
+  const grip=span('grip');grip.setAttribute('aria-hidden','true');
+  b.append(grip,label,foot);
+  const D=DATES[g.id],WEEK=7*864e5,now=Date.now();
+  if(D){
+    const isNew=now-Date.parse(D[0])<WEEK,isUpd=D[1]!==D[0]&&now-Date.parse(D[1])<WEEK,tags=[];
+    if(isNew)tags.push('new');
+    if(isUpd)tags.push('recently updated');
+    if(isNew&&isUpd)b.append(span('badge both','NEW · RECENTLY UPDATED'));
+    else if(isNew)b.append(span('badge','NEW'));
+    else if(isUpd)b.append(span('badge upd','RECENTLY UPDATED'));
+    if(tags.length)b.setAttribute('aria-label',b.getAttribute('aria-label')+', '+tags.join(', '));
+  }
+  b.addEventListener('click',()=>launch(g,b));
+  shelf.appendChild(b);
+}
+const CATS={'aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
+ 'brokebox':'Arcade','jetway-tycoon':'Sim','five-star-getaway':'Driving','lawn-guard':'Arcade','two-minute-drill':'Sports',
+ 'kickflip-island':'Sports','curb-cut':'Sports','puck-havoc':'Arcade','midnight-motorway':'Driving','zip-riot':'Arcade','wisp-hollow':'Action'};
+let filt='All';
+function apply(){
+  const q=$('q').value.trim().toLowerCase();let n=0;
+  for(const g of GAMES){
+    const dim=g.kind.slice(0,2),cat=CATS[g.id];
+    const okF=filt==='All'||filt===cat||filt===dim;
+    const okQ=!q||(g.name+' '+g.kind+' '+g.blurb+' '+cat).toLowerCase().includes(q);
+    $('cart-'+g.id).hidden=!(okF&&okQ);if(okF&&okQ)n++;
+  }
+  $('count').textContent=n===GAMES.length?n+' on the shelf':n+' of '+GAMES.length;
+  $('none').hidden=n>0;
+}
+for(const f of ['All','3D','2D','Arcade','Action','Sim','Sports','Driving']){
+  const c=document.createElement('button');c.type='button';c.className='chip';c.textContent=f;
+  c.setAttribute('aria-pressed',f==='All');
+  c.addEventListener('click',()=>{filt=f;document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===c));apply()});
+  $('chips').appendChild(c);
+}
+$('q').addEventListener('input',apply);apply();
+
+const lastGame=GAMES.find(g=>g.id===last);
+if(lastGame){
+  $('contname').textContent='Jump back into '+lastGame.name;
+  $('cont').hidden=false;
+  $('cont').addEventListener('click',()=>launch(lastGame,$('cart-'+lastGame.id)));
+}
+
+function tick(){
+  try{$('clock').textContent=new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}catch(e){}
+}
+tick();clockTimer=setInterval(tick,15000);
+
+/* arrow keys move between cartridges */
+shelf.addEventListener('keydown',e=>{
+  const dir={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+  const cur=document.activeElement&&document.activeElement.closest?document.activeElement.closest('.cart'):null;
+  if(!dir||!cur)return;
+  const r=cur.getBoundingClientRect();let best=null,bd=Infinity;
+  for(const c of shelf.children){
+    if(c===cur)continue;
+    const q=c.getBoundingClientRect(),dx=q.left-r.left,dy=q.top-r.top;
+    if(dir[0]&&(Math.abs(dy)>4||Math.sign(dx)!==dir[0]))continue;
+    if(dir[1]&&(Math.abs(dy)<=4||Math.sign(dy)!==dir[1]))continue;
+    const d=Math.abs(dy)*1000+Math.abs(dx);
+    if(d<bd){bd=d;best=c}
+  }
+  if(best){e.preventDefault();best.focus();best.scrollIntoView({block:'nearest'})}
+});
+
+function fail(msg){
+  busy=false;
+  $('bootbar').hidden=true;$('bootmsg').textContent=msg;$('bootback').hidden=false;$('bootback').focus();
+}
+$('bootback').addEventListener('click',()=>{
+  boot.hidden=true;$('bootback').hidden=true;$('bootbar').hidden=false;$('bootmsg').textContent='Loading';
+  document.querySelectorAll('.cart.in').forEach(c=>c.classList.remove('in'));
+});
+
+function launch(g,cart){
+  if(busy)return;busy=true;
+  if(cart)cart.classList.add('in');
+  skin(boot,g);$('bootname').textContent=g.name;boot.hidden=false;
+  try{localStorage.setItem(LAST,g.id)}catch(e){}
+  const wait=new Promise(r=>setTimeout(r,650));
+  fetch('games/'+g.id+'.html',{cache:'no-cache'})
+    .then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.text()})
+    .then(html=>wait.then(()=>html))
+    .then(html=>{
+      if(html.indexOf('mx-home')<0)throw new Error('not a game file');
+      /* on a computer, add the desktop layer (keyboard shortcuts, controls list, no thumb sticks) */
+      const lay=$('mxdesk')?$('mxdesk').textContent:'';
+      if(lay)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';<\/script><script>'+lay+'<\/script>');
+      clearInterval(clockTimer);
+      window.__maxcade=1;
+      /* swap this whole page for the game; the house button reloads to get back here */
+      document.open();document.write(html);document.close();
+    })
+    .catch(()=>{
+      if(!$('bootmsg')){location.reload();return}
+      fail(navigator.onLine===false
+      ? 'You are offline. Reconnect, then pick the game again.'
+      : g.name+' did not load. Go back and tap it again.');
+    });
+}
+})();
+</script>
+
+</body></html>

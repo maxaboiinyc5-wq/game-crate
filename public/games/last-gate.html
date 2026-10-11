@@ -1,0 +1,749 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<script>
+/* Maxcade: "back to console" tab on the side of the screen. Lives in a shadow root so the game's CSS and selectors never touch it. */
+(function(){
+  if(window.__mxHomeOn)return;window.__mxHomeOn=1;
+  var KEY='maxcade.homepos2',BW=30,BH=46,pos=[1,.5],host=document.createElement('div');
+  host.id='mx-home';
+  host.style.cssText='position:fixed;z-index:2147483647;left:0;top:0;margin:0;padding:0;border:0;width:0;height:0;touch-action:none;-webkit-user-select:none;user-select:none';
+  var root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+  root.innerHTML='<style>'
+    +':host{all:initial}'
+    +'.w{position:absolute;left:0;top:0;width:'+BW+'px;height:'+BH+'px;margin:-'+(BH/2)+'px 0 0 -'+(BW/2)+'px;font:600 14px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif}'
+    +'.h{display:block;width:100%;height:100%;box-sizing:border-box;margin:0;padding:0;border:2px solid rgba(255,255,255,.75);border-radius:5px;background:rgba(18,16,34,.6);cursor:pointer;opacity:.65;touch-action:none}'
+    +'.h svg{display:block;width:18px;height:18px;margin:0 auto;fill:#fff}'
+    +'.h:focus-visible,.q button:focus-visible{outline:3px solid #ffb020;outline-offset:2px;opacity:1}'
+    +'.open .h{opacity:1;background:#191629}'
+    +'.q{display:none;position:absolute;width:200px;box-sizing:border-box;padding:12px;border-radius:8px;background:#191629;border:2px solid #373055;color:#f3efe6;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.5)}'
+    +'.open .q{display:block}'
+    +'.sl .q{right:calc(100% + 8px)}.sr .q{left:calc(100% + 8px)}'
+    +'.vt .q{top:0}.vb .q{bottom:0}.vm .q{top:50%;transform:translateY(-50%)}'
+    +'.q p{margin:0 0 10px;font:inherit}'
+    +'.q button{display:block;width:100%;box-sizing:border-box;margin:0;padding:11px 8px;border:0;border-radius:6px;font:inherit;cursor:pointer}'
+    +'.x{background:#ffb020;color:#191629}'
+    +'.s{background:#2d2748;color:#f3efe6;margin-top:8px!important}'
+    +'</style>'
+    +'<div class="w"><button class="h" type="button" aria-label="Console menu" title="Console menu">'
+    +'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11.2h2.7V21h5.3v-6h3v6h5.3v-9.8h2.7z"/></svg></button>'
+    +'<div class="q"><p>Leave this game?</p><button class="x" type="button">Back to console</button><button class="s" type="button">Keep playing</button></div></div>';
+  var w=root.querySelector('.w'),h=root.querySelector('.h');
+  function place(x,y){
+    var W=window.innerWidth,H=window.innerHeight;
+    x=Math.max(BW/2,Math.min(W-BW/2,x));y=Math.max(BH/2+4,Math.min(H-BH/2-4,y));
+    host.style.left=x+'px';host.style.top=y+'px';
+    w.classList.toggle('sl',x>W/2);w.classList.toggle('sr',x<=W/2);
+    w.classList.toggle('vt',y<110);w.classList.toggle('vb',y>H-110);w.classList.toggle('vm',y>=110&&y<=H-110);
+    pos=[x/W,y/H];
+  }
+  function put(){place(pos[0]*window.innerWidth,pos[1]*window.innerHeight)}
+  try{var p=JSON.parse(localStorage.getItem(KEY)||'null');if(p&&p.length===2&&isFinite(p[0])&&isFinite(p[1]))pos=p}catch(e){}
+  put();window.addEventListener('resize',put);
+  var drag=null;
+  h.addEventListener('pointerdown',function(e){
+    var r=host.getBoundingClientRect();
+    drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,ox:r.left,oy:r.top,moved:false};
+    try{h.setPointerCapture(e.pointerId)}catch(_){}
+    e.preventDefault();
+  });
+  h.addEventListener('pointermove',function(e){
+    if(!drag||e.pointerId!==drag.id)return;
+    var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
+    if(!drag.moved&&Math.hypot(dx,dy)<9)return;
+    drag.moved=true;w.classList.remove('open');
+    place(drag.ox+dx,drag.oy+dy);
+  });
+  function end(e){
+    if(!drag||e.pointerId!==drag.id)return;
+    var d=drag;drag=null;
+    if(e.type==='pointercancel')return;
+    if(d.moved){try{localStorage.setItem(KEY,JSON.stringify(pos))}catch(_){}}
+    else w.classList.toggle('open');
+  }
+  h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
+  h.addEventListener('click',function(e){if(e.detail===0)w.classList.toggle('open')});
+  root.querySelector('.s').addEventListener('click',function(){w.classList.remove('open')});
+  root.querySelector('.x').addEventListener('click',function(){
+    try{
+      if(window.__maxcade)location.reload();
+      else if(history.length>1)history.back();
+      else location.href='../';
+    }catch(e){location.href='../'}
+  });
+  ['pointerdown','pointerup','pointermove','mousedown','mouseup','touchstart','touchend','touchmove','click','keydown','keyup'].forEach(function(t){
+    host.addEventListener(t,function(e){e.stopPropagation()});
+  });
+  (document.documentElement||document.body).appendChild(host);
+})();
+</script>
+
+<title>Last Gate</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Saira+Stencil+One&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: one-screen field console. Status strip, live yard camera, tabbed clipboard, one big night switch. */
+:root{
+  --bg:#13150e; --panel:#1c1f15; --panel2:#272b1c; --line:#3b402b;
+  --ink:#e8e3cd; --dim:#9c9a80; --amber:#f0a81e; --rust:#dc5a34; --sick:#a4d63c; --ok:#7fc06a; --steel:#6fc3c9;
+  --display:'Saira Stencil One',Impact,sans-serif;
+  --body:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --mono:'Share Tech Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:500 17px/1.3 var(--body);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button,select{font:inherit;color:inherit}
+#app{height:100%;max-width:540px;margin:0 auto;display:flex;flex-direction:column}
+#hud{padding:8px 16px 6px;display:flex;flex-direction:column;gap:6px}
+.top{display:flex;align-items:baseline;gap:6px 8px;flex-wrap:wrap}
+.top h1{font:400 22px/1 var(--display);margin:0;letter-spacing:.04em;color:var(--amber)}
+.top .day{font:400 14px var(--mono);color:var(--ink)}
+.top .threat{margin-left:auto;font:400 12px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.top .threat.big{color:var(--rust)}
+.mute{background:var(--panel);border:1px solid var(--line);padding:2px 8px;font:400 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--dim);border-radius:2px}
+.res{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.chip{background:var(--panel);border:1px solid var(--line);padding:3px 2px 2px;text-align:center;min-width:0}
+.chip b{display:block;font:400 17px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.chip span{display:block;font:400 10px/1.2 var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.chip.low b{color:var(--rust)}
+.bars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bar{display:flex;align-items:center;gap:6px;font:400 10px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.bar i{flex:1;height:7px;background:var(--panel2);border:1px solid var(--line);position:relative;display:block}
+.bar i u{position:absolute;inset:0 auto 0 0;background:var(--amber);display:block}
+.bar em{font-style:normal;color:var(--ink);min-width:44px;text-align:right}
+#sceneWrap{position:relative;height:30%;min-height:150px;border-block:1px solid var(--line)}
+#scene{width:100%;height:100%;display:block}
+#banner{position:absolute;left:0;right:0;top:6px;text-align:center;font:400 13px var(--mono);letter-spacing:.1em;color:var(--ink);text-shadow:0 1px 3px #000;pointer-events:none}
+#fast{position:absolute;right:10px;bottom:8px;background:#000a;border:1px solid var(--line);padding:4px 10px;font:400 12px var(--mono);letter-spacing:.08em}
+#tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--panel)}
+#tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 0 7px;font:600 14px var(--body);text-transform:uppercase;letter-spacing:.02em;color:var(--dim);white-space:nowrap}
+#tabs button.on{color:var(--amber);border-bottom-color:var(--amber)}
+#tabs button sup{font:400 11px var(--mono);color:var(--bg);background:var(--amber);padding:0 5px;margin-left:3px;border-radius:8px}
+#panel{flex:1;min-height:0;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+footer{padding:8px 16px 12px}
+.btn{background:var(--panel2);border:1px solid var(--line);padding:9px 12px;font:600 16px var(--body);text-transform:uppercase;letter-spacing:.05em;border-radius:2px;cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,select:focus-visible,#tabs button:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.btn[disabled]{opacity:.38;pointer-events:none}
+.btn.go{background:var(--amber);color:#1a1405;border-color:var(--amber)}
+.btn.bad{border-color:var(--rust);color:var(--rust)}
+.btn.good{border-color:var(--ok);color:var(--ok)}
+.btn.sm{padding:6px 10px;font-size:14px}
+#nightBtn{width:100%;padding:13px;font-size:18px}
+.card{background:var(--panel);border:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:10px;align-items:center}
+.row>.grow{flex:1;min-width:0}
+.h{font:600 19px/1.1 var(--body);text-transform:uppercase;letter-spacing:.04em}
+.dim{color:var(--dim)}
+.small{font-size:15px}
+.mono{font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.tag{font:400 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border:1px solid currentColor;white-space:nowrap}
+.quote{font-style:italic;color:var(--ink);border-left:2px solid var(--line);padding-left:8px}
+.face{width:68px;height:68px;border:1px solid var(--line);flex:none;image-rendering:pixelated}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.chk{background:var(--panel2);border:1px dashed var(--line);padding:7px 8px;text-align:left;font:500 15px/1.2 var(--body);min-height:52px;cursor:pointer}
+.chk b{display:block;font:400 11px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:2px}
+.chk.done{border-style:solid;cursor:default}
+.chk.r-ok{border-color:var(--ok)} .chk.r-ok b{color:var(--ok)}
+.chk.r-warn{border-color:var(--amber)} .chk.r-warn b{color:var(--amber)}
+.chk.r-bad{border-color:var(--rust)} .chk.r-bad b{color:var(--rust)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.person{display:grid;grid-template-columns:10px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.person:last-child{border-bottom:0}
+.dot{width:10px;height:10px;border-radius:50%}
+.hpb{height:4px;background:var(--panel2);margin-top:3px;width:90px;max-width:100%}
+.hpb u{display:block;height:100%;background:var(--ok)}
+select{background:var(--panel2);border:1px solid var(--line);padding:6px 6px;border-radius:2px;font:600 15px var(--body)}
+.pick{border:1px solid var(--line);background:var(--panel2);padding:6px 10px;font:600 15px var(--body);cursor:pointer}
+.pick.on{border-color:var(--amber);color:var(--amber)}
+.wrap{display:flex;flex-wrap:wrap;gap:6px}
+.logl{font-size:15px;padding:3px 0;border-bottom:1px solid var(--line)}
+.logl b{font:400 11px var(--mono);color:var(--dim);margin-right:6px}
+.c-bad{color:var(--rust)} .c-good{color:var(--ok)} .c-warn{color:var(--amber)} .c-sick{color:var(--sick)}
+#modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+#modal .box{background:var(--panel);border:1px solid var(--amber);max-width:440px;width:100%;max-height:88%;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+#modal h2{font:400 22px/1.1 var(--display);margin:0;color:var(--amber);letter-spacing:.03em;text-wrap:balance}
+#modal p{margin:0}
+#modal ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+#modal .acts{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+#acct{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+#acct .box{background:var(--panel);border:1px solid var(--amber);max-width:440px;width:100%;max-height:92%;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+#acct h2{font:400 26px/1 var(--display);margin:0;color:var(--amber);letter-spacing:.04em}
+#acct p{margin:0}
+#acctList{display:flex;flex-direction:column;gap:6px}
+.arow{display:flex;gap:6px}
+.arow .btn:first-child{flex:1;min-width:0;text-align:left;text-transform:none;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arow .btn:first-child span{display:block;font:400 11px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+#acctForm{display:flex;gap:6px}
+#acctName{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:9px 10px;font:600 18px var(--body);border-radius:2px;user-select:text;-webkit-user-select:text}
+#acctName:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.grade{font:400 72px/1 var(--display);color:var(--amber);text-align:center}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stats div{background:var(--panel2);border:1px solid var(--line);padding:6px 8px;font:400 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+.stats b{display:block;font:400 22px/1.1 var(--mono);color:var(--ink)}
+#credits{position:fixed;inset:0;background:#0b0c08;z-index:12;overflow:hidden}
+#credRoll{position:absolute;left:0;right:0;top:0;padding:0 16px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;animation:roll 40s linear forwards}
+#credRoll.still{animation:none;top:50%;transform:translateY(-50%)}
+#credRoll h3{font:400 40px/1 var(--display);color:var(--amber);margin:0 0 20px;letter-spacing:.04em}
+#credRoll h4{font:400 12px var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin:34px 0 6px}
+#credRoll p{margin:0;font:600 22px/1.25 var(--body)}
+#credRoll p small{font:400 12px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
+#credRoll .big{font:400 26px/1.2 var(--display);color:var(--ink);margin-top:6px}
+#credBtn{position:absolute;right:16px;bottom:16px}
+@keyframes roll{from{transform:translateY(100vh)}to{transform:translateY(-100%)}}
+@media (prefers-reduced-motion:reduce){#credits{overflow-y:auto}#credRoll{animation:none;position:static;padding-block:40px 90px}}
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:#000d;border:1px solid var(--line);padding:8px 14px;max-width:88%;text-align:center;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;font-size:16px}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+
+<div id="app">
+  <header id="hud"></header>
+  <div id="sceneWrap"><canvas id="scene"></canvas><div id="banner"></div><button id="fast" class="btn sm" hidden>Speed x3</button></div>
+  <nav id="tabs"></nav>
+  <main id="panel"></main>
+  <footer><button id="nightBtn" class="btn go">Lock the gate · start night</button></footer>
+</div>
+<div id="acct" hidden><div class="box"><h2>LAST GATE</h2><p>Choose an account or make a new one.</p><div id="acctList"></div>
+<form id="acctForm"><input id="acctName" maxlength="16" placeholder="New account name" autocomplete="off" aria-label="New account name"><button class="btn go" type="submit">Create</button></form>
+<p id="acctErr" class="c-bad small"></p><p class="dim small">Every account saves by itself as you play, on this device. Close the tab any time.</p></div></div>
+<div id="credits" hidden><div id="credRoll"></div><button id="credBtn" class="btn go" type="button">Skip</button></div>
+<div id="modal" hidden><div class="box"></div></div>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), chance=p=>Math.random()<p, pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const SKILLS={farmer:{n:'Farmer',c:'#9bbd4e'},guard:{n:'Guard',c:'#dc5a34'},medic:{n:'Medic',c:'#6fc3c9'},engineer:{n:'Engineer',c:'#f0a81e'},scout:{n:'Scout',c:'#b995e0'}};
+const ROLES={rest:'Rest',farm:'Farm',guard:'Guard wall',medic:'Infirmary',engineer:'Workshop'};
+const MATCH={farm:'farmer',guard:'guard',medic:'medic',engineer:'engineer'};
+const ROOMS={
+  bunks:{n:'Bunks',cost:15,c:'#6b5a3e',d:'Beds for 4 more people.'},
+  farm:{n:'Farm',cost:20,c:'#56752b',d:'3 farm jobs. Each farmer grows 3 food a day (5 if skilled).'},
+  well:{n:'Well',cost:20,c:'#356a82',d:'8 water every day.'},
+  infirmary:{n:'Infirmary',cost:30,c:'#b3ab94',d:'2 medic jobs. Heals the hurt, catches infections, allows quarantine.'},
+  workshop:{n:'Workshop',cost:30,c:'#8a5626',d:'3 engineer jobs. Makes scrap, fixes the wall, unlocks turrets and ammo.'},
+  tower:{n:'Watchtower',cost:25,c:'#565b49',u:1,d:'3 extra gate checks, counts the horde, and shoots at night.'},
+  radio:{n:'Radio room',cost:35,c:'#5d4c80',u:1,d:'Broadcast to bring more survivors. The dead hear it too.'}
+};
+const LOCS={
+  suburbs:{n:'Suburb houses',risk:.08,rk:'Low risk',loot:{food:[3,6],water:[2,5],scrap:[1,3]}},
+  mall:{n:'Dead mall',risk:.16,rk:'Medium risk',loot:{scrap:[4,8],food:[2,4],ammo:[0,3]}},
+  hospital:{n:'St. Agnes hospital',risk:.26,rk:'High risk',loot:{meds:[1,2],water:[1,3]}},
+  depot:{n:'Army depot',risk:.32,rk:'Very high risk',loot:{ammo:[5,10],scrap:[2,5]}}
+};
+const NAMES=['Dana','Marcus','Ivy','Theo','Rosa','Hank','Priya','Cole','June','Otis','Mei','Brandt','Lena','Sam','Nadia','Gus','Tara','Felix','Wren','Diego','Opal','Reed','Kira','Amos','Bea','Jonah','Sloane','Viktor','Esme','Rufus','Noor','Clyde','Hattie','Emil','Zora','Boone','Maeve','Ansel','Pilar','Dutch'];
+const STORIES=['Walked here from Dayton after the bridge fell.','My group got split up at the rail yard three days ago.','I was holed up in a school gym until the food ran out.','Been following your smoke for two days.','Our bus broke down on Route 9. I am the only one left.','I worked the night shift when it started. Never made it home.','A family took me in for a while. They are gone now.','I hid in a grain silo for a month.','I heard there were walls here. That is all I want.','Lost my brother at the river crossing. Kept walking.'];
+
+let AC=null,muted=false,nbuf=null,lastShot=0,lastThump=0,nextGroan=0;try{muted=localStorage.getItem('lastgate.mute')==='1'}catch(e){}
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+let silentEl=null;
+function unlock(){
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  if(!silentEl){try{const n=4000,b=new Uint8Array(44+n),dv=new DataView(b.buffer),w=(o,t)=>{for(let i=0;i<t.length;i++)b[o+i]=t.charCodeAt(i)};
+    w(0,'RIFF');dv.setUint32(4,36+n,true);w(8,'WAVEfmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,8000,true);dv.setUint32(28,8000,true);dv.setUint16(32,1,true);dv.setUint16(34,8,true);w(36,'data');dv.setUint32(40,n,true);b.fill(128,44);
+    let bin='';for(let i=0;i<b.length;i++)bin+=String.fromCharCode(b[i]);
+    silentEl=new Audio('data:audio/wav;base64,'+btoa(bin));silentEl.loop=true;silentEl.setAttribute('playsinline','');}catch(e){}}
+  if(silentEl&&silentEl.paused){const p=silentEl.play();if(p&&p.catch)p.catch(()=>{})}
+  const a=ac();if(a&&a.state!=='running'){const p=a.resume();if(p&&p.then)p.then(musicSync).catch(()=>{})}
+  musicSync();
+}
+['pointerup','touchend','click','keydown','mousedown'].forEach(ev=>addEventListener(ev,unlock,true));
+let musicOn=true,mGain=null,mTimer=null,mStep=0,mNext=0;try{musicOn=localStorage.getItem('lastgate.music')!=='0'}catch(e){}
+let mLow=null;
+function mNote(q,t,d,type,v,low){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=q;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(low?mLow:mGain);o.start(t);o.stop(t+d+.05)}
+function mKick(t,v){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(38,t+.13);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.2);o.connect(g);g.connect(mGain);o.start(t);o.stop(t+.25)}
+function mHit(t,d,v,fq){if(!nbuf){nbuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const c=nbuf.getChannelData(0);for(let k=0;k<c.length;k++)c[k]=Math.random()*2-1}
+  const sr=AC.createBufferSource(),g=AC.createGain(),fl=AC.createBiquadFilter();sr.buffer=nbuf;fl.type='bandpass';fl.frequency.value=fq;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);sr.connect(fl);fl.connect(g);g.connect(mGain);sr.start(t,Math.random()*.5,d+.03)}
+const RE=164.8,RIFF=[[[RE,0],[196,3],[220,6],[196,10],[RE,12]],[[RE,0],[246.9,4],[233.1,6],[220,8],[196,12]],[[146.8,0],[RE,3],[196,6],[RE,12]],[[RE,0],[293.7,4],[246.9,8],[196,10],[RE,14]]];
+const EB=[82.4,110,69.3,61.7],EM=[[329.6,415.3,493.9,415.3],[440,554.4,440,329.6],[415.3,329.6,277.2,329.6],[493.9,370,493.9,587.3]];
+const NB=[82.4,82.4,0,82.4,82.4,0,98,82.4,82.4,82.4,0,82.4,116.5,110,98,0];
+function mTick(){
+  if(!AC||!mGain||!S||AC.state!=='running')return;const night=S.phase==='night',spb=night?.14:.3;
+  if(mNext<AC.currentTime)mNext=AC.currentTime+.05;
+  while(mNext<AC.currentTime+.3){const st=mStep++,bar=Math.floor(st/16)%4,i=st%16,t=mNext;
+    if(END){if(END.t>6.5){const r=EB[bar];if(i===0){mNote(r,t,spb*16,'sawtooth',.15,true);mNote(r*1.5,t,spb*16,'sawtooth',.09,true)}if(i===0||i===8)mKick(t,.3);if(i===4||i===12)mHit(t,.1,.08,1500);if(i%4===0){const q=EM[bar][i/4];mNote(q,t,.75,'sawtooth',.12,true);mNote(q*2,t,.4,'square',.015)}}mNext+=spb;continue}
+    if(night){
+      if(i%4===0||i===10)mKick(t,.5);if(i===4||i===12)mHit(t,.14,.3,1800);if(i%2)mHit(t,.03,.07,7000);
+      if(NB[i])mNote(NB[i],t,.13,'sawtooth',.2,true);
+      if(bar%2&&(i===0||i===8)){mNote(659.3,t,.5,'square',.03);mNote(622.3,t+.28,.4,'square',.03)}
+    }else{
+      if(i===0){mNote(41.2,t,spb*16,'sawtooth',.16,true);mNote(41.6,t,spb*16,'sawtooth',.14,true)}
+      if(i===0||i===8)mKick(t,.3);if(i===4||i===12)mHit(t,.1,.09,1200);
+      for(const n of RIFF[bar])if(n[1]===i){mNote(n[0],t,.7,'sawtooth',.13,true);mNote(n[0]*2.005,t,.35,'square',.018)}
+    }
+    mNext+=spb}
+}
+function musicSync(){if(!AC)return;if(!mGain){mGain=AC.createGain();mGain.connect(AC.destination);mLow=AC.createBiquadFilter();mLow.type='lowpass';mLow.frequency.value=700;mLow.Q.value=4;mLow.connect(mGain)}mGain.gain.value=musicOn?.6:0;if(musicOn&&!mTimer)mTimer=setInterval(mTick,100);if(!musicOn&&mTimer){clearInterval(mTimer);mTimer=null}}
+document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden){AC.suspend();if(silentEl)silentEl.pause()}});
+function tone(f,d,type,v,f2,delay){if(muted)return;const a=ac();if(!a)return;const t=a.currentTime+(delay||0),o=a.createOscillator(),g=a.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v||.08,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.03)}
+function noise(d,v,fq,delay){if(muted)return;const a=ac();if(!a)return;if(!nbuf){nbuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1}
+  const t=a.currentTime+(delay||0),sr=a.createBufferSource(),g=a.createGain(),fl=a.createBiquadFilter();sr.buffer=nbuf;fl.type='lowpass';fl.frequency.value=fq||1200;g.gain.setValueAtTime(v||.15,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);sr.connect(fl);fl.connect(g);g.connect(a.destination);sr.start(t,Math.random()*.5,d+.03)}
+const SFX={
+  tap(){tone(520,.05,'square',.04)},
+  ok(){tone(523,.1,'triangle',.1);tone(784,.16,'triangle',.1,0,.09)},
+  bad(){tone(160,.3,'sawtooth',.09,85)},
+  warn(){tone(330,.09,'square',.06);tone(330,.09,'square',.06,0,.13)},
+  build(){noise(.06,.22,900);noise(.06,.22,900,.14);noise(.09,.24,700,.28)},
+  shot(){noise(.09,.15,2600);tone(190,.07,'square',.05,70)},
+  thump(){tone(75,.16,'sine',.22,40)},
+  groan(){tone(90+Math.random()*45,.55,'sawtooth',.04,58)},
+  bell(){[0,.55,1.1].forEach(d=>{tone(392,1,'sine',.14,0,d);tone(786,.6,'sine',.05,0,d)})},
+  dawn(){[392,494,587,784].forEach((q,i)=>tone(q,.26,'triangle',.09,0,i*.13))},
+  over(){[392,330,262,196].forEach((q,i)=>tone(q,.42,'sawtooth',.08,0,i*.3))},
+  coin(){tone(988,.07,'square',.06);tone(1319,.15,'square',.06,0,.07)},
+  gate(){tone(130,.4,'sawtooth',.06,230)},
+  win(){[[659.3,0,.18],[659.3,.2,.18],[659.3,.4,.18],[830.6,.6,.5],[740,1.15,.25],[830.6,1.45,.25],[987.8,1.75,1.4]].forEach(n=>{tone(n[0],n[2],'square',.06,0,n[1]);tone(n[0]/2,n[2],'triangle',.11,0,n[1])});[0,.6,1.75].forEach(d=>tone(82.4,.5,'sine',.2,45,d))}
+};
+const ASND={tab:'tap',admit:'ok',deny:'thump',trade:'coin',build:'build',expand:'build',wall:'build',repair:'build',turret:'build',ammo:'coin',send:'gate',auto:'tap',loc:'tap',crew:'tap',bcast:'warn',sendoff:'tap',restart:'tap',switchAcct:'tap',mute:'tap',music:'tap'};
+let S, tab='gate', sel={loc:'suburbs',ids:[]}, N=null, restartArm=false;
+
+function mkPerson(skill,name){return{id:S.nid++,name:name||pick(NAMES),skill,role:'rest',hp:100,st:'ok',q:0,inf:false,tr:null,seed:R(1,1e9)}}
+function fresh(){
+  S={v:1,day:1,food:40,water:40,scrap:60,meds:4,ammo:60,morale:70,wall:150,wallMax:150,cols:3,rows:2,rooms:['bunks','farm','well'],turrets:0,people:[],visitors:[],checks:5,broadcast:false,bcastY:false,crew:null,log:[],nid:1,hordeBonus:1,expands:0,wallLv:0,phase:'day',best:S&&S.best||0};
+  const nm=NAMES.slice().sort(()=>Math.random()-.5);
+  ['farmer','guard','medic','engineer','scout'].forEach((s,i)=>S.people.push(mkPerson(s,nm[i])));
+  autoAssign(true);
+}
+const count=t=>S.rooms.filter(r=>r===t).length;
+const cap=()=>2+4*count('bunks');
+const plots=()=>S.cols*S.rows;
+const slots=r=>r==='farm'?3*count('farm'):r==='medic'?2*count('infirmary'):r==='engineer'?3*count('workshop'):99;
+const workers=r=>S.people.filter(p=>p.role===r&&p.st==='ok');
+const roomCost=t=>Math.round(ROOMS[t].cost*(1+.25*count(t)));
+const expandCost=()=>30+10*S.expands, wallCost=()=>25+8*S.wallLv, turretCost=()=>25+5*S.turrets;
+function hordeSize(){return Math.round((3+1.3*Math.min(S.day,6)+.45*Math.max(0,S.day-6))*(S.day%5===0?1.4:1)*(S.broadcast?1.35:1)*S.hordeBonus)}
+function log(m,c){S.log.unshift({d:S.day,m,c:c||''});if(S.log.length>90)S.log.pop()}
+function morale(n){S.morale=clamp(S.morale+n,0,100)}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600)}
+function remove(p){S.people=S.people.filter(x=>x!==p)}
+function stt(){return S.stats||(S.stats={kills:0,saved:0,turned:0,lost:[]})}
+function kill(p,why){stt().lost.push(p.name);remove(p);morale(-8);log(`${p.name} ${why}.`,'c-bad')}
+let ACCT=null,delArm=null;
+const AK='lastgate.accounts',akey=n=>'lastgate.acct.'+n.toLowerCase();
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function accts(){try{const a=JSON.parse(localStorage.getItem(AK)||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function setAccts(a){try{localStorage.setItem(AK,JSON.stringify(a))}catch(e){}}
+function loadAcct(n){try{const j=JSON.parse(localStorage.getItem(akey(n))||'null');return j&&j.v===1&&j.people&&j.people.length?j:null}catch(e){return null}}
+function save(){if(!ACCT||!S)return;try{localStorage.setItem(akey(ACCT),JSON.stringify(S))}catch(e){}}
+function showAccts(){
+  let a=accts();
+  if(!a.length){try{const old=localStorage.getItem('lastgate.save');if(old&&JSON.parse(old).people){a=['My base'];setAccts(a);localStorage.setItem(akey('My base'),old);localStorage.removeItem('lastgate.save')}}catch(e){}}
+  $('#acctList').innerHTML=a.map((n,i)=>{const j=loadAcct(n);return`<div class="arow"><button class="btn" data-acct="${i}">${esc(n)}<span>${j?`Day ${j.day} · ${j.people.length} survivors · best ${j.best||0}`:'New base'}</span></button><button class="btn sm ${delArm===i?'bad':''}" data-del="${i}">${delArm===i?'Sure?':'Delete'}</button></div>`}).join('')||'<p class="dim small">No accounts yet. Make one below.</p>';
+  $('#acct').hidden=false;
+}
+function enterAcct(n){
+  ACCT=n;delArm=null;const j=loadAcct(n);$('#acct').hidden=true;$('#acctErr').textContent='';$('#acctName').value='';
+  if(j){S=j;if(S.phase!=='day'){S.phase='day';S.people.forEach(p=>{if(p.st==='away')p.st='ok'});S.crew=null}S.checks=Math.max(S.checks,20);tab='gate';render();toast('Welcome back, '+n);finalWarn()}
+  else{S=null;fresh();newDay();intro()}
+}
+$('#acctList').addEventListener('click',e=>{const a=accts(),b=e.target.closest('[data-acct]'),d=e.target.closest('[data-del]');
+  if(b)return enterAcct(a[+b.dataset.acct]);
+  if(d){const i=+d.dataset.del;if(delArm!==i){delArm=i;return showAccts()}try{localStorage.removeItem(akey(a[i]))}catch(e){}if(ACCT===a[i]){ACCT=null;S=null}a.splice(i,1);setAccts(a);delArm=null;showAccts()}});
+$('#acctForm').addEventListener('submit',e=>{e.preventDefault();const n=$('#acctName').value.trim().replace(/\s+/g,' '),a=accts(),err=$('#acctErr');
+  if(!n)return err.textContent='Type a name first.';
+  if(a.some(x=>x.toLowerCase()===n.toLowerCase()))return err.textContent='That name is taken. Pick a different one.';
+  a.push(n);setAccts(a);enterAcct(n)});
+
+function modal({title,html,choices}){
+  return new Promise(res=>{
+    const m=$('#modal'),b=m.querySelector('.box');
+    b.innerHTML=`<h2>${title}</h2>${html||''}<div class="acts">${choices.map((c,i)=>`<button class="btn ${c.cls||''}" data-i="${i}" ${c.dis?'disabled':''}>${c.t}</button>`).join('')}</div>`;
+    m.hidden=false;b.scrollTop=0;
+    b.onclick=e=>{const el=e.target.closest('button[data-i]');if(!el)return;SFX.tap();m.hidden=true;b.onclick=null;res(choices[+el.dataset.i].v)};
+  });
+}
+
+/* ---------- visitors ---------- */
+function genVisitor(){
+  const r=Math.random();
+  if(r<.12&&S.day>1){
+    const T=[['scrap',10,'food',8],['scrap',10,'water',8],['food',8,'meds',2],['scrap',12,'ammo',12],['food',6,'scrap',10],['scrap',15,'meds',2],['ammo',10,'food',8],['water',8,'scrap',9]].sort(()=>Math.random()-.5).slice(0,3);
+    return{type:'trader',name:pick(NAMES),seed:R(1,1e9),offers:T.map(t=>({g:t[0],gn:t[1],k:t[2],kn:t[3],used:false}))};
+  }
+  const type=r<.7?'clean':r<.84?'infected':r<.93?'thief':'raider';
+  const v={type,name:pick(NAMES),skill:pick(Object.keys(SKILLS)),story:pick(STORIES),seed:R(1,1e9),bite:false,fake:false,shaky:false,weapon:false,fever:false,bag:false,res:{}};
+  if(type==='clean'){v.fake=chance(.08);v.shaky=chance(.15);v.weapon=chance(.12);v.fever=chance(.06)}
+  if(type==='infected'){v.bite=true;v.fever=true;v.shaky=chance(.5)}
+  if(type==='thief'){v.fake=chance(.75);v.shaky=chance(.6);v.weapon=chance(.6);if(!v.fake&&!v.shaky&&!v.weapon)v.fake=true;v.bag=chance(.7)}
+  if(type==='raider'){v.weapon=chance(.85);v.shaky=chance(.5);v.fake=chance(.4);if(!v.fake&&!v.shaky&&!v.weapon)v.weapon=true;v.bag=chance(.7)}
+  return v;
+}
+function checkResult(v,k){
+  const bad=v.type==='thief'||v.type==='raider';
+  if(k==='arms')return v.bite?['bad','Fresh bite under the left sleeve. Infected.']:['ok','Arms and neck are clean. No bites.'];
+  if(k==='id')return v.fake?(bad?['bad','The photo is someone else. Fake ID.']:['warn','No papers at all. Says they burned.']):['ok','ID matches the face and the name.'];
+  if(k==='temp')return v.fever?(v.bite?['bad','Burning up. Fever of 103 and grey around the eyes.']:['warn','A little warm. Could be the long walk.']):['ok','Normal temperature. Clear eyes.'];
+  if(k==='bag')return v.bag?(v.type==='raider'?['bad','A map with your base circled in red.']:['bad','A bag full of other people\'s ration cards.']):['ok','Spare clothes, a photo, half a water bottle.'];
+  if(k==='story')return v.shaky?['warn','Story changes when you ask twice.']:['ok','Same answers both times. Story holds up.'];
+  return v.weapon?(v.type==='raider'?['bad','Loaded pistol in the boot and a raider radio.']:v.type==='thief'?['bad','Lockpicks and an empty duffel bag.']:['warn','A kitchen knife. Handed it over right away.']):['ok','No weapons in pockets or bag.'];
+}
+function newDay(){
+  const n=S.day===1?2:R(2,4)+(S.bcastY?2:0);
+  S.phase='day';S.checks=20+(count('tower')?3:0);
+  S.visitors=[];for(let i=0;i<n;i++)S.visitors.push(genVisitor());
+  save();tab='gate';render();finalWarn();
+}
+const isFinal=()=>S.day>=30&&!S.won;
+function finalWarn(){
+  if(!isFinal()||S.warned===S.day)return;S.warned=S.day;save();SFX.bell();
+  modal({title:`Day ${S.day} · the last night`,html:'<p>Scouts warn that the last zombies are coming, including the boss zombie. Be prepared.</p><p class="dim small">The boss is armored, takes about 300 hits, calls more zombies the whole fight, and goes berserk at half health. Max out guards, turrets, ammo and the wall. Beat it tonight and you win.</p>',choices:[{t:'Get ready',v:1,cls:'bad'}]});
+}
+
+/* ---------- actions ---------- */
+function autoAssign(silent){
+  S.people.forEach(p=>{if(p.st==='ok')p.role='rest'});
+  S.people.filter(p=>p.st==='ok').forEach(p=>{
+    const want=Object.keys(MATCH).find(r=>MATCH[r]===p.skill)||'guard';
+    p.role=workers(want).length<slots(want)?want:'guard';
+  });
+  if(!silent){toast('Jobs handed out by skill');render()}
+}
+const A={
+  tab(d){tab=d.t;restartArm=false;render()},
+  check(d){const v=S.visitors[0];if(!v||v.res[d.k])return;if(S.checks<1)return toast('No checks left today');S.checks--;v.res[d.k]=checkResult(v,d.k);SFX[v.res[d.k][0]==='ok'?'tap':v.res[d.k][0]]();render()},
+  admit(){stt().saved++;const v=S.visitors.shift();const p=mkPerson(v.skill,v.name);p.seed=v.seed;p.inf=v.bite;p.tr=v.type==='thief'||v.type==='raider'?v.type:null;
+    const want=Object.keys(MATCH).find(r=>MATCH[r]===p.skill)||'guard';S.people.push(p);p.role=workers(want).length<slots(want)?want:'guard';
+    log(`Let in ${v.name}, ${SKILLS[v.skill].n.toLowerCase()}.`);toast(S.people.length>cap()?`${v.name} is in. You are over your bed count.`:`${v.name} is in.`);render()},
+  deny(){stt().turned++;const v=S.visitors.shift();const t={clean:`was honest. A ${SKILLS[v.skill].n.toLowerCase()} lost.`,infected:'was infected. Good call.',thief:'was a thief. Good call.',raider:'was a raider scout. Good call.'}[v.type];
+    log(`Turned away ${v.name}. ${v.name} ${t}`,v.type==='clean'?'c-warn':'c-good');toast(`${v.name} ${t}`);render()},
+  trade(d){const v=S.visitors[0],o=v.offers[+d.i];if(o.used||S[o.g]<o.gn)return;S[o.g]-=o.gn;S[o.k]+=o.kn;o.used=true;log(`Traded ${o.gn} ${o.g} for ${o.kn} ${o.k}.`);render()},
+  sendoff(){S.visitors.shift();render()},
+  build(d){const t=d.t,c=roomCost(t);if(S.rooms.length>=plots())return toast('No free plot. Expand the base first.');if(S.scrap<c)return toast('Not enough scrap');S.scrap-=c;S.rooms.push(t);log(`Built ${ROOMS[t].n}.`,'c-good');render()},
+  expand(){const c=expandCost();if(S.scrap<c)return toast('Not enough scrap');S.scrap-=c;S.expands++;if(S.cols<=S.rows+1&&S.cols<6)S.cols++;else S.rows++;log('Pushed the walls out. More plots.','c-good');render()},
+  wall(){const c=wallCost();if(S.scrap<c)return toast('Not enough scrap');S.scrap-=c;S.wallLv++;S.wallMax+=50;S.wall+=50;log('Reinforced the wall.','c-good');render()},
+  repair(){if(S.scrap<5||S.wall>=S.wallMax)return;S.scrap-=5;S.wall=Math.min(S.wallMax,S.wall+20);render()},
+  turret(){const c=turretCost();if(S.scrap<c)return toast('Not enough scrap');S.scrap-=c;S.turrets++;log('Mounted a turret on the wall.','c-good');render()},
+  ammo(){if(S.scrap<5)return;S.scrap-=5;S.ammo+=15;render()},
+  bcast(){S.broadcast=!S.broadcast;toast(S.broadcast?'On the air. More people tomorrow, more dead tonight.':'Radio off');render()},
+  auto(){autoAssign()},
+  loc(d){sel.loc=d.l;render()},
+  crew(d){const id=+d.id,i=sel.ids.indexOf(id);if(i>=0)sel.ids.splice(i,1);else if(sel.ids.length<4)sel.ids.push(id);else toast('Four people at most');render()},
+  send(){const ids=sel.ids.filter(id=>S.people.some(p=>p.id===id&&p.st==='ok'));if(!ids.length)return;S.crew={loc:sel.loc,ids};ids.forEach(id=>S.people.find(p=>p.id===id).st='away');sel.ids=[];log(`Sent ${ids.length} to the ${LOCS[S.crew.loc].n.toLowerCase()}.`);toast('Crew is out. Back at dusk.');render()},
+  music(){musicOn=!musicOn;try{localStorage.setItem('lastgate.music',musicOn?'1':'0')}catch(e){}musicSync();renderHUD()},
+  mute(){muted=!muted;try{localStorage.setItem('lastgate.mute',muted?'1':'0')}catch(e){}renderHUD();if(!muted)SFX.ok()},
+  ending(){ending()},
+  switchAcct(){save();delArm=null;showAccts()},
+  restart(){if(!restartArm){restartArm=true;return render()}restartArm=false;fresh();intro();newDay()}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||!S||S.phase!=='day'&&el.dataset.a!=='tab'&&el.dataset.a!=='mute'&&el.dataset.a!=='music')return;if(ASND[el.dataset.a])SFX[ASND[el.dataset.a]]();A[el.dataset.a](el.dataset)});
+document.addEventListener('change',e=>{const el=e.target.closest('select[data-pid]');if(!el||!S||S.phase!=='day')return;const p=S.people.find(x=>x.id===+el.dataset.pid),r=el.value;
+  if(workers(r).length>=slots(r)){toast(slots(r)?'No free job there. Build another room.':'Build that room first.')}else p.role=r;render()});
+$('#nightBtn').onclick=()=>{if(S&&S.phase==='day')startNight()};
+$('#fast').onclick=()=>{if(N){N.fast=!N.fast;$('#fast').textContent=N.fast?'Speed x1':'Speed x3'}};
+
+/* ---------- render ---------- */
+function renderHUD(){
+  const big=S.day%5===0,tw=count('tower');
+  const threat=S.phase==='night'?'':isFinal()?'Final night · boss':tw?`Horde tonight: ${hordeSize()}`:big?'Big horde tonight':'Horde size unknown';
+  const chip=(k,v,low)=>`<div class="chip ${low?'low':''}"><b>${v}</b><span>${k}</span></div>`;
+  const n=S.people.length;
+  $('#hud').innerHTML=`<div class="top"><h1>LAST GATE</h1><span class="day">DAY ${S.day}</span><button class="mute" data-a="mute">SFX ${muted?'off':'on'}</button><button class="mute" data-a="music">Music ${musicOn?'on':'off'}</button><span class="threat ${big||isFinal()?'big':''}">${threat}</span></div>
+  <div class="res">${chip('Food',S.food,S.food<n*2)}${chip('Water',S.water,S.water<n*2)}${chip('Scrap',S.scrap)}${chip('Meds',S.meds)}${chip('Ammo',S.ammo,S.ammo<10)}${chip('Beds',n+'/'+cap(),n>cap())}</div>
+  <div class="bars"><div class="bar">Morale<i><u style="width:${S.morale}%;background:${S.morale<25?'var(--rust)':'var(--amber)'}"></u></i><em>${Math.round(S.morale)}</em></div>
+  <div class="bar">Wall<i><u style="width:${S.wall/S.wallMax*100}%;background:${S.wall<S.wallMax*.3?'var(--rust)':'var(--ok)'}"></u></i><em>${Math.round(S.wall)}/${S.wallMax}</em></div></div>`;
+}
+function render(){
+  renderHUD();
+  const vq=S.visitors.length;
+  $('#tabs').innerHTML=[['gate','Gate'],['build','Build'],['people','People'],['scout','Scavenge'],['log','Log']].map(([k,n])=>`<button data-a="tab" data-t="${k}" class="${tab===k?'on':''}">${n}${k==='gate'&&vq?`<sup>${vq}</sup>`:''}</button>`).join('');
+  const P=$('#panel'),st=P.scrollTop;
+  P.innerHTML={gate:vGate,build:vBuild,people:vPeople,scout:vScout,log:vLog}[tab]();
+  P.scrollTop=st;
+  P.querySelectorAll('canvas[data-seed]').forEach(c=>drawFace(c,+c.dataset.seed));
+  const nb=$('#nightBtn');nb.disabled=S.phase!=='day';nb.textContent=S.phase==='day'?'Lock the gate · start night':'Night '+S.day;
+  if(S.phase==='day')save();
+}
+function vGate(){
+  const v=S.visitors[0];
+  if(!v)return`<div class="card"><div class="h">The gate is quiet</div><p class="dim small" style="margin:0">Nobody else is waiting. Set jobs, build, send a crew out, then lock up for the night.</p></div>`;
+  const more=S.visitors.length>1?`${S.visitors.length-1} more waiting`:'Last one today';
+  if(v.type==='trader')return`<div class="card"><div class="row"><canvas class="face" width="34" height="34" data-seed="${v.seed}"></canvas><div class="grow"><div class="h">${v.name}, trader</div><div class="mono">${more}</div><div class="small dim">Pulls a cart up to the gate. Does not want to come in.</div></div></div>
+    ${v.offers.map((o,i)=>`<button class="btn sm" data-a="trade" data-i="${i}" ${o.used||S[o.g]<o.gn?'disabled':''}>Give ${o.gn} ${o.g} · get ${o.kn} ${o.k}${o.used?' (done)':''}</button>`).join('')}
+    <button class="btn" data-a="sendoff">Wave the trader on</button></div>`;
+  const C=[['arms','Check arms'],['id','Check ID'],['story','Ask twice'],['frisk','Pat down']];
+  return`<div class="card"><div class="row"><canvas class="face" width="34" height="34" data-seed="${v.seed}"></canvas><div class="grow"><div class="h">${v.name}</div><div class="row" style="gap:6px"><span class="tag" style="color:${SKILLS[v.skill].c}">Says: ${SKILLS[v.skill].n}</span><span class="mono">${more}</span></div></div></div>
+  <div class="quote small">"${v.story}"</div>
+  <div class="mono">Checks left today: ${S.checks}</div>
+  <div class="checks">${C.map(([k,n])=>{const r=v.res[k];return r?`<div class="chk done r-${r[0]}"><b>${n}</b>${r[1]}</div>`:`<button class="chk" data-a="check" data-k="${k}"><b>${n}</b>Tap to check</button>`}).join('')}</div>
+  <div class="two"><button class="btn good" data-a="admit">Let in</button><button class="btn bad" data-a="deny">Turn away</button></div></div>
+  <p class="dim small" style="margin:0">A bite means infected. Fake ID, lockpicks or a hidden pistol mean trouble. A shaky story or a knife alone could be nerves.</p>`;
+}
+function vBuild(){
+  const free=plots()-S.rooms.length,ws=count('workshop');
+  let h=`<div class="card"><div class="row"><div class="grow"><div class="h">Base · ${S.rooms.length}/${plots()} plots used</div><div class="small dim">Every room needs a free plot.</div></div><button class="btn sm" data-a="expand" ${S.cols*S.rows>=24?'disabled':''}>Expand · ${expandCost()}</button></div></div>`;
+  h+=`<div class="card">`+Object.keys(ROOMS).map(t=>{const r=ROOMS[t],n=count(t),done=r.u&&n;return`<div class="row"><span class="dot" style="background:${r.c};border-radius:2px"></span><div class="grow"><div><b>${r.n}</b> <span class="mono">${done?'built':n?'x'+n:''}</span></div><div class="small dim">${r.d}</div></div><button class="btn sm" data-a="build" data-t="${t}" ${done||!free||S.scrap<roomCost(t)?'disabled':''}>${done?'Built':roomCost(t)+' scrap'}</button></div>`}).join('')+`</div>`;
+  h+=`<div class="card"><div class="h">Defenses</div>
+  <div class="row"><div class="grow"><b>Reinforce wall</b><div class="small dim">+50 wall strength.</div></div><button class="btn sm" data-a="wall" ${S.scrap<wallCost()?'disabled':''}>${wallCost()} scrap</button></div>
+  <div class="row"><div class="grow"><b>Patch wall</b><div class="small dim">+20 wall right now.</div></div><button class="btn sm" data-a="repair" ${S.scrap<5||S.wall>=S.wallMax?'disabled':''}>5 scrap</button></div>
+  <div class="row"><div class="grow"><b>Turret</b> <span class="mono">${S.turrets?'x'+S.turrets:''}</span><div class="small dim">${ws?'Fast, accurate, eats ammo.':'Needs a workshop.'}</div></div><button class="btn sm" data-a="turret" ${!ws||S.turrets>=8||S.scrap<turretCost()?'disabled':''}>${turretCost()} scrap</button></div>
+  <div class="row"><div class="grow"><b>Craft 15 ammo</b><div class="small dim">${ws?'Melt scrap into rounds.':'Needs a workshop.'}</div></div><button class="btn sm" data-a="ammo" ${!ws||S.scrap<5?'disabled':''}>5 scrap</button></div>
+  ${count('radio')?`<div class="row"><div class="grow"><b>Radio broadcast</b><div class="small dim">2 more people at the gate tomorrow. Tonight's horde grows by a third.</div></div><button class="btn sm ${S.broadcast?'go':''}" data-a="bcast">${S.broadcast?'On air':'Off'}</button></div>`:''}</div>`;
+  return h;
+}
+function vPeople(){
+  const f=workers('farm').reduce((a,p)=>a+(p.skill==='farmer'?5:3),0),n=S.people.length;
+  return`<div class="card"><div class="row"><div class="grow"><div class="h">${n} survivors · ${cap()} beds</div><div class="small dim">Food ${f>=n?'+':''}${f-n} a day · Water ${8*count('well')-n>=0?'+':''}${8*count('well')-n} a day · ${workers('guard').length} on the wall</div></div><button class="btn sm" data-a="auto">Auto jobs</button></div>
+  <div>${S.people.map(p=>{const s=SKILLS[p.skill];const stt=p.st==='away'?'<span class="tag c-warn">Scavenging</span>':p.st==='quar'?`<span class="tag c-sick">Quarantine ${p.q}d</span>`:`<select data-pid="${p.id}" id="role${p.id}" aria-label="Job for ${p.name}">${Object.keys(ROLES).map(r=>`<option value="${r}" ${p.role===r?'selected':''}>${ROLES[r]}${MATCH[r]===p.skill?' ★':''}</option>`).join('')}</select>`;
+    return`<div class="person"><span class="dot" style="background:${s.c}"></span><div><b>${p.name}</b> <span class="mono" style="color:${s.c}">${s.n}</span><div class="hpb"><u style="width:${p.hp}%;background:${p.hp<50?'var(--rust)':'var(--ok)'}"></u></div></div>${stt}</div>`}).join('')}</div></div>
+  <p class="dim small" style="margin:0">A star marks the job that fits their skill. Skilled workers do about double.</p>`;
+}
+function vScout(){
+  if(S.crew)return`<div class="card"><div class="h">Crew is out</div><p class="small dim" style="margin:0">${S.crew.ids.length} at the ${LOCS[S.crew.loc].n.toLowerCase()}. They come back when you lock the gate.</p></div>`;
+  const av=S.people.filter(p=>p.st==='ok');sel.ids=sel.ids.filter(id=>av.some(p=>p.id===id));
+  return`<div class="card"><div class="h">Where to</div>${Object.keys(LOCS).map(k=>{const l=LOCS[k];return`<button class="pick ${sel.loc===k?'on':''}" data-a="loc" data-l="${k}" style="text-align:left"><b>${l.n}</b> · <span class="mono">${l.rk}</span><div class="small dim">Finds: ${Object.keys(l.loot).join(', ')}</div></button>`}).join('')}</div>
+  <div class="card"><div class="h">Who goes (up to 4)</div><div class="wrap">${av.map(p=>`<button class="pick ${sel.ids.includes(p.id)?'on':''}" data-a="crew" data-id="${p.id}">${p.name} <span class="mono" style="color:${SKILLS[p.skill].c}">${SKILLS[p.skill].n}</span></button>`).join('')}</div>
+  <p class="small dim" style="margin:0">Scouts carry more and get hurt half as often. Anyone you send is off their job today.</p>
+  <button class="btn go" data-a="send" ${sel.ids.length?'':'disabled'}>Send ${sel.ids.length||''} out</button></div>`;
+}
+function vLog(){
+  return`<div class="card"><div class="row"><div class="grow"><div class="h">Logbook</div><div class="small dim">${esc(ACCT||'')} · best run: ${S.best||0} days · ${S.won?'won on day '+S.wonDay:'goal: beat the boss on day 30'}</div></div>${S.won&&S.end?'<button class="btn sm" data-a="ending">Ending</button>':''}<button class="btn sm" data-a="switchAcct">Accounts</button><button class="btn sm ${restartArm?'bad':''}" data-a="restart">${restartArm?'Tap again to wipe':'New game'}</button></div>
+  <div>${S.log.map(l=>`<div class="logl ${l.c}"><b>D${l.d}</b>${l.m}</div>`).join('')||'<div class="small dim">Nothing yet.</div>'}</div></div>`;
+}
+
+/* ---------- night ---------- */
+async function handleSick(p,msg){
+  const inf=count('infirmary');SFX.warn();
+  const v=await modal({title:'Infection inside',html:`<p>${msg}</p><p class="dim small">You have ${S.meds} meds.${inf?'':' No infirmary, so no quarantine.'}</p>`,choices:[{t:'Cure · 3 meds',v:'c',cls:'good',dis:S.meds<3},{t:'Quarantine · 2 days, might not make it',v:'q',dis:!inf},{t:'Send away',v:'x',cls:'bad'}]});
+  if(v==='c'){S.meds-=3;p.inf=false;log(`Cured ${p.name}.`,'c-good')}
+  else if(v==='q'){p.st='quar';p.q=2;log(`${p.name} went into quarantine.`,'c-sick')}
+  else{remove(p);morale(-6);log(`${p.name} was sent out the gate, infected.`,'c-bad')}
+}
+async function crewReturn(){
+  const c=S.crew;if(!c)return;S.crew=null;const loc=LOCS[c.loc],got={},lines=[],bit=[];
+  for(const id of c.ids){const p=S.people.find(x=>x.id===id);if(!p)continue;p.st='ok';const sc=p.skill==='scout';
+    for(const k in loc.loot)got[k]=(got[k]||0)+Math.round(R(...loc.loot[k])*(sc?1.6:1));
+    if(chance(loc.risk*(sc?.5:1))){const r=Math.random();
+      if(r<.5){p.hp-=40;if(p.hp<=0){kill(p,'died of wounds on the way back');lines.push(`<li class="c-bad">${p.name} died on the way back.</li>`)}else lines.push(`<li class="c-warn">${p.name} came back hurt.</li>`)}
+      else if(r<.78){bit.push(p);lines.push(`<li class="c-sick">${p.name} came back bitten.</li>`)}
+      else{kill(p,`never came back from the ${loc.n.toLowerCase()}`);lines.push(`<li class="c-bad">${p.name} never came back.</li>`)}}}
+  for(const k in got)S[k]+=got[k];
+  const haul=Object.keys(got).filter(k=>got[k]).map(k=>`${got[k]} ${k}`).join(', ')||'nothing';
+  log(`Crew back from the ${loc.n.toLowerCase()}: ${haul}.`);renderHUD();
+  await modal({title:'Crew is back',html:`<p>Haul from the ${loc.n.toLowerCase()}: <b>${haul}</b>.</p><ul>${lines.join('')||'<li class="c-good">Everyone made it back fine.</li>'}</ul>`,choices:[{t:'Good',v:1}]});
+  for(const p of bit)if(S.people.includes(p))await handleSick(p,`${p.name} has a bite on the forearm from the run.`);
+}
+async function startNight(){
+  S.phase='busy';render();
+  if(S.visitors.length){log(`${S.visitors.length} left outside when the gate shut.`);S.visitors=[]}
+  await crewReturn();
+  let raiders=0;const rd=S.people.find(p=>p.tr==='raider');
+  if(rd){remove(rd);raiders=4;S.wall=Math.max(0,S.wall-20);const f=Math.min(8,Math.ceil(S.food*.15)),a=Math.min(10,Math.ceil(S.ammo*.15));S.food-=f;S.ammo-=a;morale(-10);SFX.bad();log(`${rd.name} was a raider scout. Opened the gate from inside.`,'c-bad');
+    await modal({title:'Betrayal',html:`<p>${rd.name} unbolts the gate after dark and whistles. Raiders rush in, grab <b>${f} food</b> and <b>${a} ammo</b>, and smash the wall on the way out. More of them are coming with the horde.</p>`,choices:[{t:'To the wall',v:1,cls:'bad'}]})}
+  S.phase='night';render();SFX.bell();
+  const fin=isFinal();const res=await battle(fin?Math.round(hordeSize()*2)+15:hordeSize(),raiders,fin);
+  S.phase='busy';
+  await dawn(res);
+}
+function battle(n,raiders,fin){
+  return new Promise(res=>{
+    const sp=[];for(let i=0;i<n;i++)sp.push({t:Math.random()*Math.min(15,4+n*.35),brute:S.day>=5&&chance(fin?.25:.06)});
+    if(fin)sp.push({t:7,boss:true});
+    for(let i=0;i<raiders;i++)sp.push({t:Math.random()*3,raider:true});
+    sp.sort((a,b)=>a.t-b.t);
+    N={sp,zs:[],shots:[],t:0,kills:0,lost:[],cd:{},res,fin:!!fin,fast:false,hud:0};
+    $('#fast').hidden=false;$('#fast').textContent='Speed x3';
+  });
+}
+function stepNight(dt){
+  const {bx,by,bw,bh}=G;N.t+=dt;
+  while(N.sp.length&&N.sp[0].t<=N.t){const s=N.sp.shift(),e=R(0,3);
+    const x=e===0?-6:e===1?G.W+6:Math.random()*G.W,y=e===2?-6:e===3?G.H+6:Math.random()*G.H;
+    N.zs.push({x,y,hp:s.boss?300:s.brute?3:s.raider?2:1,sp:s.boss?7:s.raider?27:s.brute?11:15+Math.random()*7,boss:s.boss,bt:1.5,brute:s.brute,raider:s.raider,at:false,w:Math.random()*6})}
+  for(const z of N.zs){const cx=clamp(z.x,bx,bx+bw),cy=clamp(z.y,by,by+bh),dx=cx-z.x,dy=cy-z.y,d=Math.hypot(dx,dy);
+    if(d>3){z.x+=dx/d*z.sp*dt;z.y+=dy/d*z.sp*dt}
+    else{z.at=true;if(S.wall>0&&performance.now()-lastThump>420){lastThump=performance.now();SFX.thump()}if(S.wall>0)S.wall=Math.max(0,S.wall-(z.boss?(z.rage?20:12):z.brute?4:1.8)*dt);
+      else if(z.boss){if((z.bt-=dt)<=0){z.bt=1.1;SFX.thump();const vs=S.people.filter(p=>p.st==='ok');if(vs.length){const v=pick(vs);v.hp-=55;if(v.hp<=0){kill(v,'was killed by the boss');N.lost.push(v.name)}}}}
+      else{z.hp=0;z.in=true;const vs=S.people.filter(p=>p.st==='ok');if(vs.length&&!chance(.45)){const v=pick(vs);v.hp-=55;if(v.hp<=0){kill(v,'was pulled down at the breach');N.lost.push(v.name)}}}}}
+  const sh=[];const gs=workers('guard');
+  gs.forEach((p,i)=>{const [x,y]=per((i+.5)/gs.length);sh.push({k:'g'+p.id,x,y,rate:p.skill==='guard'?.6:1,acc:p.skill==='guard'?.92:.78,g:1})});
+  for(let i=0;i<S.turrets;i++){const [x,y]=per(i*.37+.06);sh.push({k:'t'+i,x,y,rate:.45,acc:.8})}
+  if(count('tower'))sh.push({k:'w',x:bx-5,y:by-5,rate:1.4,acc:.7});
+  for(const s of sh){N.cd[s.k]=(N.cd[s.k]??Math.random()*s.rate)-dt;if(N.cd[s.k]>0)continue;
+    let t=null,bd=1e9;for(const z of N.zs){if(z.hp<=0)continue;const d=Math.hypot(z.x-s.x,z.y-s.y);if(d<bd){bd=d;t=z}}
+    if(!t)continue;
+    if(S.ammo>0){S.ammo--;N.cd[s.k]=s.rate;if(performance.now()-lastShot>80){lastShot=performance.now();SFX.shot()}if(chance(s.acc*(t.boss?.65:1)))t.hp--;N.shots.push({x1:s.x,y1:s.y,x2:t.x,y2:t.y,l:.12})}
+    else if(s.g&&t.at){N.cd[s.k]=s.rate*1.2;if(chance(.7))t.hp--;N.shots.push({x1:s.x,y1:s.y,x2:t.x,y2:t.y,l:.1,m:1})}
+    else N.cd[s.k]=.3}
+  N.zs=N.zs.filter(z=>{if(z.hp<=0){if(!z.in)N.kills++;if(z.boss){N.bossDead=true;SFX.over();toast('The boss is down!')}return false}return true});
+  const bz0=N.zs.find(z=>z.boss);if(bz0){bz0.rage=bz0.hp<150;if((bz0.sm=(bz0.sm??5)-dt)<=0&&(N.sum||0)<45){bz0.sm=bz0.rage?3:4.5;for(let k=0;k<3;k++)N.sp.unshift({t:N.t});N.sum=(N.sum||0)+3;SFX.groan()}}
+  N.shots=N.shots.filter(s=>(s.l-=dt)>0);
+  if(N.zs.length&&performance.now()>nextGroan){nextGroan=performance.now()+900+Math.random()*1800;SFX.groan()}
+  N.hud-=dt;if(N.hud<=0){N.hud=.2;renderHUD();const bz=N.zs.find(z=>z.boss);$('#banner').textContent=`${N.fin?'FINAL NIGHT':'NIGHT '+S.day} · ${N.zs.length+N.sp.length} OUTSIDE${bz?(bz.rage?' · BOSS ENRAGED ':' · BOSS ')+Math.max(0,bz.hp)+' HP':''}${S.ammo<=0?' · OUT OF AMMO':''}`}
+  if((!N.sp.length&&!N.zs.length)||!S.people.length){const r={kills:N.kills,lost:N.lost,fin:N.fin},f=N.res;N=null;$('#fast').hidden=true;$('#banner').textContent='';f(r)}
+}
+async function dawn(nr){
+  const L=[];const li=(t,c)=>L.push(`<li class="${c||''}">${t}</li>`);
+  li(`${nr.kills} put down at the wall. Wall at ${Math.round(S.wall)}/${S.wallMax}.`);
+  if(nr.lost.length)li(`Lost in the breach: ${nr.lost.join(', ')}.`,'c-bad');
+  stt().kills+=nr.kills;
+  if(nr.fin&&S.people.length){S.won=true;S.wonDay=S.day;log('The boss is dead. The last horde is gone. You won.','c-good');
+    const t=stt(),alive=S.people.length,ratio=alive/(alive+t.lost.length);
+    S.end={day:S.day,names:S.people.map(p=>[p.name,SKILLS[p.skill].n]),lost:t.lost.slice(),kills:t.kills,saved:t.saved,turned:t.turned,grade:ratio>=.9&&alive>=10?'S':ratio>=.8?'A':ratio>=.65?'B':ratio>=.5?'C':'D'};
+    save();await ending()}
+  log(`Night ${S.day}: held against ${nr.kills}.${nr.lost.length?' Lost '+nr.lost.join(', ')+'.':''}`,nr.lost.length?'c-bad':'');
+  if(!S.people.length)return gameOver();
+  for(const p of S.people.filter(x=>x.tr==='thief')){const f=Math.min(8,Math.ceil(S.food*.15)),s=Math.min(8,Math.ceil(S.scrap*.15)),m=0;S.food-=f;S.scrap-=s;S.meds-=m;remove(p);morale(-5);
+    li(`${p.name} was a thief. Gone before sunrise with ${f} food, ${s} scrap${m?' and 1 meds':''}.`,'c-bad');log(`${p.name} robbed the stores and ran.`,'c-bad')}
+  const medic=workers('medic'),skMed=medic.some(p=>p.skill==='medic');
+  for(const p of S.people.filter(x=>x.inf&&x.st==='ok')){
+    if(medic.length)await handleSick(p,`The medic found a bite on ${p.name} during morning rounds.`);
+    else{remove(p);morale(-12);const o=S.people.filter(x=>x.st==='ok');let t=`${p.name} was infected and turned in the night.`;
+      if(o.length){const v=pick(o);v.hp-=60;if(v.hp<=0){kill(v,`was killed when ${p.name} turned`);t+=` ${v.name} did not survive.`}else t+=` ${v.name} was badly hurt stopping it.`}
+      li(t,'c-bad');log(t,'c-bad')}}
+  for(const p of S.people.filter(x=>x.st==='quar')){if(--p.q>0)continue;
+    if(chance(skMed?.75:.5)){p.st='ok';p.inf=false;p.hp=Math.min(p.hp,60);li(`${p.name} beat the fever and is out of quarantine.`,'c-good');log(`${p.name} recovered.`,'c-good')}
+    else{kill(p,'died in quarantine');li(`${p.name} died in quarantine.`,'c-bad')}}
+  if(!S.people.length)return gameOver();
+  const f=workers('farm').reduce((a,p)=>a+(p.skill==='farmer'?5:3),0),w=8*count('well');
+  const en=workers('engineer'),sc=en.reduce((a,p)=>a+(p.skill==='engineer'?6:3),0),fix=en.reduce((a,p)=>a+(p.skill==='engineer'?12:7),0);
+  const am=en.reduce((a,p)=>a+(p.skill==='engineer'?6:4),0)+workers('guard').length*2;
+  S.food+=f;S.water+=w;S.scrap+=sc;S.ammo+=am;S.wall=Math.min(S.wallMax,S.wall+fix+15);
+  li(`Made ${f} food, ${w} water, ${sc} scrap, ${am} ammo. Wall patched up.`,'c-good');
+  const heal=15+(medic.length?(skMed?35:25):0);S.people.forEach(p=>{if(p.st!=='quar')p.hp=Math.min(100,p.hp+heal)});
+  const n=S.people.length;let short=false;
+  for(const k of['food','water']){S[k]-=n;if(S[k]<0){S[k]=0;short=true;morale(-12);const v=pick(S.people);v.hp-=30;
+    if(v.hp<=0){kill(v,k==='food'?'starved':'died of thirst');li(`Out of ${k}. ${v.name} did not make it.`,'c-bad')}else li(`Out of ${k}. ${v.name} is getting weak.`,'c-bad')}}
+  if(!short)li(`${n} people ate and drank.`);
+  if(S.people.length>cap()){morale(-8);li('Too many people for the beds. Morale is dropping.','c-warn')}else if(!short)morale(4);
+  if(S.morale<25&&S.people.length>1){const p=pick(S.people.filter(x=>x.st==='ok'));if(p){remove(p);S.food=Math.max(0,S.food-3);li(`${p.name} lost hope and walked out with 3 food.`,'c-bad');log(`${p.name} deserted.`,'c-bad')}}
+  if(!S.people.length)return gameOver();
+  S.bcastY=S.broadcast;S.broadcast=false;S.hordeBonus=1;S.day++;
+  if(S.day-1>(S.best||0))S.best=S.day-1;
+  renderHUD();SFX.dawn();
+  await modal({title:`Dawn · day ${S.day}`,html:`<ul>${L.join('')}</ul>${S.day%5===0?'<p class="c-bad">Scouts say a big horde is moving this way. Tonight will be bad.</p>':''}`,choices:[{t:'Open the gate',v:1,cls:'go'}]});
+  if(chance(.5))await randomEvent();
+  if(!S.people.length)return gameOver();
+  newDay();
+}
+async function randomEvent(){
+  const E=[
+    async()=>{S.wall=Math.max(0,S.wall-15);S.water+=8;log('Storm: wall damaged, rain barrels full.');await modal({title:'Storm',html:'<p>Wind tears at the wall all morning. It loses 15 strength, but the rain barrels catch 8 water.</p>',choices:[{t:'OK',v:1}]})},
+    async()=>{const v=await modal({title:'A kid at the gate',html:'<p>A girl, maybe nine, stands alone outside with a backpack and a flashlight. No bites. No one with her.</p>',choices:[{t:'Let her in',v:1,cls:'good'},{t:'Turn her away',v:0,cls:'bad'}]});
+      if(v){const p=mkPerson('scout','Pip');S.people.push(p);p.role='rest';morale(10);log('Took in Pip, a kid who is quick on her feet.','c-good')}else{morale(-10);log('Turned a kid away. Nobody is talking today.','c-bad')}},
+    async()=>{const v=await modal({title:'Soldier',html:`<p>A soldier in torn gear bangs on the gate. He wants 8 food and 6 ammo "for the war effort".</p>`,choices:[{t:'Pay him',v:'p',dis:S.food<8||S.ammo<6},{t:'Offer him a bunk instead',v:'b'},{t:'Refuse',v:'r',cls:'bad'}]});
+      if(v==='p'){S.food-=8;S.ammo-=6;log('Paid off a soldier.')}
+      else if(v==='b'&&S.morale>=50){const p=mkPerson('guard','Sgt. Vance');p.role='guard';S.people.push(p);log('Sgt. Vance joined the wall.','c-good');toast('He looks at the lights inside, and nods.')}
+      else if(chance(.5)){log('The soldier spat and walked off.');toast('He spits and walks off.')}
+      else{S.wall=Math.max(0,S.wall-20);log('The soldier shot up the gate. Wall -20.','c-bad');toast('He empties a magazine into the gate. Wall -20.')}},
+    async()=>{S.scrap+=12;S.ammo+=5;log('Found a supply crate: 12 scrap, 5 ammo.','c-good');await modal({title:'Supply crate',html:'<p>A parachute crate is tangled in a tree by the road. Inside: 12 scrap and 5 ammo.</p>',choices:[{t:'Haul it in',v:1,cls:'good'}]})},
+    async()=>{const l=Math.ceil(S.food*.2);S.food-=l;log(`Rats in the pantry. Lost ${l} food.`,'c-bad');await modal({title:'Rats',html:`<p>Rats chewed through the pantry sacks overnight. ${l} food is ruined.</p>`,choices:[{t:'Set traps',v:1}]})},
+    async()=>{const v=await modal({title:'Guitar at the gate',html:'<p>An old man with a guitar asks to play for a meal, then move on.</p>',choices:[{t:'Feed him · 2 food',v:1,cls:'good',dis:S.food<2},{t:'No room for songs',v:0}]});if(v){S.food-=2;morale(12);log('A night of music. Morale up.','c-good')}},
+    async()=>{S.hordeBonus=1.25;log('A herd is passing close. Tonight is worse.','c-warn');await modal({title:'Herd on the highway',html:'<p>A huge herd is drifting past on the highway. A quarter more dead will find the wall tonight.</p>',choices:[{t:'Get ready',v:1,cls:'bad'}]})}
+  ];
+  await pick(E)();renderHUD();
+}
+async function gameOver(){
+  const d=S.day;if(d>(S.best||0))S.best=d;const best=S.best;
+  
+  renderHUD();
+  SFX.over();
+  await modal({title:'The gate fell',html:`<p>Nobody is left inside. You held out for <b>${d} day${d>1?'s':''}</b>.</p><p class="dim">Best run: ${best} days.</p>`,choices:[{t:'Start over',v:1,cls:'go'}]});
+  fresh();S.best=best;newDay();
+}
+let END=null;
+async function ending(){
+  const e=S.end;if(!e||END)return;const ph=S.phase;S.phase='busy';render();
+  END={t:0};$('#banner').textContent='SUNRISE';SFX.win();
+  await new Promise(r=>setTimeout(r,7500));
+  $('#banner').textContent='';
+  const good=e.grade==='S'||e.grade==='A',mid=e.grade==='B'||e.grade==='C';
+  const text=good?'The boss is dead and the road is quiet. The gate swings open in daylight for the first time, and nearly everyone you took in walks out to see it.'
+    :mid?'The boss is dead. The gate opens at sunrise. Not everyone who came through it is here to see the morning, but the base held.'
+    :'The boss is dead, and the wall is still standing. So few of you are left to open the gate. They do it anyway.';
+  const st=(v,k)=>`<div><b>${v}</b>${k}</div>`;
+  await modal({title:good?'A new morning':mid?'Still standing':'What it cost',html:`<p>${text}</p><div class="grade" aria-label="Grade ${e.grade}">${e.grade}</div><div class="stats">${st(e.day,'Days survived')}${st(e.kills,'Zombies put down')}${st(e.names.length,'Survivors alive')}${st(e.saved,'People let in')}${st(e.lost.length,'People lost')}${st(e.turned,'Turned away')}</div>`,choices:[{t:'Roll credits',v:1,cls:'go'}]});
+  await credits(e);
+  END=null;S.phase=ph;render();
+}
+function credits(e){
+  return new Promise(res=>{
+    const c=$('#credits'),r=$('#credRoll'),b=$('#credBtn'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const lines=e.names.length+e.lost.length+10;
+    r.className='';r.innerHTML=`<h3>LAST GATE</h3><p>Day ${e.day} · Grade ${e.grade}</p><h4>The survivors</h4>${e.names.map(n=>`<p>${esc(n[0])}<small>${n[1]}</small></p>`).join('')}
+      ${e.lost.length?`<h4>In memory of</h4>${e.lost.map(n=>`<p>${esc(n)}</p>`).join('')}`:'<h4>Nobody was lost</h4>'}
+      <h4>Base commander</h4><p>${esc(ACCT||'You')}</p><h4>Created by</h4><p class="big">Maxcade developers</p><h4>Thanks for holding the gate</h4>`;
+    r.style.animationDuration=Math.max(22,Math.min(70,lines*1.6))+'s';
+    b.textContent=still?'Keep playing':'Skip';c.hidden=false;
+    const fin=()=>{r.className='still';r.innerHTML='<h3>LAST GATE</h3><h4>Created by</h4><p class="big">Maxcade developers</p><h4>The end</h4>';b.textContent='Keep playing'};
+    r.onanimationend=fin;
+    b.onclick=()=>{SFX.tap();c.hidden=true;r.onanimationend=null;r.innerHTML='';res()};
+  });
+}
+function intro(){return modal({title:'Last Gate',html:`<p>You run the last safe base for miles. Hold out until day 30, then beat the boss zombie and its horde to win.</p><ul><li><b>Gate:</b> check each stranger, then let them in or turn them away. You get 20 checks a day.</li><li><b>Build</b> rooms and <b>People</b> jobs keep everyone fed.</li><li><b>Scavenge</b> for meds, ammo and scrap.</li><li>Lock the gate when ready. The dead come every night, and a big horde every 5th.</li></ul>`,choices:[{t:'Open the gate',v:1,cls:'go'}]})}
+
+/* ---------- drawing ---------- */
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function drawFace(c,seed){const r=rng(seed),x=c.getContext('2d'),P=(a)=>a[Math.floor(r()*a.length)];
+  x.fillStyle=P(['#2b3022','#30291f','#252b2e']);x.fillRect(0,0,34,34);
+  x.fillStyle=P(['#4a5a3a','#5a4a3a','#3a4a5a','#5a3a3a','#555']);x.fillRect(6,26,22,8);
+  const skin=P(['#e3b58c','#c98f62','#a06a42','#7a4a2c','#f0c9a4']);x.fillStyle=skin;x.fillRect(11,9,12,15);x.fillRect(14,24,6,3);
+  x.fillStyle=P(['#1c1410','#4a2f18','#8a8478','#a8552a','#2a2a2a']);const h=Math.floor(r()*4);
+  if(h===0){x.fillRect(10,6,14,5)}else if(h===1){x.fillRect(10,6,14,4);x.fillRect(9,9,3,12);x.fillRect(22,9,3,12)}else if(h===2){x.fillRect(10,7,14,3)}else{x.fillStyle=P(['#5a5f3a','#3a3f4a','#6a3a2a']);x.fillRect(9,5,16,5);x.fillRect(9,9,19,2)}
+  x.fillStyle='#111';x.fillRect(13,15,2,2);x.fillRect(19,15,2,2);x.fillStyle='#0004';x.fillRect(15,20,4,1);
+  if(r()<.3){x.fillStyle='#0003';x.fillRect(11,20,12,4)}
+  if(r()<.25){x.fillStyle='#7a2a1a';x.fillRect(21,12,1,5)}
+}
+const cv=$('#scene'),cx=cv.getContext('2d');let G={W:360,H:200,bx:0,by:0,bw:10,bh:10,cell:10};
+const debris=Array.from({length:70},()=>[Math.random(),Math.random(),Math.random()]);
+const pos=new Map();
+function per(t){const{bx,by,bw,bh}=G,P=2*(bw+bh);let d=(((t%1)+1)%1)*P;if(d<bw)return[bx+d,by];d-=bw;if(d<bh)return[bx+bw,by+d];d-=bh;if(d<bw)return[bx+bw-d,by+bh];d-=bw;return[bx,by+bh-d]}
+function layout(){
+  const dpr=Math.min(2,window.devicePixelRatio||1),w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  const W=360,H=360*h/Math.max(1,w),cell=Math.min(W*.6/S.cols,H*.58/S.rows),bw=cell*S.cols,bh=cell*S.rows;
+  G={W,H,cell,bw,bh,bx:(W-bw)/2,by:(H-bh)/2-3,sc:cv.width/W};
+}
+function draw(dt){
+  layout();const{W,H,bx,by,bw,bh,cell}=G,night=S.phase==='night';
+  cx.setTransform(G.sc,0,0,G.sc,0,0);
+  if(END){END.t+=dt;const k=clamp(END.t/6,0,1),m=(a,b)=>Math.round(a+(b-a)*k);cx.fillStyle=`rgb(${m(11,120)},${m(13,98)},${m(14,48)})`;cx.fillRect(0,0,W,H);
+    const sy=by-6-k*10,gr=cx.createRadialGradient(W/2,sy,2,W/2,sy,W*.6);gr.addColorStop(0,`rgba(255,214,120,${.85*k})`);gr.addColorStop(1,'rgba(255,214,120,0)');cx.fillStyle=gr;cx.fillRect(0,0,W,H);
+    cx.fillStyle=`rgba(255,236,170,${k})`;cx.beginPath();cx.arc(W/2,sy,7,0,7);cx.fill()}
+  else{cx.fillStyle=night?'#0b0d0e':'#23261a';cx.fillRect(0,0,W,H)}
+  cx.fillStyle=night?'#15181a':'#2e3122';cx.fillRect(W/2-9,by+bh,18,H);
+  for(const d of debris){cx.fillStyle=night?'#1a1e20':d[2]<.5?'#2f3323':'#1b1d14';cx.fillRect(d[0]*W,d[1]*H,1.5+d[2]*2,1.5)}
+  cx.fillStyle=night?'#16191a':'#34382a';cx.fillRect(bx,by,bw,bh);
+  for(let i=0;i<plots();i++){const x=bx+(i%S.cols)*cell,y=by+Math.floor(i/S.cols)*cell,t=S.rooms[i];
+    if(t){const r=ROOMS[t];cx.fillStyle=r.c;cx.globalAlpha=night?.6:1;cx.fillRect(x+2.5,y+2.5,cell-5,cell-5);cx.globalAlpha=1;
+      cx.fillStyle='#0008';cx.fillRect(x+2.5,y+cell-2.5-cell*.26,cell-5,cell*.26);
+      cx.fillStyle='#f3eed8';cx.font=`600 ${Math.max(5,cell*.19)}px "Barlow Condensed",sans-serif`;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(r.n.toUpperCase().split(' ')[0],x+cell/2,y+cell-2.5-cell*.13);
+      if(t==='infirmary'){cx.fillStyle='#b3261a';cx.fillRect(x+cell/2-1.5,y+cell*.2,3,cell*.3);cx.fillRect(x+cell/2-cell*.15,y+cell*.35-1.5,cell*.3,3)}
+      if(t==='farm'){cx.strokeStyle='#8fb04a';cx.lineWidth=1;for(let k=1;k<4;k++){cx.beginPath();cx.moveTo(x+5,y+3+k*cell*.16);cx.lineTo(x+cell-5,y+3+k*cell*.16);cx.stroke()}}
+      if(t==='well'){cx.fillStyle='#8fd0e8';cx.beginPath();cx.arc(x+cell/2,y+cell*.36,cell*.14,0,7);cx.fill()}
+    }else{cx.strokeStyle='#ffffff18';cx.lineWidth=.6;cx.setLineDash([2,2]);cx.strokeRect(x+3,y+3,cell-6,cell-6);cx.setLineDash([])}}
+  const wr=S.wall/S.wallMax;cx.strokeStyle=wr<=0?'#5a2a1a':wr<.3?'#dc5a34':'#8d8a70';cx.lineWidth=2.4+S.wallLv*.5;
+  cx.beginPath();cx.moveTo(W/2-7,by+bh);cx.lineTo(bx,by+bh);cx.lineTo(bx,by);cx.lineTo(bx+bw,by);cx.lineTo(bx+bw,by+bh);cx.lineTo(W/2+7,by+bh);cx.stroke();
+  cx.strokeStyle=S.phase==='day'?'#f0a81e':'#8d8a70';cx.lineWidth=2;cx.beginPath();if(S.phase==='day'||END){cx.moveTo(W/2-7,by+bh);cx.lineTo(W/2-11,by+bh+6);cx.moveTo(W/2+7,by+bh);cx.lineTo(W/2+11,by+bh+6)}else{cx.moveTo(W/2-7,by+bh);cx.lineTo(W/2+7,by+bh)}cx.stroke();
+  if(count('tower')){cx.fillStyle='#6a6f58';cx.fillRect(bx-9,by-9,8,8);cx.strokeStyle='#f0a81e';cx.lineWidth=.8;cx.strokeRect(bx-9,by-9,8,8)}
+  for(let i=0;i<S.turrets;i++){const[x,y]=per(i*.37+.06);cx.fillStyle='#22241a';cx.beginPath();cx.arc(x,y,3.4,0,7);cx.fill();cx.strokeStyle='#f0a81e';cx.lineWidth=1;cx.stroke()}
+  const gs=workers('guard');
+  for(const p of S.people){if(p.st==='away'){pos.delete(p.id);continue}
+    let o=pos.get(p.id);if(!o){o={x:W/2,y:by+bh-4,tx:W/2,ty:by+bh/2,w:0};pos.set(p.id,o)}
+    const gi=gs.indexOf(p);
+    const pi=S.people.indexOf(p);
+    if(END){if(END.t>pi*.35){if(o.y<by+bh-1.5&&Math.abs(o.x-W/2)>3){o.tx=W/2;o.ty=by+bh-3}else{o.tx=W/2+((pi%3)-1)*5;o.ty=H+12}}}
+    else if(gi>=0){[o.tx,o.ty]=per((gi+.5)/gs.length)}else if((o.w-=dt)<=0){o.w=1.5+Math.random()*4;o.tx=bx+5+Math.random()*(bw-10);o.ty=by+5+Math.random()*(bh-10)}
+    const dx=o.tx-o.x,dy=o.ty-o.y,d=Math.hypot(dx,dy);if(d>.6){const s=Math.min(d,(night?16:11)*dt);o.x+=dx/d*s;o.y+=dy/d*s}
+    cx.fillStyle=p.st==='quar'?'#a4d63c':SKILLS[p.skill].c;cx.beginPath();cx.arc(o.x,o.y,2.5,0,7);cx.fill();cx.strokeStyle='#000a';cx.lineWidth=.7;cx.stroke()}
+  if(S.phase==='day')S.visitors.forEach((v,i)=>{cx.fillStyle=v.type==='trader'?'#f0a81e':'#d8d2ba';cx.beginPath();cx.arc(W/2,by+bh+11+i*8,2.5,0,7);cx.fill();cx.strokeStyle='#000a';cx.lineWidth=.7;cx.stroke()});
+  if(N){for(const z of N.zs){z.w+=dt*6;cx.fillStyle=z.boss?(z.rage?'#c21f14':'#7a1f1a'):z.raider?'#c8442c':z.brute?'#5f8a2a':'#8fb83a';cx.beginPath();cx.arc(z.x+Math.sin(z.w)*.6,z.y,z.boss?(z.rage?11:9):z.brute?4:2.6,0,7);cx.fill();cx.strokeStyle=z.boss?'#f0a81e':'#000b';cx.lineWidth=z.boss?1.6:.7;cx.stroke();
+      if(z.boss){cx.fillStyle='#000a';cx.fillRect(z.x-12,z.y-15,24,3);cx.fillStyle='#dc5a34';cx.fillRect(z.x-12,z.y-15,24*Math.max(0,z.hp)/300,3)}}
+    for(const s of N.shots){cx.strokeStyle=s.m?'#ffffff88':'#ffd76a';cx.lineWidth=s.m?1.2:.8;cx.beginPath();cx.moveTo(s.x1,s.y1);cx.lineTo(s.x2,s.y2);cx.stroke()}}
+}
+let last=performance.now();
+function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;if(!S)return requestAnimationFrame(frame);
+  if(N){const k=N.fast?3:1;for(let i=0;i<k&&N;i++)stepNight(dt*1.3)}
+  draw(dt);requestAnimationFrame(frame)}
+
+/* ---------- boot ---------- */
+function start(data){
+  if(data&&data.S&&data.S.v===1&&data.S.people&&data.acct){ACCT=data.acct;S=data.S;if(S.phase!=='day'){S.phase='day';S.people.forEach(p=>{if(p.st==='away')p.st='ok'});S.crew=null}render()}
+  else showAccts();
+  requestAnimationFrame(frame);
+}
+window.__mxNoHot?.hot?.snapshot?.(()=>({S,acct:ACCT}));
+window.__mxNoHot?.hot?.ready?window.__mxNoHot.hot.ready(start):start(window.__mxNoHot?.hot?.data??{});
+</script>
+
+</body></html>
