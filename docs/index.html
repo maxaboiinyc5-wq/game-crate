@@ -135,6 +135,32 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
   <button id="bootback" type="button" hidden>Back to the shelf</button>
 </div>
 
+<script type="text/plain" id="mxnozoom">
+(function(){
+  /* Game Crate: stop accidental zooming (double-tap and pinch) so the screen never gets stuck zoomed in */
+  if(window.__mxNoZoom)return;window.__mxNoZoom=1;
+  var m=document.querySelector('meta[name=viewport]');
+  if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');
+  var s=document.createElement('style');s.textContent='html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}';
+  (document.head||document.documentElement).appendChild(s);
+  ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});
+  document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1&&e.cancelable&&e.scale!==undefined&&e.scale!==1)e.preventDefault()},{passive:false});
+  document.addEventListener('dblclick',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;e.preventDefault()},{passive:false});
+})();
+</script>
+<script>(function(){
+  /* Game Crate: stop accidental zooming (double-tap and pinch) so the screen never gets stuck zoomed in */
+  if(window.__mxNoZoom)return;window.__mxNoZoom=1;
+  var m=document.querySelector('meta[name=viewport]');
+  if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');
+  var s=document.createElement('style');s.textContent='html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}';
+  (document.head||document.documentElement).appendChild(s);
+  ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});
+  document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1&&e.cancelable&&e.scale!==undefined&&e.scale!==1)e.preventDefault()},{passive:false});
+  document.addEventListener('dblclick',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;e.preventDefault()},{passive:false});
+})();
+</script>
+
 <script type="text/plain" id="mxdesk">
 /* Game Crate desktop layer. The console adds this to a game when it is launched on a computer
    (mouse + keyboard). It hides thumb controls, adds missing keyboard shortcuts and a controls list.
@@ -509,6 +535,8 @@ function launch(g,cart){
     .then(html=>{
       if(html.indexOf('mx-home')<0)throw new Error('not a game file');
       /* on a computer, add the desktop layer (keyboard shortcuts, controls list, no thumb sticks) */
+      const nz=$('mxnozoom')?$('mxnozoom').textContent:'';
+      if(nz)html=html.replace('<body>',()=>'<body><script>'+nz+'<\/script>');
       const lay=$('mxdesk')?$('mxdesk').textContent:'';
       if(lay)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';<\/script><script>'+lay+'<\/script>');
       clearInterval(clockTimer);
