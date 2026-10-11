@@ -408,7 +408,7 @@ function keys(m,t,d,v){
 function pluck(m,t,d,v){
   const o=AC.createOscillator(),f=AC.createBiquadFilter(),g=AC.createGain();
   o.type='sawtooth';o.frequency.value=hz(m);f.type='lowpass';f.Q.value=4;
-  f.frequency.setValueAtTime(3400,t);f.frequency.exponentialRampToValueAtTime(520,t+.22);
+  f.frequency.setValueAtTime(2000,t);f.frequency.exponentialRampToValueAtTime(520,t+.22);
   g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);
   o.connect(f);f.connect(g);g.connect(mGain);o.start(t);o.stop(t+d+.03);
 }
@@ -421,7 +421,7 @@ function bass(m,t,d){
 function kick(t){
   const o=AC.createOscillator(),g=AC.createGain();o.type='sine';
   o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);
-  g.gain.setValueAtTime(.42,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);
+  g.gain.setValueAtTime(.26,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);
   o.connect(g);g.connect(mGain);o.start(t);o.stop(t+.25);
 }
 function hiss(t,d,v,type,fq){
@@ -431,21 +431,21 @@ function hiss(t,d,v,type,fq){
   s.connect(f);f.connect(g);g.connect(mGain);s.start(t);s.stop(t+d+.02);
 }
 function sched(){
-  if(!AC)return;const sp=60/80/4;
+  if(!AC)return;const sp=60/64/4;
   while(mNext<AC.currentTime+.3){
-    const bar=Math.floor(mStep/16)%16,i=mStep%16,t=mNext+(i%2?sp*.24:0),B=SONG[bar],ch=B[0],nx=SONG[(bar+1)%16][0];
+    const bar=Math.floor(mStep/16)%16,i=mStep%16,t=mNext+(i%2?sp*.16:0),B=SONG[bar],ch=B[0],nx=SONG[(bar+1)%16][0];
     /* drums: slow boom-bap */
-    if(i===0||i===7||i===10)kick(t);
-    if(i===4||i===12){hiss(t,.16,.16,'bandpass',1300);hiss(t,.05,.05,'highpass',5000)}
-    if(i%2===0)hiss(t,.03,i%4?.05:.03,'highpass',8000);
+    if(i===0||i===10)kick(t);
+    if(i===4||i===12)hiss(t,.09,.07,'bandpass',1700);
+    if(i%4===2)hiss(t,.025,.025,'highpass',8000);
     /* bass: root, a little push, the fifth, then a step into the next chord */
-    if(i===0)bass(ch.r,t,sp*5);if(i===7)bass(ch.r,t,sp*2);if(i===10)bass(ch.r+7,t,sp*3);if(i===14)bass(nx.r+(nx.r>ch.r?-1:1),t,sp*1.800);
+    if(i===0)bass(ch.r,t,sp*5);if(i===10)bass(ch.r+7,t,sp*3);if(i===14)bass(nx.r+(nx.r>ch.r?-1:1),t,sp*1.800);
     /* electric piano chords, played as hits not held pads */
-    if(i===0)ch.c.forEach((m,k)=>keys(m,t+k*.012,sp*7,.05));
-    if(i===10)ch.c.forEach((m,k)=>keys(m,t+k*.008,sp*3,.035));
-    if(i===7&&bar%2)ch.c.slice(1).forEach(m=>keys(m+12,t,sp*2,.02));
+    if(i===0)ch.c.forEach((m,k)=>keys(m,t+k*.03,sp*9,.045));
+    if(i===10)ch.c.forEach((m,k)=>keys(m,t+k*.02,sp*5,.025));
+    
     /* lead */
-    for(const n of B[1])if(n[0]===i)pluck(n[1],t,sp*n[2]+.18,.085);
+    for(const n of B[1])if(n[0]===i)pluck(n[1]-12,t,sp*n[2]+.3,.06);
     mNext+=sp;mStep++;
   }
 }
