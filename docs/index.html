@@ -138,10 +138,10 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
 <script type="text/plain" id="mxnozoom">
 (function(){
   /* Game Crate: stop accidental zooming (double-tap and pinch) so the screen never gets stuck zoomed in */
-  if(window.__mxNoZoom)return;window.__mxNoZoom=1;
+  if(document.getElementById('mx-nz'))return;
   var m=document.querySelector('meta[name=viewport]');
   if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');
-  var s=document.createElement('style');s.textContent='html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}';
+  var s=document.createElement('style');s.id='mx-nz';s.textContent='html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}';
   (document.head||document.documentElement).appendChild(s);
   ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});
   document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1&&e.cancelable&&e.scale!==undefined&&e.scale!==1)e.preventDefault()},{passive:false});
@@ -150,10 +150,10 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
 </script>
 <script>(function(){
   /* Game Crate: stop accidental zooming (double-tap and pinch) so the screen never gets stuck zoomed in */
-  if(window.__mxNoZoom)return;window.__mxNoZoom=1;
+  if(document.getElementById('mx-nz'))return;
   var m=document.querySelector('meta[name=viewport]');
   if(m)m.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover');
-  var s=document.createElement('style');s.textContent='html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}';
+  var s=document.createElement('style');s.id='mx-nz';s.textContent='html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}';
   (document.head||document.documentElement).appendChild(s);
   ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});
   document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1&&e.cancelable&&e.scale!==undefined&&e.scale!==1)e.preventDefault()},{passive:false});
