@@ -559,4 +559,18 @@ function launch(g,cart){
 })();
 </script>
 
+<script>
+/* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
+(function(){
+  var V='2026-10-12c';
+  function check(){
+    if(window.__maxcade)return;
+    fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
+      var m=t.match(/var V='([^']+)'/);if(m&&m[1]!==V&&!window.__maxcade)location.replace('./?v='+Date.now());
+    }).catch(function(){});
+  }
+  check();
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)check()});
+})();
+</script>
 </body></html>
