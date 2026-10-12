@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Game Crate"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#191629"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-180.png"><link rel="manifest" href="manifest.json"></head><body>
 <title>Game Crate</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;900&amp;family=Onest:wght@400;500;700&amp;display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&amp;family=Saira+Stencil+One&amp;family=Bowlby+One&amp;family=Barlow+Condensed:ital,wght@0,700;1,800&amp;family=Bungee&amp;family=Lilita+One&amp;family=Graduate&amp;family=Russo+One&amp;display=swap&amp;text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&amp;family=Saira+Stencil+One&amp;family=Bowlby+One&amp;family=Barlow+Condensed:ital,wght@0,700;1,800&amp;family=Bungee&amp;family=Lilita+One&amp;family=Graduate&amp;family=Russo+One&amp;family=Silkscreen:wght@700&amp;display=swap&amp;text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20">
 <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js">
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js">
@@ -185,6 +185,8 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
     'lawn-guard':{keys:{Digit1:['c#k-sun'],Digit2:['c#k-pea'],Digit3:['c#k-nut'],KeyX:['c#shovel']},
       list:[['Click','Plant, or collect a sun'],['1 2 3','Pick a plant'],['X','Shovel']]},
     'midnight-motorway':{list:[['A D or Left Right','Change lane'],['Hold mouse + drag','Steer'],['Enter','Start']]},
+    'pocket-maker':{hide:['.pad','#bJ'],
+      list:[['Click + drag','Draw tiles'],['Right-click','Erase'],['1 to 9','Pick a tile'],['Tab','Next tile group'],['Ctrl + Z','Undo'],['P','Play your level'],['A D or Left Right','Move'],['Space or W','Jump'],['R','Restart'],['Esc','Back to editing']]},
     'puck-havoc':{list:[['Click, pull back, let go','Fling the puck']]},
     'short-hop-air':{hide:['#joy'],fly:true,
       alias:{KeyW:'ArrowUp',KeyS:'ArrowDown',KeyA:'ArrowLeft',KeyD:'ArrowRight'},
@@ -299,6 +301,8 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
 <script>
 (()=>{
 const GAMES=[
+ {id:'pocket-maker',name:'Pocket Maker',kind:'2D · level maker',blurb:'Draw your own levels, hit Play, share the code.',
+  font:"'Silkscreen',ui-monospace,monospace",fw:700,bg:'#0e2341',fg:'#ffd23f',tx:'#eaf1fb',ac:'#ff4f8b',ci:'#0e2341',sz:.8},
  {id:'aisle-nine-market',name:'Aisle Nine Market',kind:'3D · store sim',blurb:'Stock the shelves and fridges, then run the register.',
   font:"'Paytone One','Arial Black',sans-serif",bg:'#fff8e8',fg:'#1b2333',tx:'#1b2333',ac:'#e63946',ci:'#ffffff'},
  {id:'last-gate',name:'Last Gate',kind:'2D · base sim',blurb:'Decide who gets in, survive the nights, beat the boss on day 30.',
@@ -334,6 +338,7 @@ const GAMES=[
 ];
 /* [first made, last updated]. Badges work themselves out from these and drop off after 7 days. */
 const DATES={
+ 'pocket-maker':['2026-10-12','2026-10-12'],
  'aisle-nine-market':['2026-10-10','2026-10-10'],'last-gate':['2026-10-10','2026-10-11'],'stormline-royale':['2026-10-10','2026-10-10'],
  'short-hop-air':['2026-10-08','2026-10-10'],'bad-goat-day':['2026-10-09','2026-10-09'],'brokebox':['2026-10-09','2026-10-09'],
  'jetway-tycoon':['2026-10-09','2026-10-11'],'five-star-getaway':['2026-10-09','2026-10-09'],'lawn-guard':['2026-10-09','2026-10-11'],
@@ -379,7 +384,7 @@ for(const g of GAMES){
   b.addEventListener('click',()=>launch(g,b));
   shelf.appendChild(b);
 }
-const CATS={'aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
+const CATS={'pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
  'brokebox':'Arcade','jetway-tycoon':'Sim','five-star-getaway':'Driving','lawn-guard':'Arcade','two-minute-drill':'Sports',
  'kickflip-island':'Sports','curb-cut':'Sports','puck-havoc':'Arcade','midnight-motorway':'Driving','zip-riot':'Arcade','wisp-hollow':'Action'};
 let filt='All';
