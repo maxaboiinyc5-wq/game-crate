@@ -496,12 +496,6 @@ function tick(){
   try{$('clock').textContent=new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}catch(e){}
 }
 tick();clockTimer=setInterval(tick,15000);
-/* opening the console link with a game tag on the end (like .../game-crate/#lawn-guard) jumps straight into that game */
-(()=>{const id=(location.hash||'').slice(1).toLowerCase(),g=GAMES.find(x=>x.id===id);
-  if(!g)return;
-  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}  /* so the house button comes back to the shelf */
-  launch(g,$('cart-'+g.id));})();
-
 
 /* arrow keys move between cartridges */
 shelf.addEventListener('keydown',e=>{
