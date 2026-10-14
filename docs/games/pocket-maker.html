@@ -851,7 +851,7 @@ function makeBoss(t,x,y){
   return b;
 }
 function bossDown(b){
-  play.bossesLeft--;SFX.bossdie();play.shake=0.6;
+  play.bossesLeft--;play.beaten.add(b.id);SFX.bossdie();play.shake=0.6;
   burst(b.x+b.w/2,b.y+b.h/2,'#ffd23f',24,8);burst(b.x+b.w/2,b.y+b.h/2,'#ff4f8b',18,6);
   toast(play.bossesLeft===0&&play.hasFlag?'Boss beaten! The goal is open.':'Boss beaten!',2000);
 }
@@ -916,14 +916,15 @@ function updateBosses(dt,P,p,prevBottom){
 }
 const pcxOf=p=>p.x+p.w/2;
 function startPlay(o={}){
-  const tiles=cur.tiles.slice(),w=cur.w,enemies=[],movers=[],cannons=[],portals=[],bosses=[];
+  const tiles=cur.tiles.slice(),w=cur.w,enemies=[],movers=[],cannons=[],portals=[],bosses=[],beaten=new Set(o.beaten||[]);
+  const cpx=(o.cp!=null&&cur.tiles[o.cp]===CHECK)?o.cp%w:-1;let bossAll=0;
   let sx=1,sy=ROWS-3,total=0,gemsT=0,keysT=0,hasFlag=false;
   for(let y=0;y<ROWS;y++)for(let x=0;x<w;x++){const i=y*w+x,t=tiles[i];
     if(t===ENEMY){enemies.push({type:'walk',x:x+0.1,y:y+0.3,w:0.8,h:0.7,vx:-2.2,vy:0,alive:true,squish:0});tiles[i]=E;}
     else if(t===SPIKY){enemies.push({type:'spiky',x:x+0.08,y:y+0.3,w:0.84,h:0.7,vx:-1.6,vy:0,alive:true,squish:0});tiles[i]=E;}
     else if(t===FLYER){enemies.push({type:'flyer',x:x+0.1,y:y+0.15,by:y+0.15,w:0.8,h:0.7,vx:-1.7,vy:0,t:Math.random()*6,alive:true,squish:0});tiles[i]=E;}
     else if(t===MOVER){const m=movers[movers.length-1];if(m&&m.ty===y&&m.x+m.w===x)m.w++;else movers.push({x,ty:y,y,w:1,vx:2,dx:0,x0:x});tiles[i]=E;}
-    else if(BOSS(t)){bosses.push(makeBoss(t,x,y));tiles[i]=E;}
+    else if(BOSS(t)){bossAll++;if(!beaten.has(i)&&!(cpx>=0&&x<cpx)){const b=makeBoss(t,x,y);b.id=i;bosses.push(b);}else beaten.add(i);tiles[i]=E;}
     else if(t===START){sx=x;sy=y;tiles[i]=E;}
     else if(t===CANNON)cannons.push({tx:x,ty:y,t:1+Math.random()*1.5});
     else if(t===PORTAL)portals.push(i);
@@ -934,7 +935,7 @@ function startPlay(o={}){
     airJumps:1,star:0,boostT:0,portalLock:-1,ride:null,hx:0,hy:0};
   play={tiles,w,enemies,movers,cannons,portals,balls:[],crumble:new Map(),p,total,coins:0,gemsT,gems:0,keysT,keys:0,wings:false,
     time:o.time||0,deaths:o.deaths||0,cp:o.cp??null,won:false,hasFlag,look:0,lockMsg:0,
-    bosses,bossT:bosses.length,bossesLeft:bosses.length,bombs:[],fire:[],shake:0};
+    bosses,beaten,bossT:bossAll,bossesLeft:bosses.length,bombs:[],fire:[],shake:0};
   hits.clear();parts.length=0;
   camX=clampCam(p.x+p.w/2-vw/TS/2);$('#msg').hidden=true;updateHud(true);
 }
@@ -970,7 +971,7 @@ function tryLock(tx,ty){
 function killEnemy(e,P){e.alive=false;e.squish=0;SFX.stomp();burst(e.x+e.w/2,e.y+e.h/2,e.type==='flyer'?'#ff5d8f':e.type==='spiky'?'#c9772e':'#b9a0ff',8,4);}
 function step(dt){
   const p=play.p,P=phys(),inp=inputs();
-  if(p.dead){p.deadT+=dt;p.vy+=P.g*dt;p.y+=p.vy*dt;if(p.deadT>1.1)startPlay({deaths:play.deaths,cp:play.cp,time:play.time});return;}
+  if(p.dead){p.deadT+=dt;p.vy+=P.g*dt;p.y+=p.vy*dt;if(p.deadT>1.1)startPlay({deaths:play.deaths,cp:play.cp,time:play.time,beaten:play.beaten});return;}
   if(play.won)return;
   play.time+=dt;play.shake=Math.max(0,play.shake-dt);
   // movers
