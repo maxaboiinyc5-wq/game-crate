@@ -411,8 +411,8 @@ let LV = LEVELS[0];
 let P;
 
 function loadProg() {
-  try { const p = JSON.parse(localStorage.getItem('wh.prog') || 'null'); if (p && Array.isArray(p.cleared) && Array.isArray(p.best)) return p; } catch (e) {}
-  return { cleared: [false, false, false], best: [0, 0, 0] };
+  try { const p = JSON.parse(localStorage.getItem('wh.prog') || 'null'); if (p && Array.isArray(p.cleared) && Array.isArray(p.best)) { if (typeof p.awaitingReset !== 'boolean') p.awaitingReset = false; return p; } } catch (e) {}
+  return { cleared: [false, false, false], best: [0, 0, 0], awaitingReset: false };
 }
 function saveProg(p) { try { localStorage.setItem('wh.prog', JSON.stringify(p)); } catch (e) {} }
 const PROG = loadProg();
@@ -1130,6 +1130,7 @@ function resetGame(id) {
 }
 function startGame(id) {
   id = id || nextLevel(); if (!isUnlocked(id)) return;
+  if (PROG.awaitingReset) { PROG.awaitingReset = false; G.currency = 0; saveCurrency(); SHOP.owned = []; SHOP.equipped = []; saveShop(); saveProg(PROG); }
   Snd.init(); const first = !PROG.cleared.some(Boolean) && !PROG.best.some(Boolean);
   groundGlow.visible = true; playerGroup.visible = true;
   resetGame(id); G.state = 'play'; document.body.classList.add('playing'); showScreen(null); Snd.setMusic(0.5);
@@ -1662,6 +1663,7 @@ const END_CAPS = [[0.9, 'The Hollow King is gone.'], [4.4, 'The darkness drains 
 function startEnding() {
   getTile(1); G.state = 'ending'; G.end = { t: 0, dawn: false, dawnT: 0, card: false, lift: 0, glow: 0, cap: -1, mote: 0 };
   G.unlockMsg = 'You cleared every level!';
+  PROG.awaitingReset = true; saveProg(PROG);
   document.body.classList.add('cine'); document.body.classList.remove('playing'); hurtEl.classList.remove('low');
   playerGroup.visible = true; groundGlow.visible = true; P.hp = P.maxHp; P.vx = P.vz = 0;
   Snd.setMusic(0.2); last = performance.now();
@@ -1691,7 +1693,7 @@ function updateEnding(dt) {
   camera.lookAt(P.x, 1 + E.lift * 0.7, P.z);
   if (!E.card && t >= 16.8) { E.card = true; showScreen('end'); document.body.classList.remove('cine'); setCaption(null); capEl.style.visibility = 'hidden'; }
 }
-function leaveEnding() { if (G.state !== 'ending') return; G.currency = 0; saveCurrency(); SHOP.owned = []; SHOP.equipped = []; saveShop(); showTitle(); }
+function leaveEnding() { if (G.state !== 'ending') return; showTitle(); }
 
 /* =====================================================================
    per-frame visuals
