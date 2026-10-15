@@ -1,0 +1,936 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<script>
+/* Maxcade: "back to console" tab on the side of the screen. Lives in a shadow root so the game's CSS and selectors never touch it. */
+(function(){
+  if(window.__mxHomeOn)return;window.__mxHomeOn=1;
+  var KEY='maxcade.homepos2',BW=30,BH=46,pos=[1,.5],host=document.createElement('div');
+  host.id='mx-home';
+  host.style.cssText='position:fixed;z-index:2147483647;left:0;top:0;margin:0;padding:0;border:0;width:0;height:0;touch-action:none;-webkit-user-select:none;user-select:none';
+  var root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+  root.innerHTML='<style>'
+    +':host{all:initial}'
+    +'.w{position:absolute;left:0;top:0;width:'+BW+'px;height:'+BH+'px;margin:-'+(BH/2)+'px 0 0 -'+(BW/2)+'px;font:600 14px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif}'
+    +'.h{display:block;width:100%;height:100%;box-sizing:border-box;margin:0;padding:0;border:2px solid rgba(255,255,255,.75);border-radius:5px;background:rgba(18,16,34,.6);cursor:pointer;opacity:.65;touch-action:none}'
+    +'.h svg{display:block;width:18px;height:18px;margin:0 auto;fill:#fff}'
+    +'.h:focus-visible,.q button:focus-visible{outline:3px solid #ffb020;outline-offset:2px;opacity:1}'
+    +'.open .h{opacity:1;background:#191629}'
+    +'.q{display:none;position:absolute;width:200px;box-sizing:border-box;padding:12px;border-radius:8px;background:#191629;border:2px solid #373055;color:#f3efe6;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.5)}'
+    +'.open .q{display:block}'
+    +'.sl .q{right:calc(100% + 8px)}.sr .q{left:calc(100% + 8px)}'
+    +'.vt .q{top:0}.vb .q{bottom:0}.vm .q{top:50%;transform:translateY(-50%)}'
+    +'.q p{margin:0 0 10px;font:inherit}'
+    +'.q button{display:block;width:100%;box-sizing:border-box;margin:0;padding:11px 8px;border:0;border-radius:6px;font:inherit;cursor:pointer}'
+    +'.x{background:#ffb020;color:#191629}'
+    +'.s{background:#2d2748;color:#f3efe6;margin-top:8px!important}'
+    +'</style>'
+    +'<div class="w"><button class="h" type="button" aria-label="Console menu" title="Console menu">'
+    +'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11.2h2.7V21h5.3v-6h3v6h5.3v-9.8h2.7z"/></svg></button>'
+    +'<div class="q"><p>Leave this game?</p><button class="x" type="button">Back to console</button><button class="s" type="button">Keep playing</button></div></div>';
+  var w=root.querySelector('.w'),h=root.querySelector('.h');
+  function place(x,y){
+    var W=window.innerWidth,H=window.innerHeight;
+    x=Math.max(BW/2,Math.min(W-BW/2,x));y=Math.max(BH/2+4,Math.min(H-BH/2-4,y));
+    host.style.left=x+'px';host.style.top=y+'px';
+    w.classList.toggle('sl',x>W/2);w.classList.toggle('sr',x<=W/2);
+    w.classList.toggle('vt',y<110);w.classList.toggle('vb',y>H-110);w.classList.toggle('vm',y>=110&&y<=H-110);
+    pos=[x/W,y/H];
+  }
+  function put(){place(pos[0]*window.innerWidth,pos[1]*window.innerHeight)}
+  try{var p=JSON.parse(localStorage.getItem(KEY)||'null');if(p&&p.length===2&&isFinite(p[0])&&isFinite(p[1]))pos=p}catch(e){}
+  put();window.addEventListener('resize',put);
+  var drag=null;
+  h.addEventListener('pointerdown',function(e){
+    var r=host.getBoundingClientRect();
+    drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,ox:r.left,oy:r.top,moved:false};
+    try{h.setPointerCapture(e.pointerId)}catch(_){}
+    e.preventDefault();
+  });
+  h.addEventListener('pointermove',function(e){
+    if(!drag||e.pointerId!==drag.id)return;
+    var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
+    if(!drag.moved&&Math.hypot(dx,dy)<9)return;
+    drag.moved=true;w.classList.remove('open');
+    place(drag.ox+dx,drag.oy+dy);
+  });
+  function end(e){
+    if(!drag||e.pointerId!==drag.id)return;
+    var d=drag;drag=null;
+    if(e.type==='pointercancel')return;
+    if(d.moved){try{localStorage.setItem(KEY,JSON.stringify(pos))}catch(_){}}
+    else w.classList.toggle('open');
+  }
+  h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
+  h.addEventListener('click',function(e){if(e.detail===0)w.classList.toggle('open')});
+  root.querySelector('.s').addEventListener('click',function(){w.classList.remove('open')});
+  root.querySelector('.x').addEventListener('click',function(){
+    try{
+      if(window.__maxcade)location.reload();
+      else if(history.length>1)history.back();
+      else location.href='../';
+    }catch(e){location.href='../'}
+  });
+  ['pointerdown','pointerup','pointermove','mousedown','mouseup','touchstart','touchend','touchmove','click','keydown','keyup'].forEach(function(t){
+    host.addEventListener(t,function(e){e.stopPropagation()});
+  });
+  (document.documentElement||document.body).appendChild(host);
+})();
+</script>
+
+<title>Post Office Tycoon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: full-screen 3D game, brown + gold HUD floating at the corners */
+:root{--bg:#1d0f05;--panel:rgba(45,24,10,.9);--brown:#3d2210;--brown2:#5e3a1f;--gold:#ffb500;--gold2:#ffd766;--cream:#fff4dc;--ink:#1d0f05;--red:#e0483a;--green:#3fbf5f;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;touch-action:none}
+#gl{position:fixed;inset:0;display:block}
+#touch{position:fixed;inset:0;z-index:1}
+#hud{position:fixed;inset:0;z-index:2;pointer-events:none}
+#hud button,#hud .panel,#hud canvas{pointer-events:auto}
+.panel{background:var(--panel);border:2px solid var(--gold);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#topL{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 12px;width:180px;max-width:46vw}
+#storeName{font-weight:900;color:var(--gold);font-size:13px;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+#money{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
+#clock{font-size:11px;opacity:.9;white-space:nowrap}
+.popwrap{height:7px;background:#2a160a;border-radius:4px;margin-top:5px;overflow:hidden}
+#popfill{height:100%;width:10%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s}
+#popTxt{font-size:11px;margin-top:3px;opacity:.92}
+#routeBadge{font-size:11px;color:var(--gold);margin-top:2px}
+#topR{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:8px}
+.ib{background:var(--gold);color:var(--ink);border:3px solid var(--brown);border-radius:14px;font-size:20px;font-weight:900;padding:6px 10px;display:flex;flex-direction:column;align-items:center;line-height:1;min-width:48px;cursor:pointer}
+.ib small{font-size:10px;margin-top:3px}
+#act{position:absolute;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;background:var(--gold);color:var(--ink);border:5px solid var(--brown);font-weight:900;font-size:14px;line-height:1.15;padding:8px;box-shadow:0 6px 0 #8a5a00,0 10px 20px rgba(0,0,0,.4);cursor:pointer}
+#act small{font-weight:700;font-size:11px}
+#act.off{background:#8a7658;color:#3a2a1a;box-shadow:0 6px 0 #4a3a2a}
+#act:active{transform:translateY(3px)}
+#toast{position:absolute;left:50%;top:calc(96px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:84vw;background:var(--panel);border:2px solid var(--gold);border-radius:12px;padding:8px 14px;font-weight:700;font-size:14px;text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:1}
+#hint{position:absolute;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:78vw;font-size:13px;font-weight:700;text-align:center;background:rgba(29,15,5,.72);padding:6px 12px;border-radius:10px;color:var(--gold2)}
+#hint:empty{display:none}
+@media (min-aspect-ratio:1/1){#hint{bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 340px)}}
+#pops{position:absolute;left:0;right:0;top:38%;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.pop{font-weight:900;font-size:22px;color:var(--gold);text-shadow:0 2px 0 var(--brown),0 0 10px rgba(0,0,0,.6);animation:rise 1.5s ease-out forwards;white-space:nowrap}
+.pop.big{font-size:34px}
+.pop.bad{color:#ff6b5b}
+@keyframes rise{0%{transform:translateY(10px) scale(.8);opacity:0}15%{transform:translateY(0) scale(1.05);opacity:1}80%{opacity:1}100%{transform:translateY(-60px);opacity:0}}
+#joyBase{position:absolute;width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,181,0,.6);background:rgba(61,34,16,.35);display:none;transform:translate(-50%,-50%)}
+#joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:var(--gold);transform:translate(-50%,-50%);border:3px solid var(--brown)}
+#driveHud[hidden]{display:none!important}
+#dTop{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(122px + env(safe-area-inset-top,0px));padding:8px 12px;font-size:13px;font-weight:700;width:200px;max-width:52vw}
+#dTop b{color:var(--gold)}
+.frag{display:inline-block;background:var(--red);color:#fff;border-radius:6px;padding:1px 6px;font-size:11px;margin-top:4px}
+#mini{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));width:150px;height:150px;border-radius:50%;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+#bEnd{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));top:calc(168px + env(safe-area-inset-top,0px));background:var(--brown);color:var(--gold);border:2px solid var(--gold);border-radius:10px;font-weight:800;padding:6px 10px;font-size:12px;cursor:pointer}
+#speed{position:absolute;right:calc(26px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));font-size:40px;font-weight:900;color:var(--gold);text-shadow:0 3px 0 var(--brown);text-align:right;font-variant-numeric:tabular-nums}
+#speed small{font-size:13px;display:block;margin-top:-6px}
+#pedals{position:absolute;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(110px + env(safe-area-inset-bottom,0px));display:flex;gap:10px}
+.ped{width:74px;height:74px;border-radius:16px;font-weight:900;font-size:13px;border:3px solid var(--brown);cursor:pointer}
+#gas{background:var(--gold);color:var(--ink)}
+#brk{background:#8a7658;color:#2a1a0a}
+/* modal */
+#modal{position:fixed;inset:0;z-index:10;background:rgba(10,5,2,.6);display:flex;align-items:center;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.sheet{width:100%;max-width:540px;max-height:100%;display:flex;flex-direction:column;background:#2b1709;border:3px solid var(--gold);border-radius:18px;overflow:hidden}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--brown);border-bottom:2px solid var(--gold)}
+.mh b{color:var(--gold);font-size:18px;letter-spacing:.5px;text-transform:uppercase}
+.mh button{background:var(--gold);color:var(--ink);border:0;border-radius:10px;font-weight:900;width:36px;height:36px;font-size:16px;cursor:pointer}
+#mBody{overflow:auto;padding:12px 14px 16px;user-select:text;-webkit-user-select:text}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tab{flex:1;min-width:70px;background:var(--brown2);color:var(--cream);border:2px solid transparent;border-radius:10px;padding:8px 4px;font-weight:800;font-size:13px;cursor:pointer}
+.tab.on{border-color:var(--gold);color:var(--gold)}
+.item{display:flex;align-items:center;gap:10px;background:#3a2010;border-radius:12px;padding:10px;margin-bottom:8px}
+.item .ic{font-size:26px;width:36px;text-align:center;flex:none}
+.item .tx{flex:1;min-width:0}
+.item .tx b{display:block;font-size:15px}
+.item .tx small{display:block;font-size:12px;opacity:.82;margin-top:2px;line-height:1.3}
+.buy{flex:none;background:var(--gold);color:var(--ink);border:0;border-radius:10px;padding:10px 12px;font-weight:900;font-size:14px;min-width:84px;cursor:pointer}
+.buy:disabled{background:#6a5a44;color:#2a1a0a;cursor:default}
+.buy.do{background:var(--green);color:#06210e;min-width:72px}
+.crow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#3a2010;border-radius:12px;padding:12px;margin-bottom:10px}
+.tog{min-width:76px;border:0;border-radius:20px;padding:10px 14px;font-weight:900;font-size:15px;background:#6a5a44;color:#2a1a0a;cursor:pointer}
+.tog.on{background:var(--green);color:#06210e}
+.cinfo{font-size:13px;line-height:1.5;margin-bottom:10px;opacity:.95}
+.sec{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin:12px 0 6px;font-weight:800}
+.bar{height:8px;background:#1d0f05;border-radius:4px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--gold);width:0}
+.empty{opacity:.75;font-size:13px;padding:6px 2px}
+.sum{font-size:15px;line-height:1.9}
+.sum b{color:var(--gold);float:right}
+.wide{width:100%;margin-top:14px;padding:14px}
+input.nm{width:100%;font-size:18px;padding:12px;border-radius:10px;border:2px solid var(--gold);background:#1d0f05;color:var(--cream);font-weight:700;user-select:text;-webkit-user-select:text}
+.danger{background:var(--red);color:#fff}
+/* start */
+#start{position:fixed;inset:0;z-index:20;display:flex;overflow-y:auto;background:radial-gradient(ellipse at 50% 30%,#6b3f1c,#2a1408 70%);padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.card{width:100%;max-width:420px;text-align:center;margin:auto}
+.logo{font-family:"Arial Black",Impact,system-ui,sans-serif;font-size:clamp(40px,12vw,64px);line-height:.95;color:var(--gold);text-shadow:0 5px 0 var(--brown),0 10px 24px rgba(0,0,0,.5);letter-spacing:1px}
+.stamp{display:inline-block;margin:10px 0 18px;border:3px dashed var(--gold);color:var(--gold2);padding:4px 12px;border-radius:6px;font-weight:800;font-size:13px;letter-spacing:2px;transform:rotate(-3deg)}
+.card label{display:block;text-align:left;font-weight:800;font-size:13px;margin:0 0 6px;color:var(--gold2)}
+.big{width:100%;margin-top:12px;background:var(--gold);color:var(--ink);border:4px solid var(--brown);border-radius:14px;padding:14px;font-size:18px;font-weight:900;box-shadow:0 6px 0 #8a5a00;cursor:pointer}
+.big.alt{background:var(--brown2);color:var(--gold);box-shadow:0 6px 0 #1d0f05}
+.how{font-size:12px;opacity:.8;margin-top:16px;line-height:1.5}
+#tut{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));width:min(380px,86vw);padding:10px 12px}
+.tuth{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.tuth b{color:var(--gold);font-size:11px;letter-spacing:1.5px}
+#tutSkip{background:none;border:0;color:var(--cream);opacity:.75;font-size:11px;text-decoration:underline;cursor:pointer;padding:4px}
+#tutTxt{font-size:14px;font-weight:600;line-height:1.35}
+#tutBtn{margin-top:8px;width:100%}
+.tutin{background:var(--gold);color:var(--ink);font-weight:800;border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:14px}
+@media (min-aspect-ratio:1/1){#tut{bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 340px))}}
+.slabel{text-align:left;font-weight:800;font-size:13px;color:var(--gold2);margin-bottom:6px}
+.slots{display:flex;flex-direction:column;gap:8px}
+.slot{display:flex;gap:8px}
+.slotMain{flex:1;min-width:0;text-align:left;background:var(--brown2);color:var(--cream);border:2px solid var(--gold);border-radius:12px;padding:10px 12px;cursor:pointer}
+.slotMain b{display:block;font-size:16px;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slotMain small{display:block;font-size:12px;opacity:.85;margin-top:2px}
+.slotMain.emptyS{border-style:dashed;background:transparent}
+.slotDel{flex:none;width:56px;border-radius:12px;border:2px solid var(--brown2);background:#2a1408;font-size:18px;cursor:pointer;color:var(--cream)}
+.slotDel.sure{background:var(--red);font-size:13px;font-weight:800}
+@media (max-height:520px){.logo{font-size:38px}.stamp{margin:6px 0 10px}.how{display:none}}
+[hidden]{display:none!important}
+button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+</style>
+
+<div id="touch"></div>
+<div id="hud">
+  <div id="topL" class="panel">
+    <div id="storeName"></div>
+    <div class="row"><span id="money">$0</span><span id="clock"></span></div>
+    <div class="popwrap"><div id="popfill"></div></div>
+    <div id="popTxt"></div>
+    <div id="routeBadge"></div>
+  </div>
+  <div id="topR"><button id="bClose" class="ib">🔒<small>CLOSE</small></button><button id="bShop" class="ib">🛒<small>SHOP</small></button><button id="bSet" class="ib">⚙️<small>MENU</small></button></div>
+  <div id="toast"></div>
+  <div id="pops"></div>
+  <div id="hint"></div>
+  <div id="tut" class="panel" hidden><div class="tuth"><b id="tutStep"></b><button id="tutSkip">Skip tutorial</button></div><div id="tutTxt"></div><button id="tutBtn" class="buy" hidden></button></div>
+  <button id="act" class="off">—</button>
+  <div id="driveHud" hidden>
+    <div id="dTop" class="panel"></div>
+    <canvas id="mini" width="300" height="300"></canvas>
+    <button id="bEnd">End route</button>
+    <div id="speed">0<small>MPH</small></div>
+  </div>
+  <div id="joyBase"><div id="joyKnob"></div></div>
+</div>
+<div id="modal" hidden><div class="sheet"><div class="mh"><b id="mTitle"></b><button id="mClose" aria-label="Close">✕</button></div><div id="mBody"></div></div></div>
+<div id="start">
+  <div class="card">
+    <div class="logo">POST OFFICE<br>TYCOON</div>
+    <div class="stamp">POST OFFICE SIM</div>
+    <div id="startBody"></div>
+    <div class="how">Left side: drag to walk / steer · Right side: drag to look<br>Gold button: interact · Computer: WASD + mouse drag + E</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a), ri=(a,b)=>Math.floor(rnd(a,b+1)), clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+// ================= CONSTANTS =================
+const OLD_KEY='stampdash_save_v1', SLOT_PREFIX='potycoon_slot_', SLOTS=3;
+let slot=1;
+const slotKey=n=>SLOT_PREFIX+n;
+const BROWN=0x4a2c17, BROWN2=0x5e3a1f, DARKB=0x351c0f, GOLD=0xffb500;
+const VX=[-96,-56,-16,24,64], HZ=[-66,-26,14,54,94], ROAD_W=9;
+const DESK_SLOTS=[-7,-3,1,12.5,16.5], DESK_Z=-3;
+const BIN_X=[-8.2,-6.2,-4.2], BIN_Z=-7.1, BIN_COLORS=[0xd83a3a,0x2f6fd8,0x2fa84f], BIN_NAMES=['RED','BLUE','GREEN'];
+const PILE={x:-1.3,z:-7.2}, COMP={x:4.2,z:-7.2}, RACK={x:-9.75,z:3}, LOCK={x:-6.5,z:7.55}, COFFEE={x:8.3,z:6.9};
+const TRUCK_SLOTS=[4,10.5,17,-6.5], PARK_Z=11.8, LANE_Z=16.2;
+const TIER=['Not popular','Normal','Popular','Very popular'];
+const ITEMS=[
+ {id:'tape',name:'Packing Tape',icon:'🧻',price:4,cost:20,pack:10},
+ {id:'sharpie',name:'Sharpies',icon:'🖊️',price:3,cost:15,pack:10},
+ {id:'bubble',name:'Bubble Wrap',icon:'🫧',price:6,cost:30,pack:10},
+ {id:'env',name:'Envelopes',icon:'✉️',price:2,cost:10,pack:10},
+ {id:'box',name:'Shipping Boxes',icon:'📦',price:5,cost:25,pack:10},
+ {id:'stamp',name:'Stamps',icon:'📮',price:2,cost:12,pack:12},
+];
+const BOARD_CAP=8;
+
+// ================= STATE =================
+const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
+ITEMS.forEach(i=>{DEF.stock[i.id]=0;DEF.board[i.id]=0;});
+const fresh=()=>JSON.parse(JSON.stringify(DEF));
+function readSlot(n){try{const j=localStorage.getItem(slotKey(n));return j?JSON.parse(j):null;}catch(e){return null;}}
+function loadState(n){const s=readSlot(n);
+ if(!s||typeof s!=='object')return null;if(s.tut===undefined){s.tut=99;s.tut2=99;}const d=fresh();for(const k in d)if(s[k]===undefined)s[k]=d[k];
+ s.stock=Object.assign(d.stock,s.stock);s.board=Object.assign(d.board,s.board);s.stats=Object.assign(d.stats,s.stats);
+ if(!Array.isArray(s.pile))s.pile=[];if(!Array.isArray(s.bins)||s.bins.length!==3)s.bins=[0,0,0];return s;}
+function save(){if(!started)return;S.savedAt=Date.now();try{localStorage.setItem(slotKey(slot),JSON.stringify(S));}catch(e){}}
+try{const old=localStorage.getItem(OLD_KEY);if(old){if(!localStorage.getItem(slotKey(1)))localStorage.setItem(slotKey(1),old);localStorage.removeItem(OLD_KEY);}}catch(e){}
+let S=fresh();
+
+// ================= THREE SETUP =================
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
+renderer.setSize(innerWidth,innerHeight);renderer.domElement.id='gl';document.body.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const skyCol=new THREE.Color(0x9fd3ff);scene.background=skyCol;scene.fog=new THREE.Fog(skyCol,70,240);
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,450);camera.rotation.order='YXZ';scene.add(camera);
+const hemi=new THREE.HemisphereLight(0xffffff,0x6b5a3a,0.8);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff2d8,0.7);sun.position.set(40,80,30);scene.add(sun);
+scene.add(new THREE.AmbientLight(0xffffff,0.22));
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});
+
+const matCache={};
+function mat(c){return matCache[c]||(matCache[c]=new THREE.MeshLambertMaterial({color:c}));}
+function box(w,h,d,c,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),typeof c==='number'?mat(c):c);m.position.set(x,y,z);(parent||scene).add(m);return m;}
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;}
+function textSprite(text,w,bg,fg){const t=canvasTex(256,64,g=>{g.fillStyle=bg||'#3d2210';g.beginPath();g.roundRect?g.roundRect(4,4,248,56,14):g.rect(4,4,248,56);g.fill();g.strokeStyle=fg||'#ffb500';g.lineWidth=4;g.stroke();g.fillStyle=fg||'#ffb500';g.font='bold 30px Arial, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(text,128,34);});
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t}));s.scale.set(w,w/4,1);return s;}
+
+// store-name texture (sign + trucks)
+const nameCanvas=document.createElement('canvas');nameCanvas.width=1024;nameCanvas.height=192;
+const nameTex=new THREE.CanvasTexture(nameCanvas);nameTex.anisotropy=4;
+function drawName(){const g=nameCanvas.getContext('2d');g.fillStyle='#3d2210';g.fillRect(0,0,1024,192);g.strokeStyle='#ffb500';g.lineWidth=10;g.strokeRect(10,10,1004,172);
+ const txt=(S.name||'Post Office').toUpperCase();let fs=112;g.font=`900 ${fs}px "Arial Black", Arial, sans-serif`;while(g.measureText(txt).width>930&&fs>28){fs-=4;g.font=`900 ${fs}px "Arial Black", Arial, sans-serif`;}
+ g.fillStyle='#ffb500';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,512,100);nameTex.needsUpdate=true;}
+const nameMat=new THREE.MeshBasicMaterial({map:nameTex});
+
+// ================= COLLIDERS =================
+const colliders=[];   // player
+const tcols=[];       // truck
+let worldReady=false;const dynCols=[];
+function addCol(x0,x1,z0,z1,both){const c={x0,x1,z0,z1,off:false};colliders.push(c);if(both)tcols.push(c);if(worldReady)dynCols.push(c);return c;}
+function hitBox(list,x,z,r){for(const c of list){if(c.off)continue;if(x+r>c.x0&&x-r<c.x1&&z+r>c.z0&&z-r<c.z1)return true;}return false;}
+
+// ================= GROUND & ROADS =================
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(700,700),mat(0x6fae4a));ground.rotation.x=-Math.PI/2;scene.add(ground);
+const roadTex=canvasTex(64,128,g=>{g.fillStyle='#3c3c40';g.fillRect(0,0,64,128);g.fillStyle='#ffd23f';g.fillRect(30,0,4,64);g.fillStyle='#cfcfcf';g.fillRect(3,0,2,128);g.fillRect(59,0,2,128);});
+roadTex.wrapS=roadTex.wrapT=THREE.RepeatWrapping;
+const RLEN=VX[4]-VX[0]+ROAD_W;roadTex.repeat.set(1,RLEN/8);
+const roadMat=new THREE.MeshLambertMaterial({map:roadTex});
+for(const x of VX){const g=new THREE.PlaneGeometry(ROAD_W,RLEN);g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,roadMat);m.position.set(x,0.02,(HZ[0]+HZ[4])/2);scene.add(m);}
+for(const z of HZ){const g=new THREE.PlaneGeometry(ROAD_W,RLEN);g.rotateX(-Math.PI/2);g.rotateY(Math.PI/2);const m=new THREE.Mesh(g,roadMat);m.position.set((VX[0]+VX[4])/2,0.025,z);scene.add(m);}
+for(const x of VX)for(const z of HZ)box(ROAD_W,0.02,ROAD_W,0x3c3c40,x,0.03,z);
+// sidewalk in front of store
+box(31,0.08,1.6,0xbdb6a8,4.5,0.04,8.75);
+box(3,0.1,1.2,0xffb500,0,0.05,8.8);
+
+// ================= STORE BUILDING =================
+const WALL=0x4a2c17, WALL_IN=0x6b4423;
+const wallMat=mat(WALL);
+function stripe(len,alongX,x,z){box(alongX?len:0.38,0.28,alongX?0.38:len,GOLD,x,1.15,z);box(alongX?len:0.38,0.22,alongX?0.38:len,GOLD,x,4.15,z);}
+function wallX(x0,x1,z,parent){const m=box(x1-x0,4.5,0.3,wallMat,(x0+x1)/2,2.25,z,parent);stripe(x1-x0,true,(x0+x1)/2,z);return addCol(x0,x1,z-0.2,z+0.2);}
+function wallZ(z0,z1,x){box(0.3,4.5,z1-z0,wallMat,x,2.25,(z0+z1)/2);stripe(z1-z0,false,x,(z0+z1)/2);return addCol(x-0.2,x+0.2,z0,z1);}
+wallX(-10,-1.4,8);wallX(1.4,19,8);box(2.8,1.3,0.3,wallMat,0,3.85,8);
+wallX(-10,19,-8);wallZ(-8,8,-10);wallZ(-8,8,19);
+// store shell for truck
+tcols.push({x0:-10.3,x1:19.3,z0:-8.3,z1:8.3,off:false});
+// door frame
+box(0.2,3.2,0.4,GOLD,-1.4,1.6,8);box(0.2,3.2,0.4,GOLD,1.4,1.6,8);box(3,0.2,0.4,GOLD,0,3.2,8);
+// windows
+for(const wx of [5.5,14.5]){box(4,1.9,0.36,0x2a4a66,wx,2.2,8);box(4.3,0.15,0.42,GOLD,wx,3.2,8);box(4.3,0.15,0.42,GOLD,wx,1.2,8);}
+// awning + roof + sign
+box(4,0.15,1.6,GOLD,0,3.45,8.85);
+box(29.6,0.35,16.6,DARKB,4.5,4.68,0);
+const ceil=new THREE.Mesh(new THREE.PlaneGeometry(29,16),mat(0xb08a5e));ceil.rotation.x=Math.PI/2;ceil.position.set(4.5,4.49,0);scene.add(ceil);
+for(const lx of [-6,0,6,14])for(const lz of [-4,3])box(2.4,0.06,0.5,new THREE.MeshBasicMaterial({color:0xfff6d8}),lx,4.45,lz);
+box(12.4,2.3,0.4,DARKB,0,5.95,8.05);
+const sign=new THREE.Mesh(new THREE.PlaneGeometry(11.6,2.17),nameMat);sign.position.set(0,5.95,8.27);scene.add(sign);
+const sign2=new THREE.Mesh(new THREE.PlaneGeometry(7,1.31),nameMat);sign2.position.set(-3,3.25,-7.83);scene.add(sign2);
+// floor
+const floorTex=canvasTex(128,128,g=>{g.fillStyle='#d9c29a';g.fillRect(0,0,128,128);g.fillStyle='#c4a679';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);});
+floorTex.wrapS=floorTex.wrapT=THREE.RepeatWrapping;floorTex.repeat.set(14.5,8);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(29,16),new THREE.MeshLambertMaterial({map:floorTex}));floor.rotation.x=-Math.PI/2;floor.position.set(4.5,0.012,0);scene.add(floor);
+// welcome mat
+box(2.4,0.03,1.2,0x7a1f1f,0,0.03,7);
+// divider (expansion)
+const divider=new THREE.Group();scene.add(divider);
+box(0.3,4.5,16,mat(WALL_IN),10,2.25,0,divider);box(0.38,0.28,16,GOLD,10,1.15,0,divider);
+const divSign=textSprite('EXPANSION · SHOP',3.2);divSign.position.set(9.7,2.6,0);divider.add(divSign);
+const divCol=addCol(9.8,10.2,-8,8);
+// decor plants
+function plant(x,z){box(0.6,0.6,0.6,BROWN2,x,0.3,z);const l=new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6),mat(0x3f8f3a));l.position.set(x,1.05,z);scene.add(l);addCol(x-0.35,x+0.35,z-0.35,z+0.35);}
+plant(9.3,-7.3);plant(-9.3,7.3);plant(18.3,7.3);plant(18.3,-7.3);
+// expansion benches
+for(const bz of [2,5]){box(3,0.12,0.8,GOLD,15.5,0.55,bz);box(0.15,0.5,0.7,DARKB,14.2,0.25,bz);box(0.15,0.5,0.7,DARKB,16.8,0.25,bz);}
+
+// ================= HOUSES / TOWN =================
+const HOUSE_COLS=['#e8d3a8','#c9dbe8','#e6c3c3','#cfe3c1','#efe2b5','#d8cbe6'];
+const houseMats=HOUSE_COLS.map(c=>new THREE.MeshLambertMaterial({map:canvasTex(128,128,g=>{g.fillStyle=c;g.fillRect(0,0,128,128);g.fillStyle='#fff';[[16,28],[78,28],[16,76],[78,76]].forEach(([x,y])=>g.fillRect(x-3,y-3,40,32));g.fillStyle='#3a5a78';[[16,28],[78,28],[16,76],[78,76]].forEach(([x,y])=>g.fillRect(x,y,34,26));})}));
+const roofCols=[0x8a3b2a,0x4a4a55,0x5a3a2a,0x2f4a3a];
+const houseGeo=new THREE.BoxGeometry(7,4,7), roofGeo=new THREE.ConeGeometry(5.6,2.6,4);roofGeo.rotateY(Math.PI/4);
+const houses=[];
+const treePos=[];
+for(let i=0;i<4;i++)for(let j=0;j<4;j++){
+ const x0=VX[i],x1=VX[i+1],z0=HZ[j],z1=HZ[j+1];
+ if(i===2&&j===1){ // store block: trees behind
+   for(let k=0;k<6;k++)treePos.push({x:rnd(-12,19),z:rnd(-21,-12),s:rnd(.8,1.2),col:true});continue;}
+ for(const hx of [x0+10.5,x1-10.5])for(const top of [true,false]){
+   const hz=top?z0+10.5:z1-10.5, rz=top?z0:z1, sz=top?z0+2.2:z1-2.2, face=top?-1:1;
+   const m=new THREE.Mesh(houseGeo,pick(houseMats));m.position.set(hx,2,hz);scene.add(m);
+   const r=new THREE.Mesh(roofGeo,mat(pick(roofCols)));r.position.set(hx,5.3,hz);scene.add(r);
+   box(1.2,2.2,0.1,BROWN,hx,1.1,hz+face*3.52);
+   box(0.15,1,0.15,0x333333,hx+2.5,0.5,hz+face*5.2);box(0.5,0.4,0.7,0x3a5fa8,hx+2.5,1.1,hz+face*5.2);
+   addCol(hx-3.6,hx+3.6,hz-3.6,hz+3.6,true);
+   houses.push({x:hx,z:hz,sx:hx,sz,rz,face});
+ }
+ treePos.push({x:(x0+x1)/2+rnd(-2,2),z:(z0+z1)/2+rnd(-2,2),s:rnd(.9,1.3),col:true});
+ treePos.push({x:(x0+x1)/2+rnd(-3,3),z:(z0+z1)/2+rnd(-3,3),s:rnd(.7,1.1),col:true});
+}
+for(let k=0;k<170;k++){let x,z;do{x=rnd(-170,140);z=rnd(-140,170);}while(x>-104&&x<72&&z>-74&&z<102);treePos.push({x,z,s:rnd(.8,1.5)});}
+{const trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25,0.35,2,6),mat(0x6b4a2b),treePos.length);
+ const leaves=new THREE.InstancedMesh(new THREE.ConeGeometry(1.8,4,7),mat(0x3f7f3a),treePos.length);const m4=new THREE.Matrix4();
+ treePos.forEach((p,i)=>{m4.makeTranslation(p.x,1,p.z);trunks.setMatrixAt(i,m4);m4.makeScale(p.s,p.s,p.s).setPosition(p.x,2+2*p.s,p.z);leaves.setMatrixAt(i,m4);
+  if(p.col)addCol(p.x-0.5,p.x+0.5,p.z-0.5,p.z+0.5,true);});
+ scene.add(trunks);scene.add(leaves);}
+// street lamps (decor)
+for(const z of HZ)for(let x=VX[0];x<=VX[4];x+=20){if(VX.some(v=>Math.abs(v-x)<6))continue;box(0.15,4,0.15,0x333333,x,2,z+5.2);box(0.6,0.2,0.4,0xfff1b0,x,4,z+5);}
+
+// ================= PEOPLE =================
+const G={leg:new THREE.BoxGeometry(0.2,0.8,0.22),body:new THREE.BoxGeometry(0.58,0.75,0.34),arm:new THREE.BoxGeometry(0.16,0.66,0.18),head:new THREE.SphereGeometry(0.22,10,8),hat:new THREE.CylinderGeometry(0.24,0.24,0.14,10),brim:new THREE.BoxGeometry(0.32,0.04,0.2),pkg:new THREE.BoxGeometry(0.42,0.32,0.42),stick:new THREE.BoxGeometry(0.2,0.02,0.2),tape:new THREE.BoxGeometry(0.44,0.33,0.08)};
+const SHIRTS=[0x3b82c4,0xc43b3b,0x3bc46d,0x8a4fc4,0xe08a2a,0x2ab3b3,0xd65c9a,0x777777,0x24314f,0xffffff];
+const PANTS=[0x2b2b3a,0x3a4a6a,0x4a3a2a,0x222222,0x5a5a5a];
+const SKINS=[0xf1c9a5,0xd9a47a,0xa8714a,0x7a4a2a,0xffdcc0];
+function mk(geo,c,x,y,z,parent){const m=new THREE.Mesh(geo,mat(c));m.position.set(x,y,z);parent.add(m);return m;}
+function person(shirt,pants,skin,cap){const g=new THREE.Group();
+ const hipL=new THREE.Group();hipL.position.set(-0.13,0.8,0);g.add(hipL);mk(G.leg,pants,0,-0.4,0,hipL);
+ const hipR=new THREE.Group();hipR.position.set(0.13,0.8,0);g.add(hipR);mk(G.leg,pants,0,-0.4,0,hipR);
+ mk(G.body,shirt,0,1.18,0,g);
+ const shL=new THREE.Group();shL.position.set(-0.38,1.5,0);g.add(shL);mk(G.arm,shirt,0,-0.3,0,shL);
+ const shR=new THREE.Group();shR.position.set(0.38,1.5,0);g.add(shR);mk(G.arm,shirt,0,-0.3,0,shR);
+ mk(G.head,skin,0,1.8,0,g);
+ if(cap!=null){mk(G.hat,cap,0,1.98,0,g);mk(G.brim,cap,0,1.95,0.2,g);}
+ g.userData={hipL,hipR,shL,shR,carry:false};return g;}
+function animPerson(g,t,moving){const u=g.userData;const a=moving?Math.sin(t*9)*0.6:0;u.hipL.rotation.x=a;u.hipR.rotation.x=-a;
+ if(u.carry){u.shL.rotation.x=u.shR.rotation.x=-1.25;}else{u.shL.rotation.x=-a*0.8;u.shR.rotation.x=a*0.8;}}
+function pkgMesh(col){const g=new THREE.Group();g.add(new THREE.Mesh(G.pkg,mat(0xb07a45)));const t=new THREE.Mesh(G.tape,mat(0xe8c27a));g.add(t);const s=new THREE.Mesh(G.stick,mat(BIN_COLORS[col]));s.position.y=0.17;g.add(s);return g;}
+function worker(){return person(GOLD,BROWN,pick(SKINS),DARKB);}
+
+// ================= ITEM MESHES (pin board) =================
+function itemMesh(id){const g=new THREE.Group();
+ if(id==='tape'){const m=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.045,6,14),mat(0xc9a66b));g.add(m);}
+ else if(id==='sharpie'){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.28,8),mat(0x111111));g.add(m);const c=new THREE.Mesh(new THREE.CylinderGeometry(0.034,0.034,0.08,8),mat(0x222222));c.position.y=0.12;g.add(c);}
+ else if(id==='bubble'){g.add(new THREE.Mesh(new THREE.BoxGeometry(0.06,0.3,0.3),new THREE.MeshLambertMaterial({color:0xbfe6ff,transparent:true,opacity:0.8})));}
+ else if(id==='env'){g.add(new THREE.Mesh(new THREE.BoxGeometry(0.03,0.2,0.3),mat(0xf3ecd8)));}
+ else if(id==='box'){g.add(new THREE.Mesh(new THREE.BoxGeometry(0.08,0.24,0.28),mat(0xa87a4a)));}
+ else {g.add(new THREE.Mesh(new THREE.BoxGeometry(0.02,0.16,0.16),mat(0xd23b3b)));}
+ return g;}
+
+// ================= DYNAMIC STORE OBJECTS =================
+const deskObjs=[];
+function buildDesk(i){const x=DESK_SLOTS[i];const g=new THREE.Group();
+ box(3,1.05,1,BROWN2,0,0.525,0,g);box(3.1,0.08,1.1,GOLD,0,1.09,0,g);box(3.02,0.25,1.02,DARKB,0,0.15,0,g);
+ box(0.5,0.32,0.4,0x222222,0.7,1.3,-0.05,g);const scr=box(0.42,0.26,0.04,new THREE.MeshBasicMaterial({color:0x7fe0a0}),0.7,1.32,0.17,g);
+ box(0.6,0.04,0.4,0xeeeeee,-0.6,1.15,0,g); // scale
+ const num=textSprite('DESK '+(i+1),1.4);num.position.set(0,2.1,0);g.add(num);
+ g.position.set(x,0,DESK_Z);scene.add(g);addCol(x-1.5,x+1.5,DESK_Z-0.5,DESK_Z+0.5);
+ deskObjs.push({x,g,queue:[],clerk:null,t:0});}
+function ensureDesks(){while(deskObjs.length<S.desks)buildDesk(deskObjs.length);}
+function ensureClerks(){deskObjs.forEach((d,i)=>{const want=i<S.clerks;if(want&&!d.clerk){d.clerk=worker();d.clerk.position.set(d.x-0.3,0,DESK_Z-1.0);scene.add(d.clerk);}});}
+
+// bins
+const binGroups=[];
+BIN_X.forEach((x,b)=>{const g=new THREE.Group();box(1.6,0.8,1.1,BIN_COLORS[b],0,0.4,0,g);box(1.4,0.05,0.9,0x1d0f05,0,0.81,0,g);
+ const lab=textSprite(BIN_NAMES[b]+' BIN',1.3,'#'+BIN_COLORS[b].toString(16).padStart(6,'0'),'#ffffff');lab.position.set(0,1.9,0);g.add(lab);
+ const stack=new THREE.Group();g.add(stack);g.position.set(x,0,BIN_Z);scene.add(g);addCol(x-0.8,x+0.8,BIN_Z-0.55,BIN_Z+0.55);binGroups.push(stack);});
+function updBins(){binGroups.forEach((st,b)=>{while(st.children.length)st.remove(st.children[0]);for(let k=0;k<S.bins[b];k++){const p=pkgMesh(b);p.position.set(-0.45+(k%3)*0.45,0.98+Math.floor(k/3)*0.33,k%2?0.15:-0.15);st.add(p);}});}
+// outgoing table
+box(2.2,0.85,1.1,BROWN2,PILE.x,0.425,PILE.z);box(2.3,0.06,1.2,GOLD,PILE.x,0.88,PILE.z);
+addCol(PILE.x-1.1,PILE.x+1.1,PILE.z-0.55,PILE.z+0.55);
+{const l=textSprite('OUTGOING',1.5);l.position.set(PILE.x,2.2,PILE.z);scene.add(l);}
+const pileG=new THREE.Group();pileG.position.set(PILE.x,0,PILE.z);scene.add(pileG);
+function updPile(){while(pileG.children.length)pileG.remove(pileG.children[0]);S.pile.forEach((c,k)=>{const p=pkgMesh(c);const l=k%8;p.position.set(-0.75+(l%4)*0.5,1.07+Math.floor(k/8)*0.33,l<4?-0.24:0.24);p.rotation.y=(k*0.37)%0.4;pileG.add(p);});}
+
+// computer
+let compG=null;
+function ensureComputer(){if(!S.computer||compG)return;compG=new THREE.Group();
+ box(2,0.8,1,BROWN2,0,0.4,0,compG);box(2.1,0.06,1.1,GOLD,0,0.83,0,compG);
+ box(1.1,0.7,0.08,0x111111,0,1.28,-0.2,compG);box(1,0.6,0.02,new THREE.MeshBasicMaterial({color:0x45c46a}),0,1.28,-0.15,compG);
+ box(0.12,0.3,0.12,0x111111,0,0.98,-0.2,compG);box(0.8,0.03,0.3,0x222222,0,0.88,0.2,compG);
+ const l=textSprite('DELIVERIES',1.6);l.position.set(0,2.2,0);compG.add(l);
+ compG.position.set(COMP.x,0,COMP.z);scene.add(compG);addCol(COMP.x-1,COMP.x+1,COMP.z-0.5,COMP.z+0.5);}
+
+// rack
+let rackG=null;const hookGroups={};
+function ensureRack(){if(!S.rack||rackG)return;rackG=new THREE.Group();
+ box(0.12,2.4,4.4,GOLD,0,1.7,0,rackG);box(0.14,2.2,4.2,0xc8a46e,0.02,1.7,0,rackG);
+ const hole=new THREE.MeshLambertMaterial({color:0x8a6a40});
+ ITEMS.forEach((it,k)=>{const zz=[-1.35,0,1.35][k%3],yy=k<3?2.35:1.35;
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.45,6),mat(0x999999));rod.rotation.z=Math.PI/2;rod.position.set(0.3,yy,zz);rackG.add(rod);
+  const hg=new THREE.Group();hg.position.set(0.1,yy-0.15,zz);rackG.add(hg);hookGroups[it.id]=hg;
+  const tag=textSprite(`${it.name.split(' ').pop()} $${it.price}`,0.9,'#fff4dc','#3d2210');tag.position.set(0.25,yy-0.48,zz);rackG.add(tag);});
+ const l=textSprite('PIN BOARD',1.6);l.position.set(0.3,3.3,0);rackG.add(l);
+ rackG.position.set(RACK.x,0,RACK.z);scene.add(rackG);addCol(-10,-9.4,RACK.z-2.2,RACK.z+2.2);updRack();}
+function updRack(){if(!rackG)return;ITEMS.forEach(it=>{const hg=hookGroups[it.id];while(hg.children.length)hg.remove(hg.children[0]);const n=Math.ceil(S.board[it.id]/2);for(let k=0;k<n;k++){const m=itemMesh(it.id);m.position.set(0.06+k*0.09,0,0);hg.add(m);}});}
+
+// lockers
+let lockG=null;
+function ensureLockers(){if(!S.lockers||lockG)return;lockG=new THREE.Group();box(4,2.5,0.6,BROWN2,0,1.25,0,lockG);
+ for(let r=0;r<4;r++)for(let c=0;c<5;c++)box(0.66,0.5,0.04,GOLD,-1.6+c*0.8,0.45+r*0.6,-0.31,lockG);
+ const l=textSprite('MAIL LOCKERS',1.8);l.position.set(0,3.1,0);lockG.add(l);
+ lockG.position.set(LOCK.x,0,LOCK.z);scene.add(lockG);addCol(LOCK.x-2,LOCK.x+2,LOCK.z-0.35,LOCK.z+0.35);}
+
+// coffee
+let coffeeG=null;
+function ensureCoffee(){if(!S.coffee||coffeeG)return;coffeeG=new THREE.Group();box(1.4,0.9,0.8,BROWN2,0,0.45,0,coffeeG);box(1.5,0.05,0.9,GOLD,0,0.92,0,coffeeG);
+ box(0.5,0.7,0.45,0x222222,-0.25,1.3,0,coffeeG);box(0.3,0.15,0.05,0xff3b3b,-0.25,1.45,-0.24,coffeeG);
+ for(let k=0;k<3;k++){const c=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.14,8),mat(0xffffff));c.position.set(0.3+k*0.14,1.02,0);coffeeG.add(c);}
+ const l=textSprite('FREE COFFEE',1.6);l.position.set(0,2.2,0);coffeeG.add(l);
+ coffeeG.position.set(COFFEE.x,0,COFFEE.z);scene.add(coffeeG);addCol(COFFEE.x-0.7,COFFEE.x+0.7,COFFEE.z-0.4,COFFEE.z+0.4);}
+
+function applyExpand(){if(S.expand){divider.visible=false;divCol.off=true;}}
+
+// sorters & drivers
+const sorterMeshes=[];
+function ensureSorters(){while(sorterMeshes.length<S.sorters){const w=worker();const i=sorterMeshes.length;w.position.set(-5.2-i*1.2,0,-5.6);w.rotation.y=Math.PI;scene.add(w);sorterMeshes.push(w);}}
+const drivers=[];   // {busy,t,total,r,mesh}
+function ensureDrivers(){while(drivers.length<S.drivers){const w=worker();const i=drivers.length;w.position.set(6.6+i*0.8,0,-6.2);scene.add(w);drivers.push({busy:false,t:0,total:0,r:null,mesh:w});}}
+
+// ================= TRUCKS =================
+const wheelGeo=new THREE.CylinderGeometry(0.45,0.45,0.35,12);wheelGeo.rotateZ(Math.PI/2);
+function makeTruck(){const g=new THREE.Group();
+ box(2.4,2.6,4.0,BROWN,0,1.75,-0.7,g);box(2.42,0.28,4.02,GOLD,0,1.05,-0.7,g);box(2.42,0.12,4.02,GOLD,0,3.0,-0.7,g);
+ box(2.3,1.9,1.6,BROWN,0,1.4,2.05,g);box(2.0,0.85,0.05,0x1d2c3a,0,1.85,2.86,g);box(2.32,0.2,0.1,GOLD,0,0.75,2.86,g);
+ box(0.35,0.2,0.05,0xfff3b0,-0.85,1.0,2.87,g);box(0.35,0.2,0.05,0xfff3b0,0.85,1.0,2.87,g);
+ box(0.35,0.2,0.05,0xff2a2a,-0.95,1.0,-2.72,g);box(0.35,0.2,0.05,0xff2a2a,0.95,1.0,-2.72,g);
+ for(const s of [1,-1]){const p=new THREE.Mesh(new THREE.PlaneGeometry(3.6,0.68),nameMat);p.position.set(s*1.215,2.1,-0.7);p.rotation.y=s*Math.PI/2;g.add(p);}
+ const wheels=[];for(const [wx,wz] of [[1.1,1.9],[-1.1,1.9],[1.1,-1.8],[-1.1,-1.8]]){const w=new THREE.Mesh(wheelGeo,mat(0x151515));w.position.set(wx,0.45,wz);g.add(w);wheels.push(w);}
+ g.userData.wheels=wheels;return g;}
+const parked=TRUCK_SLOTS.map(x=>{const t=makeTruck();t.position.set(x,0,PARK_Z);t.rotation.y=Math.PI/2;t.visible=false;scene.add(t);return t;});
+const dTruck=makeTruck();dTruck.visible=false;scene.add(dTruck);
+function busyDrivers(){return drivers.filter(d=>d.busy).length;}
+function freeTrucks(){return S.trucks-busyDrivers()-(mode==='drive'?1:0);}
+function refreshParked(){const n=Math.max(0,freeTrucks());parked.forEach((t,i)=>t.visible=i<n);}
+
+// delivery marker + recipient
+const marker=new THREE.Group();scene.add(marker);marker.visible=false;
+{const ring=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.2,8,32),new THREE.MeshBasicMaterial({color:GOLD}));ring.rotation.x=Math.PI/2;ring.position.y=0.2;marker.add(ring);
+ const beam=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,16,12,1,true),new THREE.MeshBasicMaterial({color:GOLD,transparent:true,opacity:0.32,depthWrite:false,side:THREE.DoubleSide}));beam.position.y=8;marker.add(beam);}
+const recipient=person(0x3b82c4,0x2b2b3a,0xd9a47a,null);recipient.visible=false;scene.add(recipient);
+
+// carried package (first person)
+const carryMesh=new THREE.Group();camera.add(carryMesh);carryMesh.position.set(0.32,-0.38,-0.75);carryMesh.visible=false;
+function updCarry(){while(carryMesh.children.length)carryMesh.remove(carryMesh.children[0]);if(P.carry>=0){carryMesh.add(pkgMesh(P.carry));carryMesh.visible=true;}else carryMesh.visible=false;}
+
+// ================= PLAYER / MODE =================
+let mode='walk', modalKind=null, started=false;
+const P={x:0,z:5,yaw:0,pitch:-0.08,carry:-1,boost:0,bob:0};
+
+// ================= UI HELPERS =================
+let toastT=0,lastToast='',lastToastAt=0;
+function toast(msg){const now=performance.now();if(msg===lastToast&&now-lastToastAt<4000)return;lastToast=msg;lastToastAt=now;const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+function popup(txt,cls){const d=document.createElement('div');d.className='pop '+(cls||'');d.textContent=txt;$('pops').appendChild(d);setTimeout(()=>d.remove(),1500);}
+let AC=null;
+function beep(f,d,type,v){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.value=f;g.gain.value=v||0.05;o.connect(g);g.connect(AC.destination);const t=AC.currentTime;g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.start(t);o.stop(t+d+0.02);}catch(e){}}
+function ching(){beep(1320,0.08,'triangle',0.08);setTimeout(()=>beep(1760,0.14,'triangle',0.08),70);}
+function addMoney(v){S.money+=v;if(v>0)S.stats.earn+=v;}
+function addPop(v){S.pop=clamp(S.pop+(v>0?v*(1-S.pop/115):v),0,100);}
+function tier(){const p=S.pop;return p<25?0:p<55?1:p<80?2:3;}
+function fmtTime(m){let h=Math.floor(m/60),mm=Math.floor(m%60);const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${String(mm).padStart(2,'0')} ${ap}`;}
+
+// ================= CUSTOMERS =================
+const customers=[];
+const angryTex=canvasTex(64,64,g=>{g.font='48px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('😠',32,36);});
+const happyTex=canvasTex(64,64,g=>{g.font='48px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('😊',32,36);});
+const qSpot=(d,k)=>({x:d.x,z:DESK_Z+1.15+1.05*k});
+function spawnCustomer(){const side=Math.random()<.5?-1:1;
+ const g=person(pick(SHIRTS),pick(PANTS),pick(SKINS),Math.random()<.25?pick(SHIRTS):null);g.position.set(side*15,0,9.2);scene.add(g);
+ let kind='drop';const r=Math.random();if(S.lockers&&r<0.2)kind='locker';else if(S.rack&&r<0.52)kind='buy';
+ const hasPkg=kind==='drop'||(kind==='buy'&&Math.random()<0.4);
+ const c={g,kind,state:'enter',path:[{x:0,z:9.2},{x:0,z:6.6}],speed:rnd(1.9,2.5),maxP:rnd(45,65),pat:0,exitX:(Math.random()<.5?-1:1)*15,color:ri(0,2),hasPkg,bill:hasPkg?ri(4,9):0,item:null,wait:0,desk:null,ready:false,held:null};
+ c.pat=c.maxP;
+ if(hasPkg){c.held=pkgMesh(c.color);c.held.position.set(0,1.2,0.42);g.add(c.held);g.userData.carry=true;}
+ const bg=new THREE.Sprite(new THREE.SpriteMaterial({color:0x1d0f05}));bg.scale.set(0.9,0.13,1);bg.position.y=2.35;g.add(bg);
+ const fill=new THREE.Sprite(new THREE.SpriteMaterial({color:0x44dd44}));fill.scale.set(0.82,0.08,1);fill.position.y=2.35;g.add(fill);
+ bg.visible=fill.visible=false;c.bg=bg;c.fill=fill;
+ customers.push(c);}
+function leavePath(c){return [{x:0,z:6.6},{x:0,z:9.2},{x:c.exitX,z:9.2}];}
+function emote(c,tex){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex}));s.scale.set(0.6,0.6,1);s.position.y=2.75;c.g.add(s);}
+function joinQueue(c){let best=null;for(const d of deskObjs){if(d.queue.length>=6)continue;if(!best||d.queue.length<best.queue.length)best=d;}
+ if(!best){angry(c,'😠 Lines are too long! Buy more desks.');return;}best.queue.push(c);c.desk=best;c.state='queue';}
+function angry(c,msg){if(c.desk){const i=c.desk.queue.indexOf(c);if(i>=0)c.desk.queue.splice(i,1);c.desk=null;}
+ c.state='leave';c.path=leavePath(c);c.bg.visible=c.fill.visible=false;emote(c,angryTex);addPop(-4);S.stats.angry++;toast(msg||'😠 A customer got tired of waiting and left!');beep(180,0.25,'sawtooth',0.04);}
+function serve(d,byClerk){const c=d.queue[0];if(!c||!c.ready)return false;d.queue.shift();c.desk=null;
+ let pay=c.bill;
+ if(c.hasPkg){if(S.pile.length<16){S.pile.push(c.color);updPile();}else{toast('📦 Outgoing pile is full! Sort some packages.');pay=Math.round(pay*0.5);}}
+ if(c.held){c.g.remove(c.held);c.held=null;c.g.userData.carry=false;}
+ addMoney(pay);addPop(0.5);S.served++;S.stats.served++;
+ c.state='leave';c.path=leavePath(c);c.bg.visible=c.fill.visible=false;emote(c,happyTex);
+ if(!byClerk){popup('+$'+pay);ching();}else if(Math.random()<0.5)beep(1500,0.05,'triangle',0.03);
+ return true;}
+function updCustomers(dt,t){const drain=S.tut<5?0:(S.coffee?0.6:1);
+ for(let i=customers.length-1;i>=0;i--){const c=customers[i];let tx,tz,k=-1;
+  if(c.state==='queue'){k=c.desk.queue.indexOf(c);const q=qSpot(c.desk,k);tx=q.x;tz=q.z;}
+  else if(c.path.length){tx=c.path[0].x;tz=c.path[0].z;}
+  let moving=false;
+  if(tx!==undefined){const dx=tx-c.g.position.x,dz=tz-c.g.position.z,d=Math.hypot(dx,dz);
+   if(d>0.06){const st=Math.min(d,c.speed*dt);c.g.position.x+=dx/d*st;c.g.position.z+=dz/d*st;c.g.rotation.y=Math.atan2(dx,dz);moving=true;}
+   else if(c.state!=='queue'){c.path.shift();if(!c.path.length)arrive(c);}
+   if(c.state==='queue'){c.ready=(k===0&&d<0.2);if(d<=0.06)c.g.rotation.y=Math.PI;}
+  }
+  if(c.state==='browse'||c.state==='atLocker'){c.wait-=dt;if(c.wait<=0)doneWaiting(c);}
+  if(c.state==='queue'||c.state==='browse'){c.pat-=dt*drain;c.bg.visible=c.fill.visible=true;const p=clamp(c.pat/c.maxP,0,1);c.fill.scale.x=0.82*p;c.fill.material.color.setHex(p>0.5?0x44dd44:p>0.25?0xffc23a:0xff4a3a);if(c.pat<=0)angry(c);}
+  if(c.state==='gone'){scene.remove(c.g);customers.splice(i,1);continue;}
+  animPerson(c.g,t+i,moving);
+ }}
+function arrive(c){
+ if(c.state==='enter'){if(c.kind==='locker'){c.state='toLocker';c.path=[{x:LOCK.x+rnd(-1.4,1.4),z:6.4}];}
+  else if(c.kind==='buy'){c.state='toRack';c.path=[{x:-8.3,z:RACK.z+rnd(-1.3,1.3)}];}else joinQueue(c);}
+ else if(c.state==='toLocker'){c.state='atLocker';c.wait=2.5;c.g.rotation.y=0;}
+ else if(c.state==='toRack'){c.state='browse';c.wait=2.2;c.g.rotation.y=-Math.PI/2;}
+ else if(c.state==='leave'){c.state='gone';}}
+function doneWaiting(c){
+ if(c.state==='atLocker'){addMoney(4);addPop(0.3);c.state='leave';c.path=leavePath(c);emote(c,happyTex);return;}
+ if(c.state==='browse'){const avail=ITEMS.filter(it=>S.board[it.id]>0);
+  if(avail.length){const it=pick(avail);S.board[it.id]--;updRack();c.item=it.id;c.bill+=it.price;const m=itemMesh(it.id);m.position.set(0.32,1.0,0.2);c.g.add(m);joinQueue(c);}
+  else{toast('📌 A customer found the pin board empty. Restock it!');addPop(-0.6);if(c.hasPkg)joinQueue(c);else{c.state='leave';c.path=leavePath(c);c.bg.visible=c.fill.visible=false;}}}}
+
+// ================= SORTING =================
+function sortPkg(b,byWorker){if(!byWorker)tutSorted=true;S.bins[b]++;addMoney(1);addPop(0.15);if(!byWorker){popup('+$1 sorted');beep(900,0.06,'triangle',0.05);}
+ if(S.bins[b]>=6){S.bins[b]=0;
+  if(S.computer&&S.deliveriesOn){requests.push(makeRoute(BIN_NAMES[b]));toast(`🗂️ ${BIN_NAMES[b]} bin full! A bin route was added to the Delivery Computer.`);}
+  else{addMoney(15);toast(`🚐 Mail van picked up the full ${BIN_NAMES[b]} bin: +$15`);}}
+ updBins();}
+
+// ================= DELIVERIES =================
+let requests=[],reqTarget=1,reqTimer=0,rollTimer=0,reqId=1,lastTier=-1;
+function rollTarget(){reqTarget=[1,ri(2,4),ri(4,5),ri(6,7)][tier()];}
+function makeRoute(binName){const n=binName?4:ri(3,6);const pool=houses.slice();const chosen=[];
+ while(chosen.length<n){chosen.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
+ const stops=[];let cx=0,cz=14;const left=chosen.slice();
+ while(left.length){let bi=0,bd=1e9;left.forEach((h,i)=>{const d=Math.abs(h.sx-cx)+Math.abs(h.sz-cz);if(d<bd){bd=d;bi=i;}});const h=left.splice(bi,1)[0];
+  const dist=Math.hypot(h.sx,h.sz-14);let pay=Math.round(18+dist/8+rnd(0,10));if(binName)pay=Math.round(pay*1.3);
+  stops.push({x:h.sx,z:h.sz,rz:h.rz,hx:h.x,hz:h.z,face:h.face,pay});cx=h.sx;cz=h.sz;}
+ const total=stops.reduce((a,s)=>a+s.pay,0);
+ return {id:reqId++,name:binName?`${binName} Bin Route`:`Route #${reqId-1}`,stops,total,fragile:!binName&&Math.random()<0.25};}
+function updDeliveries(dt){
+ if(!S.computer)return;
+ const t=tier();if(t!==lastTier){lastTier=t;rollTarget();}
+ rollTimer+=dt;if(rollTimer>45){rollTimer=0;rollTarget();}
+ if(S.deliveriesOn){reqTimer-=dt;if(reqTimer<=0){reqTimer=15;if(requests.length<reqTarget)requests.push(makeRoute());}
+  for(const d of drivers){if(!d.busy&&requests.length&&freeTrucks()>0){const r=requests.shift();d.busy=true;d.r=r;d.total=r.stops.length*10;d.t=d.total;d.mesh.visible=false;refreshParked();}}}
+ drivers.forEach((d,i)=>{if(!d.busy)return;d.t-=dt;if(d.t<=0)finishDriver(d,i);});}
+function finishDriver(d,i){const tips=d.r.stops.reduce(a=>a+ri(1,5),0);const amt=d.r.total+tips;addMoney(amt);addPop(1.5);S.routes++;S.stats.routes++;
+ toast(`🚚 Driver ${i+1} finished ${d.r.name}: +$${d.r.total} +$${tips} tips`);d.busy=false;d.r=null;d.mesh.visible=true;refreshParked();}
+
+// ---- player driving
+const T={x:0,z:0,h:0,v:0};let drive=null;
+function startRoute(id){if(mode==='drive')return;if(freeTrucks()<1){toast('No free truck right now.');return;}
+ const i=requests.findIndex(r=>r.id===id);if(i<0)return;const r=requests.splice(i,1)[0];
+ if(P.carry>=0){S.pile.unshift(P.carry);P.carry=-1;updCarry();updPile();}
+ closeModal();mode='drive';const slot=TRUCK_SLOTS[Math.max(0,freeTrucks()-1)]??TRUCK_SLOTS[0];
+ T.x=slot;T.z=LANE_Z;T.h=Math.PI/2;T.v=0;drive={r,idx:0,crashes:0,earned:0,tips:0,since:0,crashCd:0};
+ dTruck.visible=true;refreshParked();placeMarker();
+ camera.position.set(T.x-9,4.5,T.z);
+ $('driveHud').hidden=false;$('act').hidden=true;$('topR').hidden=true;$('hint').textContent='';
+ toast(`🚚 ${r.name}: ${r.stops.length} stops. Follow the gold line on the map!`);}
+function placeMarker(){const st=drive.r.stops[drive.idx];marker.position.set(st.x,0,st.z);marker.visible=true;
+ recipient.visible=true;recipient.position.set(st.x+1.6,0,st.rz+(st.face<0?6:-6));recipient.rotation.y=st.face<0?Math.PI:0;}
+function deliverStop(){const r=drive.r,st=r.stops[drive.idx];
+ const dist=drive.idx===0?Math.hypot(st.x-TRUCK_SLOTS[0],st.z-LANE_Z):Math.hypot(st.x-r.stops[drive.idx-1].x,st.z-r.stops[drive.idx-1].z);
+ const expected=dist/12+6;let tip=Math.round(clamp(9-Math.max(0,drive.since-expected)*0.5+rnd(-2,2),0,10));
+ let note='';if(r.fragile&&drive.crashes>=2){tip=0;note=' (fragile, damaged)';}
+ addMoney(st.pay+tip);drive.earned+=st.pay;drive.tips+=tip;drive.since=0;addPop(0.6);
+ popup(`+$${st.pay}  +$${tip} Tip${note}`,'big');ching();
+ drive.idx++;if(drive.idx>=r.stops.length)finishRoute();else placeMarker();}
+function finishRoute(){marker.visible=false;recipient.visible=false;addPop(2);S.routes++;S.stats.routes++;save();
+ const d=drive;openModal('summaryRoute','Route complete!',`<div class="sum">${d.r.name}<br>Stops delivered <b>${d.r.stops.length}/${d.r.stops.length}</b><br>Delivery pay <b>$${d.earned}</b><br>Tips <b>$${d.tips}</b><br>Crashes <b>${d.crashes}</b></div><button class="buy wide" data-a="back">Back to the post office</button>`);}
+function endDrive(){mode='walk';drive=null;dTruck.visible=false;marker.visible=false;recipient.visible=false;
+ P.x=0;P.z=5.5;P.yaw=0;P.pitch=-0.08;refreshParked();
+ $('driveHud').hidden=true;$('act').hidden=false;$('topR').hidden=false;
+ if(S.time>=1260)endDay();}
+function truckHit(x,z,h){const fx=Math.sin(h),fz=Math.cos(h);
+ const extra=[];parked.forEach((t,i)=>{if(t.visible)extra.push({x0:t.position.x-2.8,x1:t.position.x+2.8,z0:PARK_Z-1.25,z1:PARK_Z+1.25,off:false});});
+ for(const o of [-2,0,2]){const px=x+fx*o,pz=z+fz*o;if(hitBox(tcols,px,pz,1.2)||hitBox(extra,px,pz,1.2))return true;}return false;}
+function updDrive(dt){
+ let th=-joy.y,st=joy.x;if(K.w||K.arrowup)th=1;if(K.s||K.arrowdown)th=-1;if(K.a||K.arrowleft)st=-1;if(K.d||K.arrowright)st=1;
+ if(Math.abs(th)<0.12)th=0;
+ const max=S.fast?30:22;
+ if(th>0)T.v+=(T.v<0?28:12)*th*dt;else if(th<0)T.v+=(T.v>0?28:8)*th*dt;else T.v-=Math.sign(T.v)*Math.min(Math.abs(T.v),6*dt);
+ T.v=clamp(T.v,-8,max);
+ T.h-=st*1.9*dt*clamp(T.v/6,-1,1);
+ const nx=T.x+Math.sin(T.h)*T.v*dt,nz=T.z+Math.cos(T.h)*T.v*dt;
+ drive.crashCd-=dt;
+ if(truckHit(nx,nz,T.h)){if(Math.abs(T.v)>6&&drive.crashCd<=0){drive.crashes++;drive.crashCd=1;popup(drive.r.fragile?'💥 CRASH! Fragile packages!':'💥 CRASH!','bad');beep(90,0.3,'sawtooth',0.08);}T.v=-T.v*0.3;}
+ else{T.x=clamp(nx,VX[0]-12,VX[4]+12);T.z=clamp(nz,HZ[0]-12,HZ[4]+12);}
+ dTruck.position.set(T.x,0,T.z);dTruck.rotation.y=T.h;dTruck.userData.wheels.forEach(w=>w.rotation.x+=T.v*dt/0.45);
+ drive.since+=dt;
+ const s=drive.r.stops[drive.idx];if(s&&Math.hypot(T.x-s.x,T.z-s.z)<4.4)deliverStop();
+ const fx=Math.sin(T.h),fz=Math.cos(T.h);
+ const cx=T.x-fx*9.5,cz=T.z-fz*9.5;const k=1-Math.pow(0.002,dt);
+ camera.position.x+=(cx-camera.position.x)*k;camera.position.z+=(cz-camera.position.z)*k;camera.position.y+=(4.6-camera.position.y)*k;
+ camera.lookAt(T.x+fx*5,1.6,T.z+fz*5);
+ marker.children[0].scale.setScalar(1+Math.sin(performance.now()/200)*0.08);}
+// minimap
+const mini=$('mini'),mc=mini.getContext('2d');
+function nearest(arr,v){let b=arr[0];for(const a of arr)if(Math.abs(a-v)<Math.abs(b-v))b=a;return b;}
+function routePath(x,z,st){const hz=nearest(HZ,z),vx=nearest(VX,x);const onH=Math.abs(z-hz)<=Math.abs(x-vx);const p=[{x,z}];
+ if(onH){if(hz===st.rz){p.push({x:st.x,z:st.z});return p;}let best=VX[0],bd=1e9;for(const v of VX){const d=Math.abs(x-v)+Math.abs(v-st.x);if(d<bd){bd=d;best=v;}}
+  p.push({x:best,z:hz},{x:best,z:st.rz},{x:st.x,z:st.z});}
+ else{p.push({x:vx,z:st.rz},{x:st.x,z:st.z});}return p;}
+function drawMini(){const W=mini.width,R=W/2;mc.setTransform(1,0,0,1,0,0);mc.clearRect(0,0,W,W);mc.save();
+ mc.beginPath();mc.arc(R,R,R-3,0,Math.PI*2);mc.clip();mc.fillStyle='#5f9a44';mc.fillRect(0,0,W,W);
+ mc.translate(R,R);mc.rotate(T.h-Math.PI);mc.scale(2.3,2.3);mc.translate(-T.x,-T.z);
+ mc.strokeStyle='#3b3b3f';mc.lineWidth=ROAD_W;mc.lineCap='butt';
+ for(const x of VX){mc.beginPath();mc.moveTo(x,HZ[0]-4.5);mc.lineTo(x,HZ[4]+4.5);mc.stroke();}
+ for(const z of HZ){mc.beginPath();mc.moveTo(VX[0]-4.5,z);mc.lineTo(VX[4]+4.5,z);mc.stroke();}
+ mc.fillStyle='#4a2c17';mc.fillRect(-10,-8,29,16);mc.fillStyle='#ffb500';mc.fillRect(-10,6.5,29,1.5);
+ mc.fillStyle='#e6d8bd';for(const h of houses)mc.fillRect(h.x-3.5,h.z-3.5,7,7);
+ const st=drive.r.stops[drive.idx];
+ if(st){const p=routePath(T.x,T.z,st);mc.strokeStyle='#ffb500';mc.lineWidth=2.4;mc.lineJoin='round';mc.beginPath();mc.moveTo(p[0].x,p[0].z);for(let i=1;i<p.length;i++)mc.lineTo(p[i].x,p[i].z);mc.stroke();}
+ for(let i=drive.idx+1;i<drive.r.stops.length;i++){const s=drive.r.stops[i];mc.fillStyle='#fff4dc';mc.beginPath();mc.arc(s.x,s.z,2.2,0,Math.PI*2);mc.fill();}
+ if(st){mc.fillStyle='#ffb500';mc.strokeStyle='#3d2210';mc.lineWidth=1.2;mc.beginPath();mc.arc(st.x,st.z,3.6+Math.sin(performance.now()/180)*0.6,0,Math.PI*2);mc.fill();mc.stroke();}
+ mc.restore();
+ mc.fillStyle='#fff';mc.strokeStyle='#3d2210';mc.lineWidth=3;mc.beginPath();mc.moveTo(R,R-14);mc.lineTo(R+10,R+11);mc.lineTo(R,R+5);mc.lineTo(R-10,R+11);mc.closePath();mc.fill();mc.stroke();
+ mc.strokeStyle='#ffb500';mc.lineWidth=6;mc.beginPath();mc.arc(R,R,R-3,0,Math.PI*2);mc.stroke();
+ if(st){const dist=Math.round(Math.hypot(st.x-T.x,st.z-T.z));mc.fillStyle='rgba(29,15,5,.8)';mc.fillRect(R-44,W-46,88,28);mc.fillStyle='#ffb500';mc.font='bold 20px system-ui,sans-serif';mc.textAlign='center';mc.textBaseline='middle';mc.fillText(dist+' m',R,W-32);}}
+
+// ================= INPUT =================
+const K={};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();K[k]=true;if(k==='e'&&started&&!modalKind&&mode==='walk')doAct();if(k==='escape'&&modalKind&&modalKind!=='summaryDay'&&modalKind!=='summaryRoute')closeModal();});
+addEventListener('keyup',e=>{K[e.key.toLowerCase()]=false;});
+addEventListener('blur',()=>{for(const k in K)K[k]=false;});
+const joy={x:0,y:0,id:null,ox:0,oy:0},look={id:null,lx:0,ly:0};
+const touchEl=$('touch'),jb=$('joyBase'),jk=$('joyKnob');
+touchEl.addEventListener('pointerdown',e=>{if(!started||modalKind)return;
+ const left=e.clientX<innerWidth*0.5;
+ if(e.pointerType!=='mouse'&&left&&joy.id===null){joy.id=e.pointerId;joy.ox=e.clientX;joy.oy=e.clientY;jb.style.left=e.clientX+'px';jb.style.top=e.clientY+'px';jb.style.display='block';jk.style.transform='translate(-50%,-50%)';}
+ else if(look.id===null){look.id=e.pointerId;look.lx=e.clientX;look.ly=e.clientY;}
+ try{touchEl.setPointerCapture(e.pointerId);}catch(_){}});
+touchEl.addEventListener('pointermove',e=>{
+ if(e.pointerId===joy.id){let dx=e.clientX-joy.ox,dy=e.clientY-joy.oy;const d=Math.hypot(dx,dy),m=55;if(d>m){dx*=m/d;dy*=m/d;}joy.x=dx/m;joy.y=dy/m;jk.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;}
+ else if(e.pointerId===look.id){const s=e.pointerType==='mouse'?0.0045:0.006;P.yaw-=(e.clientX-look.lx)*s;P.pitch=clamp(P.pitch-(e.clientY-look.ly)*s,-1.2,1.2);look.lx=e.clientX;look.ly=e.clientY;}});
+function endPtr(e){if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;jb.style.display='none';}if(e.pointerId===look.id)look.id=null;}
+touchEl.addEventListener('pointerup',endPtr);touchEl.addEventListener('pointercancel',endPtr);
+
+// ================= INTERACTION =================
+function getInter(){const L=[];
+ deskObjs.forEach(d=>L.push({x:d.x,z:DESK_Z,r:2.7,lab:()=>{const c=d.queue[0];return c&&c.ready?`SERVE<br><small>$${c.bill}${c.item?' + item':''}</small>`:(d.clerk?'Clerk is<br>working':'No one<br>waiting');},ok:()=>{const c=d.queue[0];return !!(c&&c.ready);},act:()=>serve(d,false)}));
+ L.push({x:PILE.x,z:PILE.z,r:2.3,lab:()=>P.carry>=0?'Hands<br>full':S.pile.length?`PICK UP<br><small>${S.pile.length} package${S.pile.length>1?'s':''}</small>`:'No<br>packages',ok:()=>P.carry<0&&S.pile.length>0,act:()=>{P.carry=S.pile.shift();updPile();updCarry();beep(600,0.05,'triangle',0.04);}});
+ BIN_X.forEach((x,b)=>L.push({x,z:BIN_Z,r:1.8,lab:()=>P.carry<0?`${BIN_NAMES[b]} BIN<br><small>${S.bins[b]}/6</small>`:`SORT<br><small>into ${BIN_NAMES[b]}</small>`,ok:()=>P.carry>=0,act:()=>{if(P.carry===b){P.carry=-1;updCarry();sortPkg(b);}else{toast(`❌ Wrong bin! That's a ${BIN_NAMES[P.carry]} package.`);beep(200,0.15,'square',0.04);}}}));
+ if(S.computer)L.push({x:COMP.x,z:COMP.z,r:2.4,lab:()=>'DELIVERY<br>COMPUTER',ok:()=>true,act:openComputer});
+ if(S.rack)L.push({x:RACK.x+0.6,z:RACK.z,r:2.8,lab:()=>canRestock()?'RESTOCK<br><small>pin board</small>':'PIN BOARD<br><small>buy supplies</small>',ok:()=>true,act:restock});
+ if(S.coffee)L.push({x:COFFEE.x,z:COFFEE.z,r:2.2,lab:()=>P.boost>0?`☕ BOOST<br><small>${Math.ceil(P.boost)}s</small>`:'GRAB<br>COFFEE',ok:()=>P.boost<=0,act:()=>{P.boost=20;toast('☕ Speed boost for 20 seconds!');beep(700,0.1,'triangle',0.05);}});
+ return L;}
+let curInter=null;
+function pickInter(){const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw);let best=null,bs=1e9;
+ for(const it of getInter()){const dx=it.x-P.x,dz=it.z-P.z,d=Math.hypot(dx,dz);if(d>it.r)continue;const dot=d>0.01?(dx*fx+dz*fz)/d:1;if(dot<-0.1&&d>1.3)continue;const s=d-dot*1.3;if(s<bs){bs=s;best=it;}}
+ return best;}
+function doAct(){if(mode!=='walk')return;curInter=pickInter();if(curInter&&curInter.ok()){curInter.act();hudT=0;}}
+$('act').addEventListener('pointerdown',e=>{e.preventDefault();doAct();});
+function canRestock(){return ITEMS.some(it=>S.stock[it.id]>0&&S.board[it.id]<BOARD_CAP);}
+function restock(){if(!canRestock()){toast(ITEMS.some(it=>S.stock[it.id]>0)?'Pin board is already full.':'No supplies in the back. Buy some in Shop → Supplies.');return;}
+ let n=0;ITEMS.forEach(it=>{const m=Math.min(BOARD_CAP-S.board[it.id],S.stock[it.id]);S.board[it.id]+=m;S.stock[it.id]-=m;n+=m;});updRack();popup(`Restocked ${n} items`);beep(800,0.08,'triangle',0.05);save();}
+
+// ================= SHOP =================
+const DESK_PRICES=[0,600,1000,1600,2400];
+const maxDesks=()=>S.expand?5:3;
+const SHOP=[
+ {tab:'Store',icon:'🧾',name:'Front Desk',desc:()=>`You have ${S.desks}. More desks = shorter lines.`,price:()=>DESK_PRICES[S.desks]||0,can:()=>S.desks<maxDesks(),why:()=>S.desks>=5?'Max':'Expand first',buy:()=>{S.desks++;ensureDesks();}},
+ {tab:'Store',icon:'🏗️',name:'Store Expansion',desc:()=>'Opens the side room: room for 2 more desks.',price:()=>4000,can:()=>!S.expand,why:()=>'Owned',buy:()=>{S.expand=true;applyExpand();}},
+ {tab:'Store',icon:'☕',name:'Coffee Machine',desc:()=>'Customers wait 40% longer before getting mad. You can grab a coffee for a speed boost.',price:()=>1200,can:()=>!S.coffee,why:()=>'Owned',buy:()=>{S.coffee=true;ensureCoffee();}},
+ {tab:'Store',icon:'📌',name:'Pin Board Rack',desc:()=>'Sell tape, sharpies, bubble wrap and more. Stock it from Supplies.',price:()=>5000,can:()=>!S.rack,why:()=>'Owned',buy:()=>{S.rack=true;ensureRack();}},
+ {tab:'Store',icon:'🔐',name:'Mail Lockers',desc:()=>'Some customers pick up from lockers on their own: +$4 each, no line.',price:()=>6000,can:()=>!S.lockers,why:()=>'Owned',buy:()=>{S.lockers=true;ensureLockers();}},
+ {tab:'Staff',icon:'🧑‍💼',name:'Front Desk Clerk',desc:()=>`Serves a desk for you. Clerks: ${S.clerks}/${S.desks}. Wage $60/day.`,price:()=>900,can:()=>S.clerks<S.desks,why:()=>'Buy a desk',buy:()=>{S.clerks++;ensureClerks();}},
+ {tab:'Staff',icon:'🗂️',name:'Package Sorter',desc:()=>`Sorts the OUTGOING pile into bins. Sorters: ${S.sorters}/2. Wage $50/day.`,price:()=>700,can:()=>S.sorters<2,why:()=>'Max',buy:()=>{S.sorters++;ensureSorters();}},
+ {tab:'Staff',icon:'🚚',name:'Delivery Driver',desc:()=>`Runs routes when deliveries are ON. 10s per stop. Drivers: ${S.drivers}/${S.trucks} trucks. Wage $80/day.`,price:()=>1200,can:()=>S.computer&&S.drivers<S.trucks,why:()=>!S.computer?'Need computer':'Need truck',buy:()=>{S.drivers++;ensureDrivers();}},
+ {tab:'Delivery',icon:'🖥️',name:'Delivery Computer',desc:()=>'Unlocks delivery routes. Comes with 1 delivery truck.',price:()=>8000,can:()=>!S.computer,why:()=>'Owned',buy:()=>{S.computer=true;S.trucks=Math.max(1,S.trucks);if(S.tut2===0)S.tut2=1;ensureComputer();refreshParked();toast('🖥️ Delivery Computer installed in the back. Turn deliveries ON!');}},
+ {tab:'Delivery',icon:'🚛',name:'Delivery Truck',desc:()=>`Trucks: ${S.trucks}/4. Each driver needs their own truck.`,price:()=>3500,can:()=>S.computer&&S.trucks<4,why:()=>!S.computer?'Need computer':'Max',buy:()=>{S.trucks++;refreshParked();}},
+ {tab:'Delivery',icon:'⚡',name:'Turbo Engines',desc:()=>'All trucks get a higher top speed.',price:()=>2500,can:()=>S.computer&&!S.fast,why:()=>!S.computer?'Need computer':'Owned',buy:()=>{S.fast=true;}},
+ ...ITEMS.map(it=>({tab:'Supplies',icon:it.icon,name:`${it.name} ×${it.pack}`,desc:()=>`Sells for $${it.price} each · In back: ${S.stock[it.id]} · On board: ${S.board[it.id]}/${BOARD_CAP}`,price:()=>it.cost,can:()=>S.rack,why:()=>'Need rack',buy:()=>{S.stock[it.id]+=it.pack;toast(`${it.icon} Bought ${it.pack} ${it.name}. Restock the pin board!`);}})),
+];
+let shopTab='Store';
+function renderShop(){const tabs=['Store','Staff','Delivery','Supplies'];
+ let h=`<div class="tabs">${tabs.map(t=>`<button class="tab ${t===shopTab?'on':''}" data-tab="${t}">${t}</button>`).join('')}</div>`;
+ SHOP.forEach((s,i)=>{if(s.tab!==shopTab)return;const p=s.price(),can=s.can(),afford=S.money>=p;
+  h+=`<div class="item"><div class="ic">${s.icon}</div><div class="tx"><b>${s.name}</b><small>${s.desc()}</small></div><button class="buy" data-buy="${i}" ${can&&afford?'':'disabled'}>${can?'$'+p.toLocaleString():s.why()}</button></div>`;});
+ if(shopTab==='Supplies'&&!S.rack)h+=`<div class="empty">Buy the Pin Board Rack (Store tab) to start selling supplies.</div>`;
+ $('mBody').innerHTML=h;}
+
+// ================= COMPUTER =================
+let compSig='';
+function compSignature(){return [S.deliveriesOn,requests.map(r=>r.id).join(','),drivers.map(d=>d.busy?1:0).join(''),freeTrucks(),mode].join('|');}
+function renderComputer(){compSig=compSignature();const t=tier();
+ let h=`<div class="crow"><div><b>Deliveries</b><br><small>${S.deliveriesOn?'Route requests are coming in':'Turn ON to get route requests'}</small></div><button class="tog ${S.deliveriesOn?'on':''}" data-a="tog">${S.deliveriesOn?'ON':'OFF'}</button></div>
+ <div class="cinfo">Popularity: <b>${TIER[t]}</b> → ${['about 1 route','2–4 routes','4–5 routes','6–7 routes'][t]}<br>Free trucks: <b>${Math.max(0,freeTrucks())}/${S.trucks}</b> · Drivers: <b>${S.drivers}</b></div>`;
+ if(drivers.length){h+=`<div class="sec">Drivers</div>`;drivers.forEach((d,i)=>{h+=`<div class="item"><div class="ic">🚚</div><div class="tx"><b>Driver ${i+1}</b><small data-dt="${i}">${d.busy?`${d.r.name} · ${d.r.stops.length} stops · ${Math.ceil(d.t)}s left`:(S.deliveriesOn?'Waiting for a route':'Idle (deliveries OFF)')}</small>${d.busy?`<div class="bar"><i data-db="${i}" style="width:${100*(1-d.t/d.total)}%"></i></div>`:''}</div></div>`;});}
+ h+=`<div class="sec">Route requests</div>`;
+ if(!S.deliveriesOn)h+=`<div class="empty">Deliveries are OFF.</div>`;
+ else if(!requests.length)h+=`<div class="empty">No requests yet. New ones show up every few seconds.</div>`;
+ else requests.forEach(r=>{h+=`<div class="item"><div class="ic">${r.fragile?'⚠️':'📦'}</div><div class="tx"><b>${r.name}</b><small>${r.stops.length} stops · $${r.total} + tips${r.fragile?' · <span class="frag">FRAGILE</span>':''}</small></div><button class="buy do" data-do="${r.id}" ${freeTrucks()>0?'':'disabled'}>${freeTrucks()>0?'DO IT':'No truck'}</button></div>`;});
+ if(S.tut2===2)h=`<div class="tutin">👉 ${S.deliveriesOn?'Press DO IT on a route request (wait a few seconds if none yet)':'Tap OFF to turn Deliveries ON'}</div>`+h;
+ $('mBody').innerHTML=h;}
+function tickComputer(){if(modalKind!=='computer')return;if(compSignature()!==compSig){renderComputer();return;}
+ drivers.forEach((d,i)=>{if(!d.busy)return;const s=document.querySelector(`[data-dt="${i}"]`),b=document.querySelector(`[data-db="${i}"]`);if(s)s.textContent=`${d.r.name} · ${d.r.stops.length} stops · ${Math.ceil(d.t)}s left`;if(b)b.style.width=(100*(1-d.t/d.total))+'%';});}
+setInterval(tickComputer,250);
+function openComputer(){openModal('computer','Delivery Computer');renderComputer();}
+
+// ================= MODAL =================
+function openModal(kind,title,html){modalKind=kind;$('mTitle').textContent=title;if(html!=null)$('mBody').innerHTML=html;$('modal').hidden=false;
+ $('mClose').hidden=(kind==='summaryDay'||kind==='summaryRoute');joy.id=null;joy.x=joy.y=0;jb.style.display='none';look.id=null;}
+function closeModal(){modalKind=null;$('modal').hidden=true;}
+$('mClose').addEventListener('click',closeModal);
+$('modal').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.tab){shopTab=t.dataset.tab;renderShop();return;}
+ if(t.dataset.buy){const s=SHOP[+t.dataset.buy];const p=s.price();if(!s.can()||S.money<p)return;S.money-=p;s.buy();ching();save();renderShop();return;}
+ if(t.dataset.a==='tog'){S.deliveriesOn=!S.deliveriesOn;if(!S.deliveriesOn)requests=[];else{reqTimer=0.5;rollTarget();}save();renderComputer();return;}
+ if(t.dataset.do){startRoute(+t.dataset.do);return;}
+ if(t.dataset.a==='back'){closeModal();endDrive();return;}
+ if(t.dataset.a==='nextday'){closeModal();S.day++;S.time=420;S.closed=false;S.stats={earn:0,served:0,angry:0,routes:0};save();toast(`☀️ Day ${S.day}. Open for business!`);spawnT=2;return;}
+ if(t.dataset.a==='rename'){const v=$('nameIn').value.trim().slice(0,28);if(v){S.name=v;drawName();save();updHud(true);toast('Renamed to '+v);}closeModal();return;}
+ if(t.dataset.a==='save'){save();toast(`💾 Saved to slot ${slot}`);closeModal();return;}
+ if(t.dataset.a==='tut'){S.tut=0;S.tut2=S.computer?1:0;tutMoved=0;tutServedBase=S.served;closeModal();save();return;}
+ if(t.dataset.a==='quit'){toTitle();return;}
+ if(t.dataset.a==='reset'){if(t.dataset.sure){started=false;try{localStorage.removeItem(slotKey(slot));}catch(_){}toTitle();}else{t.dataset.sure='1';t.textContent='Tap again to delete this save';}return;}
+});
+$('bShop').addEventListener('click',()=>{if(!started||mode!=='walk')return;if(S.tut===5)tutShop=true;openModal('shop','Shop');renderShop();});
+$('bClose').addEventListener('click',()=>{if(!started||mode!=='walk'||modalKind)return;S.closed=!S.closed;hudT=0;
+ toast(S.closed?(customers.length?'🔒 Store closed. The day ends once the last customer leaves.':'🔒 Store closed.'):'🔓 Store is open again!');beep(S.closed?500:900,0.1,'triangle',0.05);});
+$('bSet').addEventListener('click',()=>{if(!started)return;openModal('settings','Menu',`<label for="nameIn" style="display:block;font-weight:800;margin-bottom:6px;color:#ffd766">Post office name</label><input id="nameIn" class="nm" maxlength="28" value="${S.name.replace(/"/g,'&quot;')}"><button class="buy wide" data-a="rename">Save name</button>
+ <div class="sec" style="margin-top:18px">Stats</div><div class="sum">Day <b>${S.day}</b><br>Customers served <b>${S.served}</b><br>Routes delivered <b>${S.routes}</b></div>
+ <div class="sec" style="margin-top:18px">How to play</div><div class="cinfo">Serve customers at a front desk. Their packages land on OUTGOING: carry each one to the bin that matches its sticker color. Grow popularity to get more customers. Buy the Delivery Computer to run delivery routes in a truck, then hire drivers to run them for you.</div>
+ <button class="buy wide" data-a="save">💾 Save game</button><button class="buy wide" data-a="tut" style="margin-top:8px">Replay tutorial</button><button class="buy wide" data-a="quit" style="margin-top:8px">Save &amp; quit to title</button>
+ <button class="buy wide danger" data-a="reset">Delete this save</button>`);});
+$('bEnd').addEventListener('click',()=>{if(mode!=='drive')return;marker.visible=false;recipient.visible=false;const d=drive;save();
+ openModal('summaryRoute','Route ended',`<div class="sum">${d.r.name}<br>Stops delivered <b>${d.idx}/${d.r.stops.length}</b><br>Delivery pay <b>$${d.earned}</b><br>Tips <b>$${d.tips}</b></div><button class="buy wide" data-a="back">Back to the post office</button>`);});
+
+// ================= DAY CYCLE =================
+const SKY=[[420,[255,196,138]],[540,[159,211,255]],[1020,[159,211,255]],[1150,[255,150,100]],[1260,[44,62,110]]];
+function updSky(){const m=S.time;let a=SKY[0],b=SKY[SKY.length-1];for(let i=0;i<SKY.length-1;i++)if(m>=SKY[i][0]&&m<=SKY[i+1][0]){a=SKY[i];b=SKY[i+1];break;}
+ const t=clamp((m-a[0])/((b[0]-a[0])||1),0,1);skyCol.setRGB(lerp(a[1][0],b[1][0],t)/255,lerp(a[1][1],b[1][1],t)/255,lerp(a[1][2],b[1][2],t)/255);scene.fog.color.copy(skyCol);
+ const dark=m>1150?clamp((m-1150)/110,0,1):m<480?clamp((480-m)/60,0,1)*0.4:0;sun.intensity=0.7-dark*0.45;hemi.intensity=0.8-dark*0.35;}
+let rushShown=false;
+function endDay(){customers.forEach(c=>scene.remove(c.g));customers.length=0;deskObjs.forEach(d=>d.queue.length=0);
+ drivers.forEach((d,i)=>{if(d.busy)finishDriver(d,i);});
+ const wages=S.clerks*60+S.sorters*50+S.drivers*80,rent=40+(S.expand?40:0)+(S.computer?30:0);S.money-=wages+rent;const st=S.stats;rushShown=false;save();
+ openModal('summaryDay',`Day ${S.day} closed`,`<div class="sum">Money earned <b>$${st.earn}</b><br>Customers served <b>${st.served}</b><br>Left angry <b>${st.angry}</b><br>Routes delivered <b>${st.routes}</b><br>Staff wages <b>−$${wages}</b><br>Rent &amp; bills <b>−$${rent}</b><br>Popularity <b>${TIER[tier()]}</b><br>Cash now <b>$${S.money.toLocaleString()}</b></div><button class="buy wide" data-a="nextday">Start Day ${S.day+1}</button>`);}
+
+// ================= HUD =================
+let hudT=0;
+function updHud(force){hudT-=1;if(hudT>0&&!force)return;hudT=10;updTut();
+ $('storeName').textContent=S.name;$('bClose').innerHTML=S.closed?'🔓<small>OPEN</small>':'🔒<small>CLOSE</small>';$('money').textContent='$'+Math.floor(S.money).toLocaleString();
+ const rush=S.time>=690&&S.time<810;$('clock').textContent=`Day ${S.day} · ${fmtTime(S.time)}${rush?' 🔥':''}`;
+ $('popfill').style.width=S.pop+'%';$('popTxt').textContent=`Popularity: ${TIER[tier()]}${rush?' · Lunch rush!':''}`;
+ $('routeBadge').textContent=S.computer?(S.deliveriesOn?`🚚 ${requests.length} route request${requests.length===1?'':'s'}${busyDrivers()?` · ${busyDrivers()} out`:''}`:'🚚 Deliveries OFF'):'';
+ if(mode==='walk'){curInter=pickInter();const a=$('act');if(curInter){a.innerHTML=curInter.lab();a.classList.toggle('off',!curInter.ok());}else{a.innerHTML='—';a.classList.add('off');}$('hint').textContent=$('tut').hidden?hintText():'';}
+ else if(drive){const r=drive.r;$('dTop').innerHTML=`<b>${r.name}</b><br>Stop ${Math.min(drive.idx+1,r.stops.length)} of ${r.stops.length} · Crashes ${drive.crashes}${r.fragile?`<br><span class="frag">FRAGILE: ${drive.crashes>=2?'no tips now':'2 crashes = no tips'}</span>`:''}`;
+  $('speed').innerHTML=`${Math.round(Math.abs(T.v)*2.237)}<small>MPH</small>`;}}
+function hintText(){
+ if(P.carry>=0)return `Take the ${BIN_NAMES[P.carry]} package to the ${BIN_NAMES[P.carry]} bin`;
+ if(S.served<3&&S.day===1)return 'Walk up to the front desk and tap SERVE when a customer is waiting';
+ if(S.pile.length>=5&&S.sorters===0)return 'Packages are piling up! Grab one from OUTGOING and sort it';
+ if(S.rack&&ITEMS.every(it=>S.board[it.id]===0))return ITEMS.some(it=>S.stock[it.id]>0)?'Restock the pin board':'Buy supplies in Shop → Supplies';
+ if(S.computer&&!S.deliveriesOn)return 'Turn deliveries ON at the Delivery Computer';
+ if(S.money>=8000&&!S.computer)return 'You can afford the Delivery Computer! (Shop → Delivery)';
+ return '';}
+
+// ================= TUTORIAL =================
+let tutMoved=0,tutServedBase=0,tutSorted=false,tutShop=false,tutArrowY=3;
+const tutArrow=new THREE.Mesh(new THREE.ConeGeometry(0.32,0.7,10),new THREE.MeshBasicMaterial({color:GOLD}));tutArrow.rotation.x=Math.PI;tutArrow.visible=false;scene.add(tutArrow);
+const deskTarget=()=>({x:deskObjs[0].x,z:DESK_Z,y:2.9});
+const TUT=[
+ {t:'Welcome to your post office! Drag the left side of the screen to walk (WASD on computer). Drag the right side to look around.',done:()=>tutMoved>3},
+ {t:'Walk up to DESK 1. Follow the gold arrow.',target:deskTarget,done:()=>Math.hypot(P.x-deskObjs[0].x,P.z-DESK_Z)<2.7},
+ {t:'A customer is coming in! When they reach the desk, tap the gold SERVE button.',target:deskTarget,done:()=>S.served>tutServedBase},
+ {t:'You got paid! Their package went to the OUTGOING table in the back. Walk over and tap PICK UP.',target:()=>({x:PILE.x,z:PILE.z,y:2.9}),done:()=>P.carry>=0},
+ {t:()=>{const c=BIN_NAMES[Math.max(0,P.carry)];return `Check the sticker on top of the package. It's ${c}, so SORT it into the ${c} bin.`;},target:()=>P.carry>=0?{x:BIN_X[P.carry],z:BIN_Z,y:2.6}:null,done:()=>tutSorted},
+ {t:'Nice sorting! Now tap SHOP in the top right. That is where you buy desks, workers and upgrades.',done:()=>tutShop},
+ {t:'Happy customers raise your popularity, which brings in more customers. Angry ones lower it. Every day ends with rent and bills, so watch your cash. Save up $8,000 for the Delivery Computer to unlock delivery routes. The game autosaves, and you can save any time from MENU.',btn:'Got it, let\'s go!'},
+];
+const compTarget=()=>({x:COMP.x,z:COMP.z,y:2.9});
+const TUT2=[null,
+ {t:'Your Delivery Computer is in the back of the store. Walk over and open it.',target:compTarget,done:()=>modalKind==='computer'},
+ {t:'At the Delivery Computer, turn Deliveries ON, then press DO IT on a route.',target:compTarget,done:()=>mode==='drive'},
+ {t:'You are in the truck! Left side drives and steers (WASD on computer). Follow the gold line on the map and drive into the gold ring.',done:()=>!!(drive&&drive.idx>=1)},
+ {t:'Delivered! Finish every stop to complete the route. Later, hire Delivery Drivers to run routes for you. Each driver needs their own truck.',btn:'Got it'},
+];
+function curTut(){if(S.tut<TUT.length)return {list:TUT,i:S.tut,part:1};if(S.tut2>0&&S.tut2<TUT2.length)return {list:TUT2,i:S.tut2,part:2};return null;}
+function tutAdvance(){const c=curTut();if(!c)return;
+ if(c.part===1){S.tut++;if(S.tut===2)tutServedBase=S.served;if(S.tut===4)tutSorted=false;if(S.tut===5)tutShop=false;if(S.tut>=TUT.length){S.tut=99;toast('🎉 Tutorial done! Run your post office.');}}
+ else{S.tut2++;if(S.tut2>=TUT2.length)S.tut2=99;}
+ beep(1100,0.08,'triangle',0.05);save();updTut();}
+function updTut(){const c=curTut(),el=$('tut');
+ if(!c||!started){el.hidden=true;tutArrow.visible=false;return;}
+ const step=c.list[c.i];if(step.done&&step.done()){tutAdvance();return;}
+ if(modalKind){el.hidden=true;tutArrow.visible=false;return;}
+ el.hidden=false;
+ $('tutStep').textContent=c.part===1?`TUTORIAL ${c.i+1}/${TUT.length}`:`DELIVERIES ${c.i}/${TUT2.length-1}`;
+ const txt=typeof step.t==='function'?step.t():step.t;if($('tutTxt').textContent!==txt)$('tutTxt').textContent=txt;
+ const btn=$('tutBtn');btn.hidden=!step.btn;if(step.btn)btn.textContent=step.btn;
+ const tg=step.target&&step.target();
+ if(tg&&mode==='walk'){tutArrow.visible=true;tutArrow.position.x=tg.x;tutArrow.position.z=tg.z;tutArrowY=tg.y||3;}else tutArrow.visible=false;}
+$('tutBtn').addEventListener('click',tutAdvance);
+$('tutSkip').addEventListener('click',()=>{S.tut=99;S.tut2=99;save();updTut();toast('Tutorial skipped. Replay it any time from MENU.');});
+
+// ================= MAIN LOOP =================
+let spawnT=2,saveT=0,clockAcc=0;
+function update(dt,t){
+ // clock
+ const tutCalm=S.tut<5;
+ if(S.time<1260){if(!tutCalm)S.time=Math.min(1260,S.time+dt*3.5);}else if(mode==='walk'&&!modalKind){endDay();return;}
+ const rush=S.time>=690&&S.time<810;if(rush&&!rushShown){rushShown=true;toast('🍔 Lunch rush! Lots of customers incoming.');}
+ updSky();
+ // spawn
+ if(tutCalm){if((S.tut===1||S.tut===2)&&!customers.some(c=>c.state!=='leave'&&c.state!=='gone'))spawnCustomer();}
+ else{spawnT-=dt;if(spawnT<=0){spawnT=lerp(14,3.5,S.pop/100)*(rush?0.5:1)*rnd(0.75,1.25);const cap=6+S.desks*5;if(customers.length<cap&&S.time<1230&&!S.closed)spawnCustomer();}}
+ updCustomers(dt,t);
+ if(S.closed&&mode==='walk'&&!modalKind&&!customers.length){endDay();return;}
+ // clerks
+ deskObjs.forEach(d=>{if(!d.clerk)return;const c=d.queue[0];if(c&&c.ready){d.t+=dt;if(d.t>3)d.t=0,serve(d,true);}else d.t=0;animPerson(d.clerk,t,false);});
+ // sorters
+ if(S.sorters>0&&S.pile.length){sortAcc+=dt;if(sortAcc>2.4/S.sorters){sortAcc=0;sortPkg(S.pile.shift(),true);updPile();}}
+ updDeliveries(dt);
+ if(P.boost>0)P.boost-=dt;
+ if(mode==='walk')updWalk(dt);else updDrive(dt);
+ saveT+=dt;if(saveT>10){saveT=0;save();}}
+let sortAcc=0;
+function updWalk(dt){let mx=joy.x,my=joy.y;if(K.w||K.arrowup)my=-1;if(K.s||K.arrowdown)my=1;if(K.a||K.arrowleft)mx=-1;if(K.d||K.arrowright)mx=1;
+ const sp=(P.boost>0?6.6:4.4)*dt;const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),rx=Math.cos(P.yaw),rz=-Math.sin(P.yaw);
+ const l=Math.hypot(mx,my);if(l>1){mx/=l;my/=l;}
+ const dx=(fx*-my+rx*mx)*sp,dz=(fz*-my+rz*mx)*sp,r=0.35;
+ if(!hitBox(colliders,P.x+dx,P.z,r))P.x+=dx;if(!hitBox(colliders,P.x,P.z+dz,r))P.z+=dz;
+ if(S.tut===0)tutMoved+=Math.hypot(dx,dz);
+ P.x=clamp(P.x,-110,80);P.z=clamp(P.z,-80,108);
+ const moving=Math.abs(dx)+Math.abs(dz)>0.001;if(moving)P.bob+=dt*10;
+ camera.position.set(P.x,1.65+(moving?Math.sin(P.bob)*0.04:0),P.z);camera.rotation.set(P.pitch,P.yaw,0);}
+let last=performance.now();
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
+ const paused=!started||(modalKind&&modalKind!=='computer');
+ if(!paused)update(dt,now/1000);
+ if(started){updHud();if(mode==='drive'&&drive)drawMini();if(tutArrow.visible)tutArrow.position.y=tutArrowY+Math.sin(now/200)*0.18;}
+ renderer.render(scene,camera);}
+
+// ================= START =================
+function buildFromState(){drawName();ensureDesks();ensureClerks();ensureSorters();ensureDrivers();ensureComputer();ensureRack();ensureLockers();ensureCoffee();applyExpand();updBins();updPile();refreshParked();}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+let pendingSlot=1;
+function clearWorld(){customers.forEach(c=>scene.remove(c.g));customers.length=0;
+ deskObjs.forEach(d=>{scene.remove(d.g);if(d.clerk)scene.remove(d.clerk);});deskObjs.length=0;
+ [compG,rackG,lockG,coffeeG].forEach(g=>{if(g)scene.remove(g);});compG=rackG=lockG=coffeeG=null;
+ sorterMeshes.forEach(m=>scene.remove(m));sorterMeshes.length=0;drivers.forEach(d=>scene.remove(d.mesh));drivers.length=0;
+ dynCols.forEach(c=>{const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1);});dynCols.length=0;
+ divider.visible=true;divCol.off=false;requests=[];P.carry=-1;updCarry();mode='walk';drive=null;dTruck.visible=false;marker.visible=false;recipient.visible=false;
+ P.x=0;P.z=5;P.yaw=0;P.pitch=-0.08;rushShown=false;spawnT=2;$('driveHud').hidden=true;$('act').hidden=false;$('topR').hidden=false;}
+function toTitle(){if(started)save();started=false;closeModal();clearWorld();$('tut').hidden=true;tutArrow.visible=false;$('hint').textContent='';renderStart();$('start').hidden=false;}
+function startGame(n,isNew){clearWorld();slot=n;
+ if(isNew){const nm=($('startName').value||'').trim().slice(0,28)||"Max's Post Office";S=fresh();S.name=nm;}
+ else{const s=loadState(n);if(!s){renderStart();return;}S=s;}
+ tutServedBase=S.served;
+ buildFromState();$('start').hidden=true;started=true;save();updHud(true);
+ toast(isNew?`📮 Welcome to ${S.name}!`:`📮 Welcome back to ${S.name}!`);beep(880,0.08,'triangle',0.05);}
+function renderStart(){let h='<div class="slabel">Save files</div><div class="slots">';
+ for(let n=1;n<=SLOTS;n++){const s=readSlot(n);
+  if(s&&s.name)h+=`<div class="slot"><button class="slotMain" data-load="${n}"><b>${esc(s.name)}</b><small>Slot ${n} · Day ${s.day} · $${Math.floor(s.money).toLocaleString()}${s.savedAt?' · '+ago(s.savedAt):''}</small></button><button class="slotDel" data-del="${n}" aria-label="Delete save ${n}">🗑️</button></div>`;
+  else h+=`<div class="slot"><button class="slotMain emptyS" data-new="${n}"><b>+ New game</b><small>Slot ${n} · empty</small></button></div>`;}
+ $('startBody').innerHTML=h+'</div>';}
+function showNewForm(n){pendingSlot=n;$('startBody').innerHTML=`<label for="startName">Name your post office (slot ${n})</label><input id="startName" class="nm" maxlength="28" placeholder="Max's Post Office"><button class="big" id="bNew">Open for business</button><button class="big alt" id="bBack">Back</button>`;
+ $('bNew').onclick=()=>startGame(pendingSlot,true);$('bBack').onclick=renderStart;
+ $('startName').addEventListener('keydown',e=>{if(e.key==='Enter')startGame(pendingSlot,true);});}
+$('startBody').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.load)startGame(+t.dataset.load,false);
+ else if(t.dataset.new)showNewForm(+t.dataset.new);
+ else if(t.dataset.del){if(t.dataset.sure){try{localStorage.removeItem(slotKey(+t.dataset.del));}catch(_){}renderStart();}else{t.dataset.sure='1';t.textContent='Delete?';t.classList.add('sure');}}});
+worldReady=true;drawName();renderStart();
+camera.position.set(0,1.65,5);camera.rotation.set(-0.08,0,0);
+requestAnimationFrame(loop);
+</script>
+
+</body></html>

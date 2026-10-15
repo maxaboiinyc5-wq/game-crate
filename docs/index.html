@@ -187,6 +187,8 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
     'midnight-motorway':{list:[['A D or Left Right','Change lane'],['Hold mouse + drag','Steer'],['Enter','Start']]},
     'pocket-maker':{hide:['.pad','#bJ'],
       list:[['Click + drag','Draw tiles'],['Right-click','Erase'],['1 to 9','Pick a tile'],['Tab','Next tile group'],['Ctrl + Z','Undo'],['P','Play your level'],['A D or Left Right','Move'],['Space or W','Jump'],['R','Restart'],['Esc','Back to editing']]},
+    'post-office-tycoon':{css:'.mx-desk #act::after{content:"[E]";display:block;font-size:10px;opacity:.7}',
+      list:[['W A S D','Walk, or drive the truck'],['Hold mouse + drag','Look around'],['E','Use the gold button'],['Esc','Close a menu']]},
     'puck-havoc':{list:[['Click, pull back, let go','Fling the puck']]},
     'short-hop-air':{hide:['#joy'],fly:true,
       alias:{KeyW:'ArrowUp',KeyS:'ArrowDown',KeyA:'ArrowLeft',KeyD:'ArrowRight'},
@@ -301,6 +303,8 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
 <script>
 (()=>{
 const GAMES=[
+ {id:'post-office-tycoon',name:'Post Office Tycoon',kind:'3D · tycoon',blurb:'Serve the line, sort the mail, drive the delivery routes.',
+  font:"'Bowlby One','Arial Black',sans-serif",bg:'#3d2210',fg:'#ffb500',tx:'#fff4dc',ac:'#ffb500',ci:'#3d2210',sz:.9},
  {id:'pocket-maker',name:'Pocket Maker',kind:'2D · level maker',blurb:'Draw your own levels, place bosses, share the code.',
   font:"'Silkscreen',ui-monospace,monospace",fw:700,bg:'#0e2341',fg:'#ffd23f',tx:'#eaf1fb',ac:'#ff4f8b',ci:'#0e2341',sz:.8},
  {id:'aisle-nine-market',name:'Aisle Nine Market',kind:'3D · store sim',blurb:'Stock the shelves and fridges, then run the register.',
@@ -338,6 +342,7 @@ const GAMES=[
 ];
 /* [first made, last updated]. Badges work themselves out from these and drop off after 7 days. */
 const DATES={
+ 'post-office-tycoon':['2026-10-15','2026-10-15'],
  'pocket-maker':['2026-10-12','2026-10-12'],
  'aisle-nine-market':['2026-10-10','2026-10-10'],'last-gate':['2026-10-10','2026-10-11'],'stormline-royale':['2026-10-10','2026-10-10'],
  'short-hop-air':['2026-10-08','2026-10-10'],'bad-goat-day':['2026-10-09','2026-10-09'],'brokebox':['2026-10-09','2026-10-09'],
@@ -384,7 +389,7 @@ for(const g of GAMES){
   b.addEventListener('click',()=>launch(g,b));
   shelf.appendChild(b);
 }
-const CATS={'pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
+const CATS={'post-office-tycoon':'Sim','pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
  'brokebox':'Arcade','jetway-tycoon':'Sim','five-star-getaway':'Driving','lawn-guard':'Arcade','two-minute-drill':'Sports',
  'kickflip-island':'Sports','curb-cut':'Sports','puck-havoc':'Arcade','midnight-motorway':'Driving','zip-riot':'Arcade','wisp-hollow':'Action'};
 let filt='All';
