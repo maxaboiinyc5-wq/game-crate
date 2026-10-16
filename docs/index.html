@@ -72,6 +72,8 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
   font-weight:700;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;line-height:1.3}
 .name{font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);
   font-size:calc(1.28rem * var(--sz,1));line-height:1.02;color:var(--fg);overflow-wrap:anywhere;text-wrap:balance}
+.art{display:block;width:100%;aspect-ratio:492/560;object-fit:cover;border-radius:4px;background:#0003}
+.cart:has(.art) .blurb{display:none}
 .blurb{margin-top:auto;font-size:.8rem;line-height:1.3;font-weight:500}
 .badge{position:absolute;top:-7px;right:-5px;z-index:1;padding:4px 8px;border-radius:5px;background:var(--led);color:var(--ground);
   font-family:var(--display);font-weight:900;font-size:.56rem;letter-spacing:.08em;box-shadow:0 2px 0 #0d0b18;transform:rotate(3deg)}
@@ -174,7 +176,7 @@ h2{margin:0;font-family:var(--display);font-weight:600;font-size:.78rem;letter-s
       list:[['W A S D','Walk'],['Hold mouse + drag','Look around'],['E','Use / pick up'],['Q','Drop box'],['P','Manager phone'],['Backspace','Undo change at the register']]},
     'bad-goat-day':{hide:['#btns','#stick'],
       list:[['W A S D','Move'],['Hold mouse + drag','Look around'],['Space','Jump'],['J or Shift','Headbutt'],['K or E','Lick'],['L or R','Flop']]},
-    'brokebox':{list:[['Arrows or W A S D','Move'],['Space or Z','A button'],['X','B button'],['P or Esc','Pause / back'],['M','Mute']]},
+    'brokebox':{list:[['Arrows or W A S D','Move / pick'],['Enter','Select'],['Esc','Back / pause'],['Q  E','Switch tabs'],['How to play','Each game lists its own keys'],['Controller','Plug one in, it just works']]},
     'curb-cut':{list:[['Space or Up','Ollie (hold = higher)'],['X or Right','Flip trick in the air']]},
     'five-star-getaway':{hide:['.pad'],
       list:[['A D or Left Right','Steer'],['S or Down','Brake'],['Space, W or Up','Nitro']]},
@@ -317,7 +319,7 @@ const GAMES=[
   font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:800,fs:'italic',tt:'uppercase',bg:'#121519',fg:'#eef1f4',tx:'#c3ccd6',ac:'#ffb547',ci:'#121519',sz:1.3},
  {id:'bad-goat-day',name:'Bad Goat Day',kind:'3D · sandbox',blurb:'You are a goat. The town did nothing to deserve you.',
   font:"'Bowlby One','Arial Black',sans-serif",bg:'#9ad7f0',fg:'#2b2118',tx:'#2b2118',ac:'#ff5d8f',ci:'#2b2118',sz:.95},
- {id:'brokebox',name:'Brokebox',kind:'25-game pack',blurb:'The whole Brokebox library on one cartridge.',
+ {id:'brokebox',name:'Brokebox 5',kind:'8-game console',art:'games/brokebox.jpg',blurb:'Karts, platformer, fighter, soccer and more. Trophies and controller support.',
   font:"'Bungee','Arial Black',sans-serif",bg:'#1e1b45',fg:'#ff5f45',tx:'#f4f1ff',ac:'#ffd43a',ci:'#12102a',sz:.9},
  {id:'jetway-tycoon',name:'Jetway Tycoon',kind:'3D · tycoon',blurb:'Land planes, turn the gates, grow the airport.',
   font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:700,tt:'uppercase',bg:'#14161a',fg:'#ffcf1a',tx:'#f4f1e6',ac:'#3ddc84',ci:'#14161a',sz:1.3},
@@ -345,7 +347,7 @@ const DATES={
  'post-office-tycoon':['2026-10-15','2026-10-15'],
  'pocket-maker':['2026-10-12','2026-10-12'],
  'aisle-nine-market':['2026-10-10','2026-10-10'],'last-gate':['2026-10-10','2026-10-11'],'stormline-royale':['2026-10-10','2026-10-10'],
- 'short-hop-air':['2026-10-08','2026-10-10'],'bad-goat-day':['2026-10-09','2026-10-09'],'brokebox':['2026-10-09','2026-10-09'],
+ 'short-hop-air':['2026-10-08','2026-10-10'],'bad-goat-day':['2026-10-09','2026-10-09'],'brokebox':['2026-10-09','2026-10-16'],
  'jetway-tycoon':['2026-10-09','2026-10-11'],'five-star-getaway':['2026-10-09','2026-10-09'],'lawn-guard':['2026-10-09','2026-10-11'],
  'two-minute-drill':['2026-10-08','2026-10-08'],'kickflip-island':['2026-10-08','2026-10-08'],'curb-cut':['2026-10-08','2026-10-08'],
  'puck-havoc':['2026-10-08','2026-10-13'],'midnight-motorway':['2026-10-07','2026-10-07'],'zip-riot':['2026-10-07','2026-10-07'],
@@ -371,7 +373,9 @@ for(const g of GAMES){
   b.setAttribute('aria-label','Play '+g.name+(g.id===last?', last played':''));
   skin(b,g);
   const label=span('label');
-  label.append(span('kind',g.kind),span('name',g.name),span('blurb',g.blurb));
+  label.append(span('kind',g.kind));
+  if(g.art){const im=document.createElement('img');im.className='art';im.src=g.art;im.alt='';im.loading='lazy';im.decoding='async';label.append(im)}
+  label.append(span('name',g.name),span('blurb',g.blurb));
   const foot=span('foot');foot.setAttribute('aria-hidden','true');
   foot.append(span('',g.id===last?'LAST PLAYED':'PLAY'),document.createElement('i'));
   const grip=span('grip');grip.setAttribute('aria-hidden','true');
@@ -567,7 +571,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-12d';
+  var V='2026-10-16a';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
