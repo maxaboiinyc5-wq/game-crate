@@ -114,7 +114,7 @@ h1,h2,h3,p{margin:0}
 .mark{display:flex;align-items:center;gap:.16em;font-family:var(--display);font-weight:900;font-size:clamp(34px,8.4vw,92px);letter-spacing:.02em;line-height:1}
 .mark .w{display:inline-flex;overflow:hidden}
 .mark .w i{font-style:normal;display:inline-block;transform:translateY(110%);animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards}
-.mark .five{display:inline-block;padding:0 .04em;background:linear-gradient(180deg,#ffd84d 15%,#ff5f45 85%);-webkit-background-clip:text;background-clip:text;color:transparent;transform:scale(0);animation:pop .7s 1s cubic-bezier(.3,1.6,.4,1) forwards}
+.mark .five{display:grid;place-items:center;width:1.18em;height:1.18em;border-radius:50%;background:conic-gradient(from 200deg,#ff5f45,#ffcf4d,#3fe0b0,#5aa8ff,#8f6bff,#ff5f45);color:#05060d;font-size:.82em;transform:scale(0) rotate(-90deg);animation:pop .7s 1s cubic-bezier(.3,1.6,.4,1) forwards}
 .sweep{position:relative}
 .sweep::after{content:"";position:absolute;inset:-10% -20%;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);transform:translateX(-120%);animation:sweep 1.4s 1.3s ease-in-out forwards;mix-blend-mode:overlay;pointer-events:none}
 @keyframes rise{to{transform:none}}
