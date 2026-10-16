@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Game Crate"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#191629"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-180.png"><link rel="manifest" href="manifest.json"></head><body>
 <title>Game Crate</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;900&amp;family=Onest:wght@400;500;700&amp;display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&amp;family=Saira+Stencil+One&amp;family=Bowlby+One&amp;family=Barlow+Condensed:ital,wght@0,700;1,800&amp;family=Bungee&amp;family=Lilita+One&amp;family=Graduate&amp;family=Russo+One&amp;family=Silkscreen:wght@700&amp;display=swap&amp;text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Paytone+One&amp;family=Saira+Stencil+One&amp;family=Bowlby+One&amp;family=Barlow+Condensed:ital,wght@0,700;1,800&amp;family=Bungee&amp;family=Lilita+One&amp;family=Graduate&amp;family=Russo+One&amp;family=Silkscreen:wght@700&amp;display=swap&amp;text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%20">
 <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js">
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js">
@@ -317,7 +317,7 @@ const GAMES=[
   font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:800,fs:'italic',tt:'uppercase',bg:'#121519',fg:'#eef1f4',tx:'#c3ccd6',ac:'#ffb547',ci:'#121519',sz:1.3},
  {id:'bad-goat-day',name:'Bad Goat Day',kind:'3D · sandbox',blurb:'You are a goat. The town did nothing to deserve you.',
   font:"'Bowlby One','Arial Black',sans-serif",bg:'#9ad7f0',fg:'#2b2118',tx:'#2b2118',ac:'#ff5d8f',ci:'#2b2118',sz:.95},
- {id:'brokebox',name:'Brokebox',kind:'8-game console',blurb:'Karts, platformer, fighter, soccer and more. Trophies and controller support.',
+ {id:'brokebox',name:'Brokebox 5',kind:'8-game package',blurb:'Karts, platformer, fighter, soccer and more. Trophies and controller support.',
   font:"'Bungee','Arial Black',sans-serif",bg:'#1e1b45',fg:'#ff5f45',tx:'#f4f1ff',ac:'#ffd43a',ci:'#12102a',sz:.9},
  {id:'jetway-tycoon',name:'Jetway Tycoon',kind:'3D · tycoon',blurb:'Land planes, turn the gates, grow the airport.',
   font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:700,tt:'uppercase',bg:'#14161a',fg:'#ffcf1a',tx:'#f4f1e6',ac:'#3ddc84',ci:'#14161a',sz:1.3},
@@ -567,7 +567,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16d';
+  var V='2026-10-16e';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
