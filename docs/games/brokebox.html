@@ -2067,7 +2067,7 @@ const FLOORS=[
   {name:'Bone Halls',floor:'#38322a',floor2:'#40382e',wall:'#6a5e4a',wallTop:'#8f826a',dark:'#1a1712',accent:'#e8dcc0',boss:'bone'},
   {name:'Ember Depths',floor:'#3a2420',floor2:'#432a24',wall:'#6a3428',wallTop:'#93503a',dark:'#1d0f0c',accent:'#ff7a3a',boss:'wyrm'},
   {name:"Lich's Sanctum",floor:'#2a2440',floor2:'#302a4a',wall:'#4a3a6a',wallTop:'#6a5a94',dark:'#120e20',accent:'#b38aff',boss:'lich'}];
-const CLASSES=[{id:'knight',n:'Knight',hp:6,sp:62,dmg:3,cd:.34,desc:'Sword sweep and a quick dash. Sturdy.',cost:0},{id:'ranger',n:'Ranger',hp:4,sp:70,dmg:2,cd:.26,desc:'Rapid arrows from range and a dodge roll.',cost:40},{id:'mage',n:'Mage',hp:4,sp:60,dmg:3,cd:.44,desc:'Exploding fireballs and a short-range blink.',cost:90}];
+const CLASSES=[{id:'knight',n:'Knight',hp:10,sp:62,dmg:3,cd:.34,desc:'Sword sweep and a quick dash. Sturdy.',cost:0},{id:'ranger',n:'Ranger',hp:8,sp:70,dmg:2,cd:.26,desc:'Rapid arrows from range and a dodge roll.',cost:40},{id:'mage',n:'Mage',hp:8,sp:60,dmg:3,cd:.44,desc:'Exploding fireballs and a short-range blink.',cost:90}];
 const ITEMS=[
   {id:'whet',n:'Whetstone',d:'+1 damage',f:p=>p.dmg+=1},{id:'boots',n:'Swift Boots',d:'Move 15% faster',f:p=>p.sp*=1.15},{id:'heart',n:'Heart Jar',d:'+1 heart, full heal',f:p=>{p.max+=2;p.hp=p.max}},
   {id:'split',n:'Split Shot',d:'+1 projectile, wider sword sweep',f:p=>p.shots++},{id:'fang',n:'Vampire Fang',d:'Heal a half heart every 10 kills',f:p=>p.fang=1},{id:'thorn',n:'Thorn Mail',d:'Enemies that touch you take damage',f:p=>p.thorn=1},
@@ -2143,15 +2143,15 @@ function Crypt(api,opt){
   function newRun(cls){const C=CLASSES.find(c=>c.id===cls);run={cls,items:[],kills:0,bought:0,gems:0,t:0,dmgTaken:0,floorsNoHit:0,rooms:0};
     P={x:PWW/2,y:PHH/2,r:5,cls:C.id,hp:C.hp+(S.up.heart?2:0),max:C.hp+(S.up.heart?2:0),sp:C.sp,dmg:C.dmg,cd:C.cd,range:1,shots:1,coins:S.up.coins?8:0,bombs:S.up.bomb?2:1,luck:0,wisps:0,fang:0,thorn:0,frost:0,ember:0,skin:0,magnet:0,atkT:0,dashT:0,dashCD:0,inv:0,face:0,fx:1,fy:0,swing:0,shield:0,killN:0,walk:0};
     S.runs++;api.store();F=0;startFloor()}
-  function startFloor(){map=genFloor(F);floorHit=false;enter(map.start,null);banner=`FLOOR ${F+1}  ${FLOORS[F].name.toUpperCase()}`;bannerT=2.6;api.music.play(SONGS.dun);if(F>=1)api.trophy('delve2');if(F>=3)api.trophy('delve4');if(F+1>S.best){S.best=F+1;api.store()}}
+  function startFloor(){if(F>0)P.hp=Math.min(P.max,P.hp+4);map=genFloor(F);floorHit=false;enter(map.start,null);banner=`FLOOR ${F+1}  ${FLOORS[F].name.toUpperCase()}`;bannerT=2.6;api.music.play(SONGS.dun);if(F>=1)api.trophy('delve2');if(F>=3)api.trophy('delve4');if(F+1>S.best){S.best=F+1;api.store()}}
   function enter(r,from){room=r;en=[];shots=[];bombs=[];fx.p.length=0;r.visited=true;if(from){const m={n:[7*TS+8,PHH-TS-8],s:[7*TS+8,TS+8],w:[PWW-TS-8,4*TS+8],e:[TS+8,4*TS+8]}[from];P.x=m[0];P.y=m[1]}else{P.x=PWW/2;P.y=PHH/2+20}
     paintTiles();P.shield=P.skin;
     if(!r.cleared){if(r.type==='boss'){spawnBoss();api.music.play(SONGS.boss)}else spawnRoom(r);run.rooms++}}
   function spawnRoom(r){const f=F,pool=[['slime',1],['bat',1],['archer',2],['brute',3]];if(f>=1)pool.push(['spider',1],['bigslime',3]);if(f>=2)pool.push(['wizard',3],['skull',2]);if(f>=3)pool.push(['ghost',2]);
-    let budget=4+f*2+rint(0,3);let tries=0;while(budget>0&&tries++<40){const [ty,c]=pick(pool);if(c>budget)continue;budget-=c;let x,y,k=0;do{x=rint(2,RW-3)*TS+8;y=rint(2,RH-3)*TS+8;k++}while(k<30&&(solid(x,y)||Math.hypot(x-P.x,y-P.y)<56));addEnemy(ty,x,y)}}
-  function addEnemy(type,x,y,o){const hpS=1+F*.4;const base={slime:[3,5],bigslime:[8,7],bat:[2,4],archer:[4,5],brute:[7,7],spider:[2,4],wizard:[5,5],skull:[6,6],ghost:[4,5]}[type]||[3,5];
+    let budget=3+Math.round(f*1.5)+rint(0,2);let tries=0;while(budget>0&&tries++<40){const [ty,c]=pick(pool);if(c>budget)continue;budget-=c;let x,y,k=0;do{x=rint(2,RW-3)*TS+8;y=rint(2,RH-3)*TS+8;k++}while(k<30&&(solid(x,y)||Math.hypot(x-P.x,y-P.y)<56));addEnemy(ty,x,y)}}
+  function addEnemy(type,x,y,o){const hpS=1+F*.25;const base={slime:[3,5],bigslime:[8,7],bat:[2,4],archer:[4,5],brute:[7,7],spider:[2,4],wizard:[5,5],skull:[6,6],ghost:[4,5]}[type]||[3,5];
     const e=Object.assign({type,x,y,r:base[1],hp:Math.ceil(base[0]*hpS),t:rnd(1),st:0,vx:0,vy:0,cd:rnd(1,2),slow:0,burn:0,flash:0,spawnT:.5},o||{});e.max=e.hp;en.push(e);return e}
-  function spawnBoss(){const b=FLOORS[F].boss,hp={king:70,bone:90,wyrm:110,lich:150}[b];const e=addEnemy(b,PWW/2,PHH/2-20,{boss:true,hp,r:b==='king'?14:b==='wyrm'?9:10,phase:0});e.max=e.hp;if(b==='wyrm'){e.segs=[];for(let i=0;i<10;i++)e.segs.push({x:e.x,y:e.y})}banner=({king:'THE SLIME KING',bone:'THE BONE LORD',wyrm:'THE CRYPT WYRM',lich:'THE LICH'})[b];bannerT=2.4}
+  function spawnBoss(){const b=FLOORS[F].boss,hp={king:50,bone:65,wyrm:80,lich:110}[b];const e=addEnemy(b,PWW/2,PHH/2-20,{boss:true,hp,r:b==='king'?14:b==='wyrm'?9:10,phase:0});e.max=e.hp;if(b==='wyrm'){e.segs=[];for(let i=0;i<10;i++)e.segs.push({x:e.x,y:e.y})}banner=({king:'THE SLIME KING',bone:'THE BONE LORD',wyrm:'THE CRYPT WYRM',lich:'THE LICH'})[b];bannerT=2.4}
   /* ---------- tiles ---------- */
   const tAt=(tx,ty)=>tx<0||ty<0||tx>=RW||ty>=RH?1:room.T[ty*RW+tx];
   function doorOpen(d){return room.doors[d]&&(room.cleared||en.length===0)}
@@ -2216,12 +2216,12 @@ function Crypt(api,opt){
     if(p.price){g.font='8px monospace';g.fillStyle=P.coins>=p.price?'#ffcf3a':'#ff6a6a';g.textAlign='center';g.fillText(p.price+'c',x,y+14)}}
   /* ---------- combat ---------- */
   function hurtP(n){if(P.inv>0||state!=='play'||P.dashT>0)return;if(P.shield){P.shield=0;P.inv=.6;fx.burst(P.x,P.y,10,'#c9d2e3',80,.4);AU.tone({f:900,to:400,d:.15,type:'square',v:.05});return}
-    P.hp-=n;P.inv=1;floorHit=true;run.dmgTaken+=n;shake=.25;flash=.3;api.sfx.hit();api.rumble(.5,100);if(P.hp<=0)die()}
+    P.hp-=n;P.inv=1.4;floorHit=true;run.dmgTaken+=n;shake=.25;flash=.3;api.sfx.hit();api.rumble(.5,100);if(P.hp<=0)die()}
   function hurtE(e,n,kx,ky){if(e.dead||e.spawnT>0)return;if(e.type==='ghost'&&e.phase2)return;e.hp-=n;e.flash=.08;if(P.frost)e.slow=1.5;if(P.ember)e.burn=2.2;if(!e.boss&&kx!=null){e.vx+=kx*90;e.vy+=ky*90}AU.tone({f:240+rnd(60),to:120,d:.06,type:'square',v:.03});if(e.hp<=0)killE(e)}
   function killE(e){e.dead=true;run.kills++;fx.burst(e.x,e.y,e.boss?40:12,e.type.includes('slime')||e.type==='king'?'#5ad16a':e.type==='wyrm'?'#ff7a3a':'#e8dcc0',e.boss?140:80,.5);
     if(P.fang){P.killN++;if(P.killN>=10){P.killN=0;P.hp=Math.min(P.max,P.hp+1)}}
     if(e.type==='bigslime')for(let i=0;i<2;i++)addEnemy('slime',e.x+rnd(-6,6),e.y+rnd(-6,6),{spawnT:0});
-    if(!e.boss){const r=rnd();if(r<.18+P.luck)room.picks.push({type:'coin',x:e.x,y:e.y});else if(r<.23+P.luck*.5)room.picks.push({type:pick(['half','bomb','coin']),x:e.x,y:e.y});if(rnd()<.06)room.picks.push({type:'gem',x:e.x+3,y:e.y})}
+    if(!e.boss){const r=rnd();if(r<.18+P.luck)room.picks.push({type:'coin',x:e.x,y:e.y});else if(r<.3+P.luck*.5)room.picks.push({type:pick(['half','half','bomb']),x:e.x,y:e.y});if(rnd()<.06)room.picks.push({type:'gem',x:e.x+3,y:e.y})}
     else bossDead(e)}
   function bossDead(e){en=en.filter(x=>x===e||!x.minion);for(const x of en)if(x!==e&&!x.dead){x.dead=true;fx.burst(x.x,x.y,8,'#fff',60,.3)}shots=shots.filter(s=>s.from==='p');api.sfx.boom(1);shake=.6;
     for(let i=0;i<5+F*2;i++)room.picks.push({type:'gem',x:e.x+rnd(-20,20),y:e.y+rnd(-14,14)});room.picks.push({type:'item',item:randItem(),x:PWW/2,y:PHH/2-24});
@@ -2248,7 +2248,7 @@ function Crypt(api,opt){
       case 'slime':case 'bigslime':{if(e.cd<=0){e.cd=rnd(.9,1.5);e.hop=.45;e.ha=a+rnd(-.4,.4)}if(e.hop>0){e.hop-=dt;go(e.type==='slime'?70:50,Math.cos(e.ha),Math.sin(e.ha));e.air=Math.sin((.45-e.hop)/.45*Math.PI)*5}else e.air=0;break}
       case 'bat':{e.wa=(e.wa||a)+rnd(-3,3)*dt;e.wa+=angDiff(e.wa,a)*dt*1.5;go(64,Math.cos(e.wa),Math.sin(e.wa),true);break}
       case 'spider':{go(d>10?78:0,dx/d,dy/d);break}
-      case 'archer':{const want=d<60?-1:d>90?1:0;go(38*want,dx/d,dy/d);if(!want)go(30,-dy/d*Math.sin(e.t),dx/d*Math.sin(e.t));if(e.cd<=0){e.cd=rnd(1.6,2.4);eShot(e.x,e.y-4,a,110,{kind:'arrow'})}break}
+      case 'archer':{const want=d<60?-1:d>90?1:0;go(38*want,dx/d,dy/d);if(!want)go(30,-dy/d*Math.sin(e.t),dx/d*Math.sin(e.t));if(e.cd<=0){e.cd=rnd(2,2.8);eShot(e.x,e.y-4,a,90,{kind:'arrow'})}break}
       case 'brute':{if(e.st===0){go(30,dx/d,dy/d);if(e.cd<=0&&d<120){e.st=1;e.wind=.6;e.ca=a}}else if(e.st===1){e.wind-=dt;if(e.wind<=0){e.st=2;e.run=.7;e.hitW=0}}else{e.run-=dt;moveC(e,Math.cos(e.ca)*170*dt*sl,Math.sin(e.ca)*170*dt*sl);if(e.hitW){e.st=3;e.stun=1;shake=.15;AU.noise({d:.15,v:.1,f:500})}if(e.run<=0)e.st=0}if(e.st===3){e.stun-=dt;if(e.stun<=0){e.st=0;e.cd=1.5}}break}
       case 'wizard':{if(e.cd<=0){e.st=1;e.cast=.6;e.cd=rnd(2.2,3)}if(e.st===1){e.cast-=dt;if(e.cast<=0){e.st=0;for(const o of [-.3,0,.3])eShot(e.x,e.y-6,a+o,85,{r:3,col:'#ff4dd8'});if(rnd()<.5){let k=0,x,y;do{x=rint(2,RW-3)*TS+8;y=rint(2,RH-3)*TS+8;k++}while(k<20&&(solid(x,y)||Math.hypot(x-P.x,y-P.y)<50));fx.burst(e.x,e.y,10,'#7df9ff',50,.4);e.x=x;e.y=y}}}break}
       case 'skull':{if(e.cd<=0){e.cd=1.6;const off=(e.t*.8)%TAU;for(let i=0;i<4;i++)eShot(e.x,e.y,off+i*Math.PI/2,70)}break}
