@@ -307,13 +307,29 @@ button{font:inherit;color:inherit}
 #bootback{font:700 1rem var(--body);color:var(--ground);background:var(--led);border:0;border-radius:999px;padding:12px 24px;cursor:pointer}
 
 /* ---- help sheet ---- */
-#help{position:fixed;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,16,.7);
+#help,#sheet{position:fixed;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,16,.7);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .hsheet{width:min(460px,100%);max-height:100%;overflow:auto;border-radius:18px;background:var(--deck);border:1px solid var(--seam);padding:22px;
   display:flex;flex-direction:column;gap:14px}
 .hsheet h2{margin:0;font:900 1.1rem var(--display);letter-spacing:.04em}
 .hsheet ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:#e9e4f2}
 .hsheet p{margin:0;color:var(--mute);font-size:.88rem}
+.hsheet .pin{width:100%;height:52px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:var(--text);
+  font:700 1.5rem var(--body);letter-spacing:.5em;text-align:center;padding:0 0 0 .5em}
+.hsheet .pin:focus{outline:2px solid var(--led);outline-offset:1px}
+.hsheet label{font-weight:600;font-size:.86rem;color:#e9e4f2;margin-bottom:-6px}
+.shbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hsheet .shbtns button{align-self:auto}
+.hsheet button.pri{background:var(--led);color:var(--ground)}
+.hsheet button.ghost{background:rgba(255,255,255,.08);color:var(--text)}
+.hsheet button.danger{background:#ff4d5e;color:#fff}
+.hsheet .err{margin:0;color:#ff8a95;font-weight:600;font-size:.86rem;min-height:1.2em}
+.hsheet .warn{margin:0;padding:10px 12px;border-radius:10px;background:rgba(255,77,94,.1);border:1px solid rgba(255,77,94,.3);color:#ffc2c8;font-size:.84rem}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(255,255,255,.08)}
+.setrow div{min-width:0}.setrow b{display:block}.setrow small{display:block;color:var(--mute);font-size:.82rem}
+.setrow button{flex:none}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .35s}
 .hsheet button{align-self:flex-start;border:0;border-radius:999px;background:var(--text);color:var(--ground);font-weight:700;padding:10px 20px;cursor:pointer}
 
 /* ---- sizes ---- */
@@ -392,6 +408,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
       <button class="ib" id="searchBtn" type="button" aria-label="Search games"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="tx">Search</span></button>
       <button class="ib" id="mus" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 17.5V6l11-2.5v11.8a3 3 0 1 1-2-2.8V7.1L11 8.6v9.9a3 3 0 1 1-2-2.8z"/></svg><span class="tx" id="musTx">Music off</span></button>
       <button class="ib" id="helpBtn" type="button" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.6"/><path d="M12 17h.01"/></svg></button>
+      <button class="ib" id="setBtn" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
     <div id="searchBar" hidden><input id="q" type="search" placeholder="Search games" aria-label="Search games" autocomplete="off"><button class="ib" id="qx" type="button">Close</button></div>
     <nav id="jump" aria-label="Go to a section"></nav>
@@ -464,6 +481,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
  </div>
 </div>
 
+<div id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="shT"><div class="hsheet" id="shBox"></div></div>
 <div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT">
   <div class="hsheet">
     <h2 id="helpT">How Game Crate works</h2>
@@ -898,6 +916,7 @@ $('help').addEventListener('click',e=>{if(e.target.id==='help')$('help').hidden=
 addEventListener('keydown',e=>{
   if(busy||introUp||e.ctrlKey||e.metaKey||e.altKey)return;
   const typing=e.target&&e.target.tagName==='INPUT';
+  if(!$('sheet').hidden){if(e.key==='Escape'&&sheetEsc)sheetEsc();return}
   if(e.key==='Escape'){if(!$('help').hidden){$('help').hidden=true;return}if(!$('searchBar').hidden){closeSearch();return}}
   if(typing||!$('help').hidden)return;
   const k=e.key,i=shown.indexOf(cur);
@@ -1182,6 +1201,67 @@ function renderJump(){
   for(const [id,label,extra] of J){const b=document.createElement('button');b.type='button';b.className='jb';b.innerHTML='<span></span>'+extra;b.firstChild.textContent=label;
     b.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}));box.append(b)}
 }
+/* ---- settings, reset code and reset ---- */
+let sheetEsc=null;
+const RESET_KEYS=['gc.plays','gc.ach','gc.days','gc.ev','gc.daily','gc.log','gc.favs','gc.theme','maxcade.last'];
+function hashCode(c){let h=5381;for(const ch of 'gc:'+c)h=((h<<5)+h+ch.charCodeAt(0))|0;return 'h'+(h>>>0).toString(36)}
+const hasCode=()=>!!jget('gc.code',null);
+function sheet(html,esc){const b=$('shBox');b.innerHTML=html;$('sheet').hidden=false;sheetEsc=esc||null;
+  const f=b.querySelector('input,button');if(f)setTimeout(()=>f.focus(),30);return b}
+function closeSheet(){$('sheet').hidden=true;sheetEsc=null;if(cur)carts[cur.id].focus({preventScroll:true})}
+$('sheet').addEventListener('click',e=>{if(e.target.id==='sheet'&&sheetEsc)sheetEsc()});
+function pinField(id,label){return '<label for="'+id+'">'+label+'</label><input class="pin" id="'+id+'" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">'}
+function digits(el){el.value=el.value.replace(/\D/g,'').slice(0,4)}
+function bad(box,msg){const e=box.querySelector('.err');e.textContent=msg;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake')}
+
+/* pick a new code. first=true is the first-time screen with Skip */
+function setCodeSheet(first,after){
+  const b=sheet('<h2 id="shT">'+(first?'Protect your progress':'New reset code')+'</h2>'
+    +'<p>Pick a 4-digit reset code. Nobody can reset your achievements, stats, favorites or challenges without it.</p>'
+    +pinField('pA','Reset code')+pinField('pB','Type it again')+'<p class="err"></p>'
+    +(first?'<p class="warn">You can skip this, but we do not recommend it. If your brother sneaks on, he could wipe everything.</p>':'')
+    +'<div class="shbtns"><button type="button" class="pri" id="pSave">Save code</button><button type="button" class="ghost" id="pSkip">'+(first?'Skip':'Cancel')+'</button></div>',
+    first?null:()=>{closeSheet();after&&after()});
+  const A=b.querySelector('#pA'),B=b.querySelector('#pB');
+  [A,B].forEach(x=>x.addEventListener('input',()=>{digits(x);if(x===A&&A.value.length===4)B.focus()}));
+  const save=()=>{if(A.value.length!==4){bad(b,'The code needs 4 numbers.');A.focus();return}
+    if(A.value!==B.value){bad(b,'The two codes do not match.');B.value='';B.focus();return}
+    jset('gc.code',hashCode(A.value));jset('gc.codeAsked',1);closeSheet();toastMsg('Reset code saved');after&&after()};
+  b.querySelector('#pSave').addEventListener('click',save);B.addEventListener('keydown',e=>{if(e.key==='Enter')save()});
+  b.querySelector('#pSkip').addEventListener('click',()=>{jset('gc.codeAsked',1);closeSheet();after&&after()});
+}
+/* ask for the current code, then run ok() */
+function askCode(title,ok){
+  const b=sheet('<h2 id="shT">'+title+'</h2><p>Enter your reset code.</p>'+pinField('pC','Reset code')+'<p class="err"></p>'
+    +'<div class="shbtns"><button type="button" class="pri" id="pGo">Continue</button><button type="button" class="ghost" id="pX">Cancel</button></div>',()=>openSettings());
+  const C=b.querySelector('#pC'),go=()=>{if(hashCode(C.value)===jget('gc.code',null))ok();else{bad(b,'Wrong code.');C.value='';C.focus()}};
+  C.addEventListener('input',()=>{digits(C);if(C.value.length===4)go()});
+  b.querySelector('#pGo').addEventListener('click',go);b.querySelector('#pX').addEventListener('click',()=>openSettings());
+}
+function confirmReset(){
+  const b=sheet('<h2 id="shT">Reset everything?</h2><p>This wipes your achievements, stats, favorites, daily challenges and theme on this device. It cannot be undone.</p>'
+    +'<p>Saves inside each game are not touched.</p>'
+    +'<div class="shbtns"><button type="button" class="danger" id="pR">Reset progress</button><button type="button" class="ghost" id="pX">Cancel</button></div>',()=>openSettings());
+  b.querySelector('#pX').addEventListener('click',()=>openSettings());
+  b.querySelector('#pR').addEventListener('click',()=>{RESET_KEYS.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});location.reload()});
+}
+function openSettings(){
+  const on=hasCode();
+  const b=sheet('<h2 id="shT">Settings</h2><p>Your progress saves on this device by itself, even when you refresh or close the app.</p>'
+    +'<div class="setrow"><div><b>Reset code</b><small>'+(on?'On. Needed to reset your progress.':'Off. Anyone on this device can reset your progress.')+'</small></div><button type="button" class="ghost" id="sCode">'+(on?'Change':'Set code')+'</button></div>'
+    +'<div class="setrow"><div><b>Reset progress</b><small>Achievements, stats, favorites, challenges and theme.</small></div><button type="button" class="danger" id="sReset">Reset</button></div>'
+    +'<div class="shbtns"><button type="button" id="sX">Done</button></div>',closeSheet);
+  b.querySelector('#sX').addEventListener('click',closeSheet);
+  b.querySelector('#sCode').addEventListener('click',()=>on?askCode('Change reset code',()=>setCodeSheet(false,openSettings)):setCodeSheet(false,openSettings));
+  b.querySelector('#sReset').addEventListener('click',()=>on?askCode('Reset progress',confirmReset):confirmReset());
+}
+$('setBtn').addEventListener('click',openSettings);
+function toastMsg(t){let el=$('gcToast');if(!el){el=document.createElement('div');el.id='gcToast';el.setAttribute('role','status');
+  el.style.cssText='position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;padding:10px 18px;border-radius:999px;background:var(--text);color:var(--ground);font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s';document.body.append(el)}
+  el.textContent=t;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity=0},1800)}
+/* first visit: once the title screen is gone, ask for a reset code */
+if(!jget('gc.codeAsked',0)){const w=setInterval(()=>{if(!introUp&&!busy&&$('help').hidden){clearInterval(w);setCodeSheet(true)}},300)}
+
 renderAch();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
 setInterval(renderDaily,60000);
 for(const r of document.querySelectorAll('.row'))r.addEventListener('wheel',e=>{
@@ -1236,11 +1316,11 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16h';
+  var V='2026-10-16-crate8';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
-      var m=t.match(/var V='2026-10-16h']+)'/);if(m&&m[1]!==V&&!window.__maxcade)location.replace('./?v='+Date.now());
+      var m=t.match(/var V='([^']+)'/);if(m&&m[1]!==V&&!window.__maxcade)location.replace('./?v='+Date.now());
     }).catch(function(){});
   }
   check();
