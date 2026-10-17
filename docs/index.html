@@ -446,7 +446,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     <div class="achs pad" id="achs"></div>
   </section>
   <section class="sec" id="secLike" aria-labelledby="hLike">
-    <div class="sech pad"><h2 id="hLike">Stuff you might like</h2><p>Games you have not played much that match the ones you play most.</p></div>
+    <div class="sech pad"><h2 id="hLike">For you</h2><p>Games you have not played much that match the ones you play most.</p></div>
     <div class="row" id="rowLike"></div>
   </section>
   <section class="sec" id="secRecent" aria-labelledby="hRecent">
@@ -1338,7 +1338,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16-crate10';
+  var V='2026-10-16-crate11';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
