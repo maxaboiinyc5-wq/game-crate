@@ -207,6 +207,34 @@ button{font:inherit;color:inherit}
 .apb span{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
 .apb i{display:block;height:100%;border-radius:2px;background:var(--led)}
 .anew{position:absolute;top:-7px;right:10px;padding:3px 7px;border-radius:4px;background:var(--led);color:var(--ground);font:900 .55rem var(--display);letter-spacing:.08em}
+.gsub{margin:26px 0 12px}
+.gsub h3{margin:0;font:900 1rem var(--display);letter-spacing:.01em}
+.gachs{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;align-items:start}
+.gcard{border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);overflow:hidden}
+.gch{position:relative;display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;
+  background:linear-gradient(90deg,rgba(var(--garb),.22),rgba(var(--garb),0))}
+.gcard.open .gch{border-bottom:1px solid rgba(255,255,255,.06)}
+.gal{display:none}.gcard.open .gal{display:block}
+.gnm{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.gbar{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.gbar i{display:block;height:100%;border-radius:2px;background:var(--led)}
+.gcv{flex:none;display:grid;place-items:center;width:22px;height:22px;color:var(--mute);transition:transform .2s}
+.gcv svg{width:18px;height:18px}
+.gcard.open .gcv{transform:rotate(180deg)}
+.gdot{position:absolute;top:8px;left:8px;width:9px;height:9px;border-radius:50%;background:var(--led);box-shadow:0 0 8px var(--led)}
+.gch img{flex:none;width:34px;height:34px;border-radius:8px;object-fit:cover;max-width:none}
+.gch b{display:block;min-width:0;font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);font-size:min(calc(1rem * var(--sz,1)),1.06rem);color:var(--lfg);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gct{flex:none;font-size:.78rem;color:var(--mute);font-variant-numeric:tabular-nums}
+.gct.all{color:var(--led);font-weight:700}
+.ga{position:relative;display:flex;align-items:center;gap:10px;padding:9px 12px}
+.ga+.ga{border-top:1px solid rgba(255,255,255,.05)}
+.gi{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#26213f;color:#6f6893}
+.gi svg{width:16px;height:16px}
+.ga.on .gi{background:var(--led);color:#160f04;box-shadow:0 4px 12px rgba(var(--ledrgb),.3)}
+.ga b{display:block;font-weight:700;font-size:.9rem;line-height:1.2}
+.ga:not(.on) b{color:#bdb7d6}
+.ga small{display:block;color:var(--mute);font-size:.77rem;line-height:1.25}
+.ga .anew{top:8px;right:10px}
 .row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;
   padding:4px max(16px,3.2vw) 10px;scroll-padding-inline:max(16px,3.2vw)}
 .row::-webkit-scrollbar{display:none}
@@ -444,6 +472,8 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   <section class="sec" id="secAch" aria-labelledby="hAch">
     <div class="sech pad"><h2 id="hAch">Achievements</h2><span class="sn" id="achCount"></span><p>Earned by playing games on this console.</p></div>
     <div class="achs pad" id="achs"></div>
+    <div class="sech pad gsub"><h3>In-game achievements</h3><span class="sn" id="gachCount"></span><p>Earned inside the games. A notification pops up the moment you get one.</p></div>
+    <div class="gachs pad" id="gachs"></div>
   </section>
   <section class="sec" id="secLike" aria-labelledby="hLike">
     <div class="sech pad"><h2 id="hLike">For you</h2><p>Games you have not played much that match the ones you play most.</p></div>
@@ -555,6 +585,140 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});
   document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1&&e.cancelable&&e.scale!==undefined&&e.scale!==1)e.preventDefault()},{passive:false});
   document.addEventListener('dblclick',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;e.preventDefault()},{passive:false});
+})();
+</script>
+
+<script type="text/plain" id="mxach">
+/* Game Crate in-game achievements. The same list is read by the console (to show them) and injected into each game
+   (to watch for them and pop a notification). Each test reads the game's own save, or a game variable while it runs. */
+(function(){
+  function J(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+  function N(k){try{return +localStorage.getItem(k)||0}catch(e){return 0}}
+  function V(f){try{return f()}catch(e){return undefined}}
+  function lgBest(f){var a=J('lastgate.accounts')||[],m=0;for(var i=0;i<a.length;i++){var s=J('lastgate.acct.'+String(a[i]).toLowerCase());if(s)m=Math.max(m,f(s)||0)}return m}
+  function poBest(f){var m=0;for(var i=1;i<=3;i++){var s=J('potycoon_slot_'+i);if(s)m=Math.max(m,f(s)||0)}return m}
+  function bbTro(){var d=J('bb5'),n=0;if(d&&d.tro)for(var g in d.tro)for(var t in d.tro[g])if(d.tro[g][t])n++;return n}
+  var A={
+   'wisp-hollow':[
+    ['dusk','Dusk Survivor','Complete Dusk',function(){var p=J('wh.prog');return p&&p.cleared&&p.cleared[0]}],
+    ['moonshade','Moonshade Down','Beat Midnight and defeat Moonshade',function(){var p=J('wh.prog');return p&&p.cleared&&p.cleared[1]}],
+    ['king','Hollow King Slayer','Defeat the Hollow King in Deep Hollow',function(){var p=J('wh.prog');return p&&p.cleared&&p.cleared[2]}]],
+   'zip-riot':[
+    ['z1','Warmed Up','Score 1,000 in one run',function(){return N('zipriot.best')>=1000}],
+    ['z2','Riot Starter','Score 10,000 in one run',function(){return N('zipriot.best')>=10000}],
+    ['z3','Unstoppable','Score 50,000 in one run',function(){return N('zipriot.best')>=50000}]],
+   'puck-havoc':[
+    ['w3','Ice Breaker','Reach wave 3',function(){return N('puckhavoc-wave')>=3}],
+    ['cup','Cup Winner','Beat all 5 arenas and win the cup',function(){return N('puckhavoc-cups')>=1}],
+    ['cup3','Dynasty','Win the cup 3 times',function(){return N('puckhavoc-cups')>=3}]],
+   'curb-cut':[
+    ['c1','Getting Rolling','Score 1,000 in one run',function(){return N('curbcut-best')>=1000}],
+    ['c2','Schoolyard Legend','Score 10,000 in one run',function(){return N('curbcut-best')>=10000}]],
+   'five-star-getaway':[
+    ['f1','Small Time','Get away with $1,000',function(){return N('fsg-best')>=1000}],
+    ['f2','Big Score','Get away with $10,000',function(){return N('fsg-best')>=10000}],
+    ['f3','Most Wanted','Get away with $50,000',function(){return N('fsg-best')>=50000}]],
+   'two-minute-drill':[
+    ['td','Touchdown!','Score a touchdown',function(){return N('tmd-best')>=6}],
+    ['t21','Three Scores','Put up 21 points in one game',function(){return N('tmd-best')>=21}],
+    ['t35','Hall of Famer','Put up 35 points in one game',function(){return N('tmd-best')>=35}]],
+   'bad-goat-day':[
+    ['g1','Menace','Score 5,000 in one run',function(){return N('badgoat.best')>=5000}],
+    ['g2','Public Enemy','Score 50,000 in one run',function(){return N('badgoat.best')>=50000}]],
+   'midnight-motorway':[
+    ['m1','Night Driver','Score 500 in one run',function(){return N('mm2_best')>=500}],
+    ['m2','Road Warrior','Score 1,500 in one run',function(){return N('mm2_best')>=1500}],
+    ['m3','Untouchable','Score 3,000 in one run',function(){return N('mm2_best')>=3000}],
+    ['ms','Daily Driver','Drive 3 days in a row',function(){return N('mm2_max')>=3}]],
+   'kickflip-island':[
+    ['k1','First Mission','Clear a mission',function(){var s=J('kickflip-island');return s&&s.done&&Object.keys(s.done).length>=1}],
+    ['k5','Island Legend','Clear all 5 missions',function(){var s=J('kickflip-island');return s&&s.done&&Object.keys(s.done).length>=5}],
+    ['kp','Point Machine','Bank 25,000 points',function(){var s=J('kickflip-island');return s&&s.points>=25000}]],
+   'stormline-royale':[
+    ['s1','Last One Standing','Win a match',function(){return N('slr_wins')>=1}],
+    ['s5','Storm Chaser','Win 5 matches',function(){return N('slr_wins')>=5}]],
+   'short-hop-air':[
+    ['p2','Growing Fleet','Buy a second plane',function(){var s=J('shorthop');return s&&s.owned&&s.owned.length>=2}],
+    ['pg','Golden Goose','Buy the Golden Goose',function(){var s=J('shorthop');return s&&s.owned&&s.owned.indexOf('goose')>=0}],
+    ['pa','Full Fleet','Own every plane',function(){var s=J('shorthop');return s&&s.owned&&s.owned.length>=4}]],
+   'jetway-tycoon':[
+    ['j10','Cleared to Land','Handle 10 flights',function(){var s=J('jetway-save');return s&&s.life&&s.life.fl>=10}],
+    ['j100','Busy Skies','Handle 100 flights',function(){var s=J('jetway-save');return s&&s.life&&s.life.fl>=100}],
+    ['jg','Every Gate Open','Build all 8 gates',function(){var s=J('jetway-save');return s&&s.gates>=8}],
+    ['jr','Triple Runway','Build 3 runways',function(){var s=J('jetway-save');return s&&s.runways>=3}]],
+   'last-gate':[
+    ['l7','Week One','Reach day 7',function(){return lgBest(function(s){return Math.max(s.day||0,s.best||0)})>=7}],
+    ['l20','Hold the Line','Reach day 20',function(){return lgBest(function(s){return Math.max(s.day||0,s.best||0)})>=20}],
+    ['lw','Last Gate Standing','Beat the boss on day 30',function(){return lgBest(function(s){return s.won?1:0})>=1}]],
+   'lawn-guard':[
+    ['lg10','Lawn Defender','Stop 10 zombies in one game',function(){return V(function(){return killed})>=10}],
+    ['lg30','Lawn Saved','Stop all 30 zombies',function(){return V(function(){return killed})>=30}]],
+   'pocket-maker':[
+    ['pm1','Level Designer','Make a level of your own',function(){var s=J('pocket-maker.v1');return s&&s.levels&&s.levels.length>=5}],
+    ['pm5','Level Factory','Make 4 levels of your own',function(){var s=J('pocket-maker.v1');return s&&s.levels&&s.levels.length>=8}]],
+   'aisle-nine-market':[
+    ['a3','Shopkeeper','Reach level 3',function(){var s=J('aisle9b');return s&&s.lvl>=3}],
+    ['a7','Store Manager','Reach level 7',function(){var s=J('aisle9b');return s&&s.lvl>=7}],
+    ['ax','Superstore','Fully expand the store',function(){var s=J('aisle9b');return s&&s.expand>=2}],
+    ['as','Full Staff','Hire a cashier and a stocker',function(){var s=J('aisle9b');return s&&s.staff&&s.staff.cashier&&s.staff.stocker}]],
+   'post-office-tycoon':[
+    ['o50','Next in Line','Serve 50 customers',function(){return poBest(function(s){return s.served})>=50}],
+    ['o10','Special Delivery','Finish 10 delivery routes',function(){return poBest(function(s){return s.routes})>=10}],
+    ['ox','Bigger Branch','Expand the post office',function(){return poBest(function(s){return s.expand?1:0})>=1}],
+    ['o5','Full Counter','Open all 5 desks',function(){return poBest(function(s){return s.desks})>=5}]],
+   'brokebox':[
+    ['b1','Trophy Hunter','Earn a Brokebox trophy',function(){return bbTro()>=1}],
+    ['b10','Trophy Case','Earn 10 Brokebox trophies',function(){return bbTro()>=10}],
+    ['b25','Trophy Room','Earn 25 Brokebox trophies',function(){return bbTro()>=25}]]
+  };
+  window.GC_GACH=A;
+  /* record anything newly earned. Returns the list of [game,achievement] that just unlocked */
+  window.GC_GACH_CHECK=function(only){
+    var got;try{got=JSON.parse(localStorage.getItem('gc.gach')||'{}')||{}}catch(e){got={}}
+    var fresh=[];
+    for(var g in A){if(only&&g!==only)continue;
+      for(var i=0;i<A[g].length;i++){var a=A[g][i];if(got[g]&&got[g][a[0]])continue;
+        var ok=false;try{ok=!!a[3]()}catch(e){}
+        if(ok){got[g]=got[g]||{};got[g][a[0]]={t:Date.now(),seen:0};fresh.push([g,a])}}}
+    if(fresh.length)try{localStorage.setItem('gc.gach',JSON.stringify(got))}catch(e){}
+    return fresh;
+  };
+
+  /* ---- inside a game: watch, and pop a notification when one unlocks ---- */
+  var G=window.__mxGame;if(!G||!A[G]||window.__mxAchOn)return;window.__mxAchOn=1;
+  var host,root,queue=[],showing=false;
+  function ui(){
+    if(host)return;host=document.createElement('div');host.id='mx-ach';
+    host.style.cssText='position:fixed;z-index:2147483646;left:0;top:0;width:0;height:0;margin:0;padding:0;border:0;pointer-events:none';
+    root=host.attachShadow?host.attachShadow({mode:'open'}):host;
+    root.innerHTML='<style>:host{all:initial}'
+     +'.t{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translate(-50%,-140%);display:flex;align-items:center;gap:12px;'
+     +'min-width:min(300px,86vw);max-width:92vw;box-sizing:border-box;padding:10px 18px 10px 10px;border-radius:999px;background:rgba(18,15,34,.94);'
+     +'border:1px solid rgba(255,176,32,.45);box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 24px rgba(255,176,32,.25);color:#f6f2ea;'
+     +'font:500 14px/1.25 system-ui,-apple-system,"Segoe UI",sans-serif;transition:transform .45s cubic-bezier(.2,.9,.25,1.2)}'
+     +'.t.on{transform:translate(-50%,0)}'
+     +'.i{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#ffb020;color:#1a1205}'
+     +'.i svg{width:22px;height:22px}'
+     +'.k{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;color:#ffb020}'
+     +'.n{display:block;font-weight:700;font-size:15px}.d{display:block;font-size:12px;color:#c9c3de}'
+     +'@media (prefers-reduced-motion:reduce){.t{transition:none}}</style>'
+     +'<div class="t" role="status"><span class="i"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/></svg></span>'
+     +'<span><span class="k">ACHIEVEMENT UNLOCKED</span><span class="n"></span><span class="d"></span></span></div>';
+    (document.documentElement||document.body).appendChild(host);
+  }
+  function chime(){try{var C=window.AudioContext||window.webkitAudioContext,c=new C(),t=c.currentTime;
+    [[784,0],[1047,.09],[1319,.18]].forEach(function(n){var o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=n[0];
+      g.gain.setValueAtTime(.0001,t+n[1]);g.gain.linearRampToValueAtTime(.12,t+n[1]+.01);g.gain.exponentialRampToValueAtTime(.0001,t+n[1]+.5);
+      o.connect(g);g.connect(c.destination);o.start(t+n[1]);o.stop(t+n[1]+.55)});setTimeout(function(){try{c.close()}catch(e){}},1200)}catch(e){}}
+  function next(){
+    if(showing||!queue.length)return;showing=true;ui();var a=queue.shift(),t=root.querySelector('.t');
+    root.querySelector('.n').textContent=a[1];root.querySelector('.d').textContent=a[2];chime();
+    requestAnimationFrame(function(){t.classList.add('on')});
+    setTimeout(function(){t.classList.remove('on');setTimeout(function(){showing=false;next()},500)},3800);
+  }
+  /* things already earned before this play session are saved quietly; only new ones pop up */
+  GC_GACH_CHECK(G);
+  setInterval(function(){var f=GC_GACH_CHECK(G);for(var i=0;i<f.length;i++)queue.push(f[i][1]);next()},1500);
 })();
 </script>
 
@@ -1081,6 +1245,34 @@ function stats(){
     cats:new Set(ids.map(id=>CATS[id])).size,dims:new Set(ids.map(id=>GAMES.find(g=>g.id===id).kind.slice(0,2)).filter(k=>k==='2D'||k==='3D')).size,streak,ev:jget('gc.ev',{}),daily:jget('gc.daily',[]).length,days:days.length};
 }
 function svg(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>'}
+function gTotal(){let n=0;for(const g in (window.GC_GACH||{}))n+=GC_GACH[g].length;return n}
+function gGot(){const got=jget('gc.gach',{});let n=0;for(const g in got)n+=Object.keys(got[g]).length;return n}
+const achGot=()=>Object.keys(jget('gc.ach',{})).length+gGot(),achAll=()=>ACHS.length+gTotal();
+const TROPHY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/></svg>';
+const gOpen=new Set();
+function renderGach(){
+  const A=window.GC_GACH||{},got=jget('gc.gach',{}),box=$('gachs');box.textContent='';let n=0,tot=0;
+  for(const g of GAMES){const list=A[g.id];if(!list)continue;const mine=got[g.id]||{};
+    const c=document.createElement('div');c.className='gcard';skin(c,g);c.style.setProperty('--garb',rgb(g.ac).join(','));
+    const k=list.filter(a=>mine[a[0]]).length;n+=k;tot+=list.length;
+    const hasNew=list.some(a=>mine[a[0]]&&!mine[a[0]].seen);
+    const h=document.createElement('button');h.type='button';h.className='gch';const im=document.createElement('img');im.src=thumb(g.id);im.alt='';im.loading='lazy';
+    const nm=span('gnm'),nb=document.createElement('b');nb.textContent=g.name;const bar=span('gbar'),bi=document.createElement('i');bi.style.width=Math.round(k/list.length*100)+'%';bar.append(bi);nm.append(nb,bar);
+    const cnt=span('gct'+(k===list.length?' all':''),k+' / '+list.length);const chev=span('gcv');chev.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    h.append(im,nm,cnt,chev);if(hasNew)h.append(span('gdot'));c.append(h);
+    const body=document.createElement('div');body.className='gal';c.append(body);
+    const open=gOpen.has(g.id)||hasNew;c.classList.toggle('open',open);h.setAttribute('aria-expanded',open);
+    h.addEventListener('click',()=>{const o=!c.classList.contains('open');c.classList.toggle('open',o);h.setAttribute('aria-expanded',o);o?gOpen.add(g.id):gOpen.delete(g.id)});
+    for(const a of list){const on=!!mine[a[0]],r=document.createElement('div');r.className='ga'+(on?' on':'');
+      r.innerHTML='<span class="gi">'+TROPHY+'</span><span><b></b><small></small></span>';
+      r.querySelector('b').textContent=a[1];r.querySelector('small').textContent=on?a[2]+' · '+ago(mine[a[0]].t):a[2];
+      if(on&&!mine[a[0]].seen)r.append(span('anew','NEW'));
+      r.setAttribute('aria-label',g.name+': '+a[1]+(on?', unlocked':', locked')+'. '+a[2]);body.append(r)}
+    box.append(c)}
+  $('gachCount').innerHTML='<b>'+n+'</b> of '+tot+' unlocked';
+  if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){
+    const g2=jget('gc.gach',{});for(const gg in g2)for(const k in g2[gg])g2[gg][k].seen=1;jset('gc.gach',g2);io.disconnect()}},{threshold:.15});io.observe(box)}
+}
 function renderAch(){
   const st=stats(),got=jget('gc.ach',{}),box=$('achs');let n=0,fresh=false;box.textContent='';
   for(const a of ACHS){
@@ -1098,7 +1290,8 @@ function renderAch(){
     box.append(el);
   }
   jset('gc.ach',got);
-  $('achCount').innerHTML='<b>'+n+'</b> of '+ACHS.length+' unlocked';
+  $('achCount').innerHTML='<b>'+achGot()+'</b> of '+achAll()+' unlocked';
+  renderAch.fresh=fresh;
   /* NEW tags stay until you have scrolled down and seen them */
   if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){
     const g2=jget('gc.ach',{});for(const k in g2)g2[k].seen=1;jset('gc.ach',g2);io.disconnect()}},{threshold:.4});io.observe(box)}
@@ -1172,7 +1365,7 @@ function renderStats(){
   const wk={},cut=Date.now()-7*864e5;for(const [id,t] of jget('gc.log',[]))if(t>=cut)wk[id]=(wk[id]||0)+1;
   const wkId=Object.keys(wk).sort((a,b)=>wk[b]-wk[a])[0],wkG=GAMES.find(g=>g.id===wkId);
   const cat={};for(const g of played)cat[CATS[g.id]]=(cat[CATS[g.id]]||0)+P[g.id].n;const fav=Object.keys(cat).sort((a,b)=>cat[b]-cat[a])[0];
-  const got=Object.keys(jget('gc.ach',{})).length;
+  const got=achGot();
   const card=(label,val,sub,g)=>{const c=document.createElement('div');c.className='stat';
     const sm=document.createElement('small');sm.textContent=label;const v=document.createElement('b');v.textContent=val;
     if(g){skin(c,g);v.className='g'}c.append(sm,v);
@@ -1183,13 +1376,13 @@ function renderStats(){
   card('Top this week',wkG?wkG.name:'None yet',wkG?wk[wkId]+(wk[wkId]===1?' play':' plays')+' in 7 days':'',wkG);
   card('Favorite type',fav||'None yet',fav?cat[fav]+' plays':'');
   card('Days played',st.days);
-  card('Achievements',got+' / '+ACHS.length);
+  card('Achievements',got+' / '+achAll());
   card('Daily challenges',st.daily);
 }
 
 /* themes */
 function renderThemes(){
-  const got=Object.keys(jget('gc.ach',{})).length,curT=jget('gc.theme','amber'),box=$('themes');box.textContent='';
+  const got=achGot(),curT=jget('gc.theme','amber'),box=$('themes');box.textContent='';
   for(const t of GC_THEMES){
     const open=got>=t.need,b=document.createElement('button');b.type='button';b.className='th'+(t.id===curT?' on':'')+(open?'':' lock');b.disabled=!open;
     const pv=span('tpv');pv.append(document.createElement('i'));pv.style.setProperty('--tg',t.ground);pv.style.setProperty('--td',t.deck);pv.style.setProperty('--tl',t.led);
@@ -1209,9 +1402,9 @@ function goTo(g){
   setTimeout(()=>carts[g.id].focus({preventScroll:true}),400);
 }
 function renderJump(){
-  const got=Object.keys(jget('gc.ach',{})).length,fresh=Object.values(jget('gc.ach',{})).some(a=>!a.seen),dOk=jget('gc.daily',[]).includes(today());
+  const got=achGot(),fresh=Object.values(jget('gc.ach',{})).some(a=>!a.seen)||Object.values(jget('gc.gach',{})).some(o=>Object.values(o).some(a=>!a.seen)),dOk=jget('gc.daily',[]).includes(today());
   const nNew=GAMES.filter(g=>tagsOf(g).isNew).length,nUpd=GAMES.filter(g=>tagsOf(g).isUpd).length,nFav=favs().length;
-  const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+ACHS.length+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
+  const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+achAll()+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
     ['secNew','New games',nNew?'<b class="hot">'+nNew+'</b>':''],['secUpd','Recently updated',nUpd?'<b>'+nUpd+'</b>':''],['secFav','Favorites',nFav?'<b>'+nFav+'</b>':''],
     ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','']];
   const box=$('jump');box.textContent='';
@@ -1220,7 +1413,7 @@ function renderJump(){
 }
 /* ---- settings, reset code and reset ---- */
 let sheetEsc=null;
-const RESET_KEYS=['gc.plays','gc.ach','gc.days','gc.ev','gc.daily','gc.log','gc.favs','gc.theme','maxcade.last'];
+const RESET_KEYS=['gc.plays','gc.ach','gc.gach','gc.days','gc.ev','gc.daily','gc.log','gc.favs','gc.theme','maxcade.last'];
 function hashCode(c){let h=5381;for(const ch of 'gc:'+c)h=((h<<5)+h+ch.charCodeAt(0))|0;return 'h'+(h>>>0).toString(36)}
 const hasCode=()=>!!jget('gc.code',null);
 function sheet(html,esc){const b=$('shBox');b.innerHTML=html;$('sheet').hidden=false;sheetEsc=esc||null;
@@ -1279,13 +1472,18 @@ function openSettings(){
 }
 $('setBtn').addEventListener('click',openSettings);
 function toastMsg(t){let el=$('gcToast');if(!el){el=document.createElement('div');el.id='gcToast';el.setAttribute('role','status');
-  el.style.cssText='position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;padding:10px 18px;border-radius:999px;background:var(--text);color:var(--ground);font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s';document.body.append(el)}
+  el.style.cssText='position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;padding:10px 18px;border-radius:999px;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;background:var(--text);color:var(--ground);font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s';document.body.append(el)}
   el.textContent=t;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity=0},1800)}
 /* first visit: once the title screen is gone, ask for a reset code */
 if(!jget('gc.codeAsked',0)){const w=setInterval(()=>{if(!introUp&&!busy&&$('help').hidden){clearInterval(w);setCodeSheet(true)}},300)}
 
-renderAch();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
+try{new Function($('mxach').textContent)()}catch(e){}
+const gFresh=window.GC_GACH_CHECK?GC_GACH_CHECK():[];
+renderAch();renderGach();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
 setInterval(renderDaily,60000);
+/* achievements earned since the last visit to the menu */
+{const cf=ACHS.filter(a=>{const g=jget('gc.ach',{})[a.id];return g&&!g.seen&&Date.now()-g.t<5000}).map(a=>a.n),all=cf.concat(gFresh.map(x=>x[1][1]));
+  if(all.length)setTimeout(()=>toastMsg(all.length===1?'Achievement unlocked: '+all[0]:all.length+' new achievements'),900)}
 for(const r of document.querySelectorAll('.row'))r.addEventListener('wheel',e=>{
   if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;const max=r.scrollWidth-r.clientWidth;
   if(max<=0||(e.deltaY>0&&r.scrollLeft>=max-1)||(e.deltaY<0&&r.scrollLeft<=0))return;
@@ -1321,6 +1519,9 @@ function launch(g,cart){
       if(nz)html=html.replace('<body>',()=>'<body><script>'+nz+'<\/script>');
       const lay=$('mxdesk')?$('mxdesk').textContent:'';
       if(lay)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';<\/script><script>'+lay+'<\/script>');
+      /* in-game achievements: watch for them and pop a notification (phones and computers) */
+      const ach=$('mxach')?$('mxach').textContent:'';
+      if(ach)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';<\/script><script>'+ach+'<\/script>');
       clearInterval(clockTimer);
       window.__maxcade=1;
       /* swap this whole page for the game; the house button reloads to get back here */
@@ -1338,7 +1539,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-17-crate12';
+  var V='2026-10-17-crate13';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
