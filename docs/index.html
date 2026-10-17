@@ -1236,11 +1236,11 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16g';
+  var V='2026-10-16h';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
-      var m=t.match(/var V='2026-10-16g']+)'/);if(m&&m[1]!==V&&!window.__maxcade)location.replace('./?v='+Date.now());
+      var m=t.match(/var V='2026-10-16h']+)'/);if(m&&m[1]!==V&&!window.__maxcade)location.replace('./?v='+Date.now());
     }).catch(function(){});
   }
   check();
