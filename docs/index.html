@@ -466,7 +466,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     <div class="row" id="rowFav"></div>
   </section>
   <section class="sec" id="secDaily" aria-labelledby="hDaily">
-    <div class="sech pad"><h2 id="hDaily">Daily challenge</h2><span class="sn" id="dailyLeft"></span><p>A new game every day. Play it before midnight to finish the challenge.</p></div>
+    <div class="sech pad"><h2 id="hDaily">Daily challenge</h2><span class="sn" id="dailyLeft"></span><p>A new game every day. Just play it before midnight. You do not have to beat it.</p></div>
     <div class="pad"><button type="button" class="daily" id="daily"></button></div>
   </section>
   <section class="sec" id="secStats" aria-labelledby="hStats">
@@ -499,7 +499,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     <ul>
       <li>Scroll down for achievements, picks for you, favorites, the daily challenge, your stats and more. The buttons under the genres jump straight to each one.</li>
       <li>Tap the heart next to Play to add a game to Favorites.</li>
-      <li>Play the daily challenge game before midnight to finish it. A new one shows up every day.</li>
+      <li>Daily challenge: just play that day's game before midnight. You do not have to beat it. A new one shows up every day.</li>
       <li>Earn achievements to unlock new menu colors in Themes.</li>
     </ul>
     <h3>Saving and reset</h3>
@@ -1071,8 +1071,8 @@ const ACHS=[
  {id:'streak',n:'On a Roll',d:'Play 3 days in a row',ic:'cal',p:s=>[s.streak,3]},
  {id:'fresh',n:'Fresh Off the Line',d:'Play a game while it is still marked NEW',ic:'spark',p:s=>[s.ev.fresh?1:0,1]},
  {id:'owl',n:'Night Owl',d:'Play a game between midnight and 5 AM',ic:'moon',p:s=>[s.ev.owl?1:0,1]},
- {id:'daily',n:'Challenge Accepted',d:'Finish a daily challenge',ic:'check',p:s=>[s.daily,1]},
- {id:'daily5',n:'Daily Grinder',d:'Finish 5 daily challenges',ic:'target',p:s=>[s.daily,5]}];
+ {id:'daily',n:'Challenge Accepted',d:'Do a daily challenge',ic:'check',p:s=>[s.daily,1]},
+ {id:'daily5',n:'Daily Grinder',d:'Do 5 daily challenges',ic:'target',p:s=>[s.daily,5]}];
 function stats(){
   const P=plays(),ids=GAMES.map(g=>g.id).filter(id=>P[id]&&P[id].n>0);
   const days=jget('gc.days',[]).slice().sort((a,b)=>a-b);let streak=days.length?1:0,run=1;
@@ -1157,8 +1157,8 @@ function renderDaily(){
   const d=today(),g=dailyGame(d),done=jget('gc.daily',[]),b=$('daily');skin(b,g);b.textContent='';
   const img=document.createElement('img');img.src=art(g.id);img.alt='';img.loading='lazy';
   const x=span('dx'),ok=done.includes(d);
-  x.append(span('dk',"TODAY'S CHALLENGE"),span('dn',g.name),span('ds'+(ok?' done':''),ok?'Done for today. Nice.':'Play '+g.name+' today to finish it.'),
-    span('dd',done.length+(done.length===1?' challenge':' challenges')+' finished'));
+  x.append(span('dk',"TODAY'S CHALLENGE"),span('dn',g.name),span('ds'+(ok?' done':''),ok?'Done for today. Nice.':'Just play '+g.name+' today. You do not have to beat it.'),
+    span('dd',done.length+(done.length===1?' challenge':' challenges')+' done'));
   b.append(img,x);b.setAttribute('aria-label',"Today's challenge: "+g.name+(ok?', done':''));
   b.onclick=()=>goTo(g);
   const n=new Date(),mid=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1),m=Math.max(1,Math.round((mid-n)/6e4));
@@ -1338,7 +1338,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-17a';
+  var V='2026-10-17-crate12';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
