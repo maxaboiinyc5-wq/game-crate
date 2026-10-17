@@ -201,40 +201,17 @@ button{font:inherit;color:inherit}
 .ach.on .aic{background:var(--led);color:#160f04;box-shadow:0 6px 18px rgba(var(--ledrgb),.28)}
 .atx{min-width:0;flex:1}
 .atx b{display:block;font-weight:700;line-height:1.25}
+.agame{display:block;margin-bottom:2px;font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ach.extra{display:none}
+.achmore{margin-top:14px}
+#achAll{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:var(--text);font-weight:700;font-size:.88rem;padding:10px 18px;border-radius:999px;cursor:pointer}
+#achAll:hover{border-color:var(--led)}
 .ach:not(.on) .atx b{color:#cfc9e4}
 .atx small{display:block;margin-top:2px;color:var(--mute);font-size:.8rem;line-height:1.3}
 .apb{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:.72rem;color:var(--mute);font-variant-numeric:tabular-nums}
 .apb span{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
 .apb i{display:block;height:100%;border-radius:2px;background:var(--led)}
 .anew{position:absolute;top:-7px;right:10px;padding:3px 7px;border-radius:4px;background:var(--led);color:var(--ground);font:900 .55rem var(--display);letter-spacing:.08em}
-.gsub{margin:26px 0 12px}
-.gsub h3{margin:0;font:900 1rem var(--display);letter-spacing:.01em}
-.gachs{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;align-items:start}
-.gcard{border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);overflow:hidden}
-.gch{position:relative;display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;
-  background:linear-gradient(90deg,rgba(var(--garb),.22),rgba(var(--garb),0))}
-.gcard.open .gch{border-bottom:1px solid rgba(255,255,255,.06)}
-.gal{display:none}.gcard.open .gal{display:block}
-.gnm{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
-.gbar{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
-.gbar i{display:block;height:100%;border-radius:2px;background:var(--led)}
-.gcv{flex:none;display:grid;place-items:center;width:22px;height:22px;color:var(--mute);transition:transform .2s}
-.gcv svg{width:18px;height:18px}
-.gcard.open .gcv{transform:rotate(180deg)}
-.gdot{position:absolute;top:8px;left:8px;width:9px;height:9px;border-radius:50%;background:var(--led);box-shadow:0 0 8px var(--led)}
-.gch img{flex:none;width:34px;height:34px;border-radius:8px;object-fit:cover;max-width:none}
-.gch b{display:block;min-width:0;font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);font-size:min(calc(1rem * var(--sz,1)),1.06rem);color:var(--lfg);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gct{flex:none;font-size:.78rem;color:var(--mute);font-variant-numeric:tabular-nums}
-.gct.all{color:var(--led);font-weight:700}
-.ga{position:relative;display:flex;align-items:center;gap:10px;padding:9px 12px}
-.ga+.ga{border-top:1px solid rgba(255,255,255,.05)}
-.gi{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#26213f;color:#6f6893}
-.gi svg{width:16px;height:16px}
-.ga.on .gi{background:var(--led);color:#160f04;box-shadow:0 4px 12px rgba(var(--ledrgb),.3)}
-.ga b{display:block;font-weight:700;font-size:.9rem;line-height:1.2}
-.ga:not(.on) b{color:#bdb7d6}
-.ga small{display:block;color:var(--mute);font-size:.77rem;line-height:1.25}
-.ga .anew{top:8px;right:10px}
 .row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;
   padding:4px max(16px,3.2vw) 10px;scroll-padding-inline:max(16px,3.2vw)}
 .row::-webkit-scrollbar{display:none}
@@ -470,10 +447,9 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
 
  <div class="more" id="more">
   <section class="sec" id="secAch" aria-labelledby="hAch">
-    <div class="sech pad"><h2 id="hAch">Achievements</h2><span class="sn" id="achCount"></span><p>Earned by playing games on this console.</p></div>
+    <div class="sech pad"><h2 id="hAch">Achievements</h2><span class="sn" id="achCount"></span><p>Earned on the console and inside each game. A notification pops up the moment you get one.</p></div>
     <div class="achs pad" id="achs"></div>
-    <div class="sech pad gsub"><h3>In-game achievements</h3><span class="sn" id="gachCount"></span><p>Earned inside the games. A notification pops up the moment you get one.</p></div>
-    <div class="gachs pad" id="gachs"></div>
+    <div class="pad achmore"><button type="button" id="achAll" hidden></button></div>
   </section>
   <section class="sec" id="secLike" aria-labelledby="hLike">
     <div class="sech pad"><h2 id="hLike">For you</h2><p>Games you have not played much that match the ones you play most.</p></div>
@@ -685,8 +661,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     return fresh;
   };
 
-  /* ---- inside a game: watch, and pop a notification when one unlocks ---- */
-  var G=window.__mxGame;if(!G||!A[G]||window.__mxAchOn)return;window.__mxAchOn=1;
+  /* ---- the gold pop-up, used in games and on the menu ---- */
   var host,root,queue=[],showing=false;
   function ui(){
     if(host)return;host=document.createElement('div');host.id='mx-ach';
@@ -717,6 +692,13 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     requestAnimationFrame(function(){t.classList.add('on')});
     setTimeout(function(){t.classList.remove('on');setTimeout(function(){showing=false;next()},500)},3800);
   }
+  window.GC_ACH_POP=function(list){for(var i=0;i<list.length;i++)queue.push(list[i]);next()};
+
+  /* ---- inside a game: watch, and pop a notification when one unlocks ---- */
+  var G=window.__mxGame;if(!G||window.__mxAchOn)return;window.__mxAchOn=1;
+  /* console achievements earned by starting this game (Press Start and the like) */
+  if(window.__mxPending&&window.__mxPending.length){var pend=window.__mxPending;setTimeout(function(){GC_ACH_POP(pend)},1200)}
+  if(!A[G])return;
   /* things already earned before this play session are saved quietly; only new ones pop up */
   GC_GACH_CHECK(G);
   setInterval(function(){var f=GC_GACH_CHECK(G);for(var i=0;i<f.length;i++)queue.push(f[i][1]);next()},1500);
@@ -1250,53 +1232,43 @@ function gTotal(){let n=0;for(const g in (window.GC_GACH||{}))n+=GC_GACH[g].leng
 function gGot(){const got=jget('gc.gach',{});let n=0;for(const g in got)n+=Object.keys(got[g]).length;return n}
 const achGot=()=>Object.keys(jget('gc.ach',{})).length+gGot(),achAll=()=>ACHS.length+gTotal();
 const TROPHY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/></svg>';
-const gOpen=new Set();
-function renderGach(){
-  const A=window.GC_GACH||{},got=jget('gc.gach',{}),box=$('gachs');box.textContent='';let n=0,tot=0;
-  for(const g of GAMES){const list=A[g.id];if(!list)continue;const mine=got[g.id]||{};
-    const c=document.createElement('div');c.className='gcard';skin(c,g);c.style.setProperty('--garb',rgb(g.ac).join(','));
-    const k=list.filter(a=>mine[a[0]]).length;n+=k;tot+=list.length;
-    const hasNew=list.some(a=>mine[a[0]]&&!mine[a[0]].seen);
-    const h=document.createElement('button');h.type='button';h.className='gch';const im=document.createElement('img');im.src=thumb(g.id);im.alt='';im.loading='lazy';
-    const nm=span('gnm'),nb=document.createElement('b');nb.textContent=g.name;const bar=span('gbar'),bi=document.createElement('i');bi.style.width=Math.round(k/list.length*100)+'%';bar.append(bi);nm.append(nb,bar);
-    const cnt=span('gct'+(k===list.length?' all':''),k+' / '+list.length);const chev=span('gcv');chev.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
-    h.append(im,nm,cnt,chev);if(hasNew)h.append(span('gdot'));c.append(h);
-    const body=document.createElement('div');body.className='gal';c.append(body);
-    const open=gOpen.has(g.id)||hasNew;c.classList.toggle('open',open);h.setAttribute('aria-expanded',open);
-    h.addEventListener('click',()=>{const o=!c.classList.contains('open');c.classList.toggle('open',o);h.setAttribute('aria-expanded',o);o?gOpen.add(g.id):gOpen.delete(g.id)});
-    for(const a of list){const on=!!mine[a[0]],r=document.createElement('div');r.className='ga'+(on?' on':'');
-      r.innerHTML='<span class="gi">'+TROPHY+'</span><span><b></b><small></small></span>';
-      r.querySelector('b').textContent=a[1];r.querySelector('small').textContent=on?a[2]+' · '+ago(mine[a[0]].t):a[2];
-      if(on&&!mine[a[0]].seen)r.append(span('anew','NEW'));
-      r.setAttribute('aria-label',g.name+': '+a[1]+(on?', unlocked':', locked')+'. '+a[2]);body.append(r)}
-    box.append(c)}
-  $('gachCount').innerHTML='<b>'+n+'</b> of '+tot+' unlocked';
-  if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){
-    const g2=jget('gc.gach',{});for(const gg in g2)for(const k in g2[gg])g2[gg][k].seen=1;jset('gc.gach',g2);io.disconnect()}},{threshold:.15});io.observe(box)}
+/* console achievements: record any that are now earned. Returns the new ones */
+function checkConsoleAch(){
+  const st=stats(),got=jget('gc.ach',{}),fresh=[];
+  for(const a of ACHS){const [v,goal]=a.p(st);if(v>=goal&&!got[a.id]){got[a.id]={t:Date.now(),seen:0};fresh.push(a)}}
+  if(fresh.length)jset('gc.ach',got);return fresh;
 }
+let achOpen=false;
 function renderAch(){
-  const st=stats(),got=jget('gc.ach',{}),box=$('achs');let n=0,fresh=false;box.textContent='';
-  for(const a of ACHS){
-    const [v,goal]=a.p(st),done=v>=goal;
-    if(done&&!got[a.id]){got[a.id]={t:Date.now(),seen:0};fresh=true}
-    const on=!!got[a.id];if(on)n++;
-    const el=document.createElement('div');el.className='ach'+(on?' on':'');
-    el.innerHTML='<span class="aic">'+svg(a.ic)+'</span><span class="atx"><b></b><small></small></span>';
-    el.querySelector('b').textContent=a.n;
-    el.querySelector('small').textContent=on?a.d+' · '+ago(got[a.id].t):a.d;
-    if(!on&&goal>1){const pb=document.createElement('span');pb.className='apb';const tr=document.createElement('span'),fi=document.createElement('i');
-      fi.style.width=Math.round(Math.min(v,goal)/goal*100)+'%';tr.append(fi);pb.append(tr,document.createTextNode(Math.min(v,goal)+' / '+goal));el.querySelector('.atx').append(pb)}
-    if(on&&!got[a.id].seen)el.append(span('anew','NEW'));
-    el.setAttribute('aria-label',a.n+(on?', unlocked':', locked')+'. '+a.d);
+  checkConsoleAch();
+  const st=stats(),got=jget('gc.ach',{}),ggot=jget('gc.gach',{}),A=window.GC_GACH||{},box=$('achs'),items=[];box.textContent='';
+  for(const a of ACHS){const [v,goal]=a.p(st),r=got[a.id];
+    items.push({on:!!r,t:r?r.t:0,seen:r?r.seen:1,name:a.n,desc:a.d,icon:svg(a.ic),v,goal,game:null})}
+  for(const g of GAMES){const list=A[g.id];if(!list)continue;const mine=ggot[g.id]||{};
+    for(const a of list){const r=mine[a[0]];items.push({on:!!r,t:r?r.t:0,seen:r?r.seen:1,name:a[1],desc:a[2],icon:TROPHY,v:0,goal:1,game:g})}}
+  /* earned ones first, newest first; then the rest */
+  const order=items.map((x,i)=>[x,i]).sort((p,q)=>(q[0].on-p[0].on)||(q[0].t-p[0].t)||(p[1]-q[1])).map(p=>p[0]);
+  const SHOW=12,many=order.length>SHOW;
+  order.forEach((x,i)=>{
+    const el=document.createElement('div');el.className='ach'+(x.on?' on':'')+(many&&!achOpen&&i>=SHOW?' extra':'');
+    el.innerHTML='<span class="aic">'+x.icon+'</span><span class="atx"><b></b><small></small></span>';
+    if(x.game){const tg=span('agame',x.game.name);tg.style.setProperty('--gc',light(x.game.fg)?x.game.fg:x.game.ac);el.querySelector('.atx').prepend(tg)}
+    el.querySelector('b').textContent=x.name;
+    el.querySelector('small').textContent=x.on?x.desc+' · '+ago(x.t):x.desc;
+    if(!x.on&&x.goal>1){const pb=document.createElement('span');pb.className='apb';const tr=document.createElement('span'),fi=document.createElement('i');
+      fi.style.width=Math.round(Math.min(x.v,x.goal)/x.goal*100)+'%';tr.append(fi);pb.append(tr,document.createTextNode(Math.min(x.v,x.goal)+' / '+x.goal));el.querySelector('.atx').append(pb)}
+    if(x.on&&!x.seen)el.append(span('anew','NEW'));
+    el.setAttribute('aria-label',(x.game?x.game.name+': ':'')+x.name+(x.on?', unlocked':', locked')+'. '+x.desc);
     box.append(el);
-  }
-  jset('gc.ach',got);
+  });
+  const btn=$('achAll');btn.hidden=!many;btn.textContent=achOpen?'Show less':'Show all '+order.length+' achievements';
   $('achCount').innerHTML='<b>'+achGot()+'</b> of '+achAll()+' unlocked';
-  renderAch.fresh=fresh;
   /* NEW tags stay until you have scrolled down and seen them */
   if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){
-    const g2=jget('gc.ach',{});for(const k in g2)g2[k].seen=1;jset('gc.ach',g2);io.disconnect()}},{threshold:.4});io.observe(box)}
+    const g1=jget('gc.ach',{});for(const k in g1)g1[k].seen=1;jset('gc.ach',g1);
+    const g2=jget('gc.gach',{});for(const gg in g2)for(const k in g2[gg])g2[gg][k].seen=1;jset('gc.gach',g2);io.disconnect()}},{threshold:.2});io.observe(box)}
 }
+$('achAll').addEventListener('click',()=>{achOpen=!achOpen;renderAch();if(!achOpen)$('secAch').scrollIntoView({block:'start'})});
 function dayOf(str){const m=String(str).match(/(\d+)-(\d+)-(\d+)/);return m?new Date(+m[1],m[2]-1,+m[3]):new Date()}
 function fmtDay(str){return dayOf(str).toLocaleDateString([], {month:'short',day:'numeric'})}
 function tile(g,meta){
@@ -1480,11 +1452,12 @@ if(!jget('gc.codeAsked',0)){const w=setInterval(()=>{if(!introUp&&!busy&&$('help
 
 try{new Function($('mxach').textContent)()}catch(e){}
 const gFresh=window.GC_GACH_CHECK?GC_GACH_CHECK():[];
-renderAch();renderGach();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
+renderAch();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
 setInterval(renderDaily,60000);
 /* achievements earned since the last visit to the menu */
-{const cf=ACHS.filter(a=>{const g=jget('gc.ach',{})[a.id];return g&&!g.seen&&Date.now()-g.t<5000}).map(a=>a.n),all=cf.concat(gFresh.map(x=>x[1][1]));
-  if(all.length)setTimeout(()=>toastMsg(all.length===1?'Achievement unlocked: '+all[0]:all.length+' new achievements'),900)}
+{const all=gFresh.map(x=>x[1]);
+  if(all.length&&window.GC_ACH_POP){const list=all.length>3?all.slice(0,2).concat([['more','+'+(all.length-2)+' more achievements','Scroll down to Achievements to see them']]):all;
+    setTimeout(()=>GC_ACH_POP(list),900)}}
 for(const r of document.querySelectorAll('.row'))r.addEventListener('wheel',e=>{
   if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;const max=r.scrollWidth-r.clientWidth;
   if(max<=0||(e.deltaY>0&&r.scrollLeft>=max-1)||(e.deltaY<0&&r.scrollLeft<=0))return;
@@ -1505,6 +1478,7 @@ $('bootback').addEventListener('click',()=>{
 
 function launch(g,cart){
   if(busy)return;busy=true;countPlay(g.id);musicStop();
+  const newAch=checkConsoleAch().map(a=>[a.id,a.n,a.d]);
   if(cart)cart.classList.add('in');
   skin(boot,g);$('bootimg').src=art(g.id);$('bootname').textContent=g.name;
   setTimeout(()=>{boot.hidden=false},cart?260:0);
@@ -1522,7 +1496,7 @@ function launch(g,cart){
       if(lay)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';<\/script><script>'+lay+'<\/script>');
       /* in-game achievements: watch for them and pop a notification (phones and computers) */
       const ach=$('mxach')?$('mxach').textContent:'';
-      if(ach)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';<\/script><script>'+ach+'<\/script>');
+      if(ach)html=html.replace('<body>',()=>'<body><script>window.__mxGame='+JSON.stringify(g.id)+';window.__mxPending='+JSON.stringify(newAch).replace(/</g,'\\u003c')+';<\/script><script>'+ach+'<\/script>');
       clearInterval(clockTimer);
       window.__maxcade=1;
       /* swap this whole page for the game; the house button reloads to get back here */
@@ -1540,7 +1514,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-17-crate14';
+  var V='2026-10-17-crate15';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
