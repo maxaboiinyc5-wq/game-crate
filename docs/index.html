@@ -312,6 +312,7 @@ button{font:inherit;color:inherit}
 .hsheet{width:min(460px,100%);max-height:100%;overflow:auto;border-radius:18px;background:var(--deck);border:1px solid var(--seam);padding:22px;
   display:flex;flex-direction:column;gap:14px}
 .hsheet h2{margin:0;font:900 1.1rem var(--display);letter-spacing:.04em}
+.hsheet h3{margin:4px 0 -6px;font:700 .72rem var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--led)}
 .hsheet ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:#e9e4f2}
 .hsheet p{margin:0;color:var(--mute);font-size:.88rem}
 .hsheet form{display:flex;flex-direction:column;gap:14px;margin:0}
@@ -487,12 +488,26 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
 <div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT">
   <div class="hsheet">
     <h2 id="helpT">How Game Crate works</h2>
+    <h3>Playing</h3>
     <ul>
       <li>Tap a cartridge to see it, then tap it again or press Play.</li>
+      <li>Use the genre tabs at the top to filter, or Search to find a game by name.</li>
       <li>In a game, tap the house button on the right side to come back here. You can drag it out of the way.</li>
       <li class="kb">On a computer, the keyboard tab on the left side of each game lists its controls.</li>
     </ul>
-    <p>Saves stay on this console, on this device. Progress from the old separate game links does not carry over, so each game starts fresh here.</p>
+    <h3>Below the shelf</h3>
+    <ul>
+      <li>Scroll down for achievements, picks for you, favorites, the daily challenge, your stats and more. The buttons under the genres jump straight to each one.</li>
+      <li>Tap the heart next to Play to add a game to Favorites.</li>
+      <li>Play the daily challenge game before midnight to finish it. A new one shows up every day.</li>
+      <li>Earn achievements to unlock new menu colors in Themes.</li>
+    </ul>
+    <h3>Saving and reset</h3>
+    <ul>
+      <li>Your progress saves on this device by itself, even when you refresh or close the app.</li>
+      <li>Only Settings (the gear) can reset it. If you set a reset code, nobody can reset without it. Your phone can make the code and save it in the Passwords app.</li>
+      <li>Saves inside each game stay separate and are never touched by a reset.</li>
+    </ul>
     <button id="helpX" type="button">Got it</button>
   </div>
 </div>
@@ -910,7 +925,7 @@ $('q').addEventListener('input',apply);
 $('q').addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();if(e.key==='Enter'&&cur){e.preventDefault();$('q').blur()}});
 
 /* ---- help ---- */
-$('helpBtn').addEventListener('click',()=>{$('help').hidden=false;$('helpX').focus()});
+$('helpBtn').addEventListener('click',()=>{$('help').hidden=false;$('helpX').focus({preventScroll:true});$('help').querySelector('.hsheet').scrollTop=0});
 $('helpX').addEventListener('click',()=>{$('help').hidden=true});
 $('help').addEventListener('click',e=>{if(e.target.id==='help')$('help').hidden=true});
 
@@ -1323,7 +1338,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16-crate9';
+  var V='2026-10-16-crate10';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
