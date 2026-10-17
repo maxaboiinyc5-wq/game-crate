@@ -51,8 +51,10 @@ button{font:inherit;color:inherit}
   background-image:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 
 /* ---- app frame ---- */
-.app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;
-  padding:calc(env(safe-area-inset-top,0px) + 14px) 0 calc(env(safe-area-inset-bottom,0px) + 10px);overflow:hidden}
+.app{position:relative;z-index:1;height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 0 calc(env(safe-area-inset-bottom,0px) + 10px)}
+/* the first screen: menu, hero and shelf. The next section's title peeks in at the bottom so you know to scroll */
+.screen{min-height:calc(100% - 46px);display:flex;flex-direction:column}
 .pad{padding-inline:max(16px,3.2vw)}
 
 /* top bar */
@@ -162,6 +164,46 @@ button{font:inherit;color:inherit}
 .legend{display:flex;justify-content:flex-end;gap:18px;font-size:.78rem;color:var(--mute)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 
+/* ---- below the shelf ---- */
+.more{position:relative;display:flex;flex-direction:column;gap:40px;padding:28px 0 40px;margin-top:14px;
+  background:linear-gradient(180deg,rgba(15,12,29,0) 0,rgba(15,12,29,.9) 40px,var(--ground) 140px)}
+.sech{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:14px}
+.sech h2{margin:0;font:900 clamp(1.1rem,2.2vw,1.4rem) var(--display);letter-spacing:.01em}
+.sech p{flex-basis:100%;margin:0;color:var(--mute);font-size:.88rem}
+.sn{margin-left:auto;color:var(--mute);font-size:.85rem;font-variant-numeric:tabular-nums}
+.sn b{color:var(--led);font-weight:700}
+.achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.ach{position:relative;display:flex;align-items:center;gap:12px;min-width:0;padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.ach.on{background:rgba(255,176,32,.07);border-color:rgba(255,176,32,.28)}
+.aic{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:#26213f;color:#6f6893}
+.aic svg{width:24px;height:24px}
+.ach.on .aic{background:linear-gradient(150deg,#ffd468,#ff9f1c);color:#2a1a02;box-shadow:0 6px 18px rgba(255,176,32,.28)}
+.atx{min-width:0;flex:1}
+.atx b{display:block;font-weight:700;line-height:1.25}
+.ach:not(.on) .atx b{color:#cfc9e4}
+.atx small{display:block;margin-top:2px;color:var(--mute);font-size:.8rem;line-height:1.3}
+.apb{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:.72rem;color:var(--mute);font-variant-numeric:tabular-nums}
+.apb span{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.apb i{display:block;height:100%;border-radius:2px;background:var(--led)}
+.anew{position:absolute;top:-7px;right:10px;padding:3px 7px;border-radius:4px;background:var(--led);color:var(--ground);font:900 .55rem var(--display);letter-spacing:.08em}
+.row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;
+  padding:4px max(16px,3.2vw) 10px;scroll-padding-inline:max(16px,3.2vw)}
+.row::-webkit-scrollbar{display:none}
+.tile{flex:none;width:clamp(230px,23vw,300px);scroll-snap-align:start;border:0;padding:0;background:none;color:inherit;text-align:left;cursor:pointer}
+.tim{position:relative;display:block;aspect-ratio:16/10;border-radius:12px;overflow:hidden;background:var(--bgs);
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 24px rgba(0,0,0,.45);transition:transform .25s var(--ease),box-shadow .25s}
+.tim img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;display:block}
+.tim::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,6,16,.85) 0%,rgba(8,6,16,0) 55%)}
+.tile:hover .tim{transform:translateY(-3px);box-shadow:0 0 0 2px var(--ac),0 14px 30px rgba(0,0,0,.5)}
+.tile:focus-visible{outline:none}.tile:focus-visible .tim{box-shadow:0 0 0 3px #fff}
+.tnm{position:absolute;left:12px;right:12px;bottom:10px;z-index:1;font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);
+  text-transform:var(--tt,none);font-size:calc(1.25rem * var(--sz,1));line-height:1.05;color:var(--lfg);text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.tkd{position:absolute;left:10px;top:10px;z-index:1;padding:3px 8px;border-radius:999px;background:var(--ac);color:var(--ci);font-weight:700;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
+.tmeta{display:block;margin-top:9px;font-size:.85rem;color:var(--mute);line-height:1.35}
+.tmeta b{color:var(--text);font-weight:600}
+.empty{margin:0;padding:18px;border-radius:14px;border:1px dashed rgba(255,255,255,.14);color:var(--mute);font-size:.92rem}
+
 /* ---- title screen: a wall of every game drifting behind the logo ---- */
 #intro{position:fixed;inset:0;z-index:30;overflow:hidden;background:#07050f;cursor:pointer;transition:opacity .6s var(--ease)}
 #intro.bye{opacity:0;pointer-events:none}
@@ -229,7 +271,7 @@ button{font:inherit;color:inherit}
 @media (max-height:760px) and (min-width:700px){.app{--cw:128px}.hname{font-size:calc(clamp(2.2rem,5.4vw,4.2rem) * var(--hsz,1))}}
 @media (hover:none),(pointer:coarse){.legend,.kb{display:none}}
 @media (max-width:699px){
-  .app{--cw:clamp(112px,33vw,136px);padding-top:calc(env(safe-area-inset-top,0px) + 10px);overflow-y:auto}
+  .app{--cw:clamp(112px,33vw,136px);padding-top:calc(env(safe-area-inset-top,0px) + 10px)}
   .top{gap:10px}
   .logo{font-size:1rem}
   #tabs{order:5;flex-basis:100%;border-radius:14px}
@@ -251,6 +293,11 @@ button{font:inherit;color:inherit}
   #play{height:44px;flex:1;justify-content:center;max-width:260px;font-size:.92rem}
   .hint{display:none}
   .rack{gap:12px}
+  .more{gap:32px}
+  .achs{grid-template-columns:1fr 1fr;gap:10px}
+  .ach{flex-direction:column;align-items:flex-start;gap:9px;padding:12px}
+  .aic{width:40px;height:40px;border-radius:11px}.aic svg{width:21px;height:21px}
+  .tile{width:68vw;max-width:260px}
 }
 @media (prefers-reduced-motion:reduce){
   .wrow,.istart{animation:none}.wall{animation:none;opacity:.5}.icart{animation:none;transform:none}.isub,.istart{opacity:1}
@@ -263,6 +310,7 @@ button{font:inherit;color:inherit}
 <div class="bg" aria-hidden="true"><img class="bgimg" id="bgA" alt=""><img class="bgimg" id="bgB" alt=""><div class="tint"></div><div class="grain"></div></div>
 
 <div class="app" id="app">
+ <div class="screen">
   <header class="top pad">
     <div class="brand"><span class="led" aria-hidden="true"></span><span class="logo">GAME CRATE</span></div>
     <nav id="tabs" role="tablist" aria-label="Filter games"></nav>
@@ -295,6 +343,30 @@ button{font:inherit;color:inherit}
     <p id="none" hidden>No games match. Try another word or pick All.</p>
     <div class="legend pad"><span><kbd>&larr;</kbd><kbd>&rarr;</kbd> Choose</span><span><kbd>Enter</kbd> Play</span><span><kbd>Q</kbd><kbd>E</kbd> Filter</span><span><kbd>/</kbd> Search</span></div>
   </section>
+ </div>
+
+ <div class="more" id="more">
+  <section class="sec" aria-labelledby="hAch">
+    <div class="sech pad"><h2 id="hAch">Achievements</h2><span class="sn" id="achCount"></span><p>Earned by playing games on this console.</p></div>
+    <div class="achs pad" id="achs"></div>
+  </section>
+  <section class="sec" aria-labelledby="hLike">
+    <div class="sech pad"><h2 id="hLike">Stuff you might like</h2><p>Games you have not played much that match the ones you play most.</p></div>
+    <div class="row" id="rowLike"></div>
+  </section>
+  <section class="sec" aria-labelledby="hRecent">
+    <div class="sech pad"><h2 id="hRecent">Recently played</h2><p>Your last 3 games.</p></div>
+    <div class="row" id="rowRecent"></div>
+  </section>
+  <section class="sec" aria-labelledby="hNew">
+    <div class="sech pad"><h2 id="hNew">New games</h2><p>Added in the last week.</p></div>
+    <div class="row" id="rowNew"></div>
+  </section>
+  <section class="sec" aria-labelledby="hUpd">
+    <div class="sech pad"><h2 id="hUpd">Recently updated</h2><p>Games that got new stuff in the last week.</p></div>
+    <div class="row" id="rowUpd"></div>
+  </section>
+ </div>
 </div>
 
 <div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT">
@@ -586,7 +658,15 @@ let introUp=false;
 /* ---- how much each game has been played, kept on this device ---- */
 const PLAYS='gc.plays';
 function plays(){try{return JSON.parse(localStorage.getItem(PLAYS)||'{}')||{}}catch(e){return{}}}
-function countPlay(id){const p=plays(),r=p[id]||{n:0,t:0};r.n++;r.t=Date.now();p[id]=r;try{localStorage.setItem(PLAYS,JSON.stringify(p))}catch(e){}}
+function countPlay(id){const p=plays(),r=p[id]||{n:0,t:0};r.n++;r.t=Date.now();p[id]=r;try{localStorage.setItem(PLAYS,JSON.stringify(p))}catch(e){}
+  /* facts some achievements need: what day you played, late-night play, playing a game while it is NEW */
+  const now=new Date(),day=Math.round(new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime()/864e5);
+  const ds=jget('gc.days',[]);if(!ds.includes(day)){ds.push(day);jset('gc.days',ds.slice(-60))}
+  const ev=jget('gc.ev',{}),g=GAMES.find(x=>x.id===id);
+  if(now.getHours()<5)ev.owl=1;if(g&&tagsOf(g).isNew)ev.fresh=1;jset('gc.ev',ev);
+}
+function jget(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}}
+function jset(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function ago(t){
   const d=Math.floor((new Date().setHours(0,0,0,0)-new Date(t).setHours(0,0,0,0))/864e5);
   return d<=0?'today':d===1?'yesterday':d<7?d+' days ago':new Date(t).toLocaleDateString([], {month:'short',day:'numeric'});
@@ -731,7 +811,8 @@ addEventListener('keydown',e=>{
   else if(k==='/'){e.preventDefault();openSearch()}
 });
 /* mouse wheel scrolls the rack sideways */
-rack.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){rack.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
+rack.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;const max=rack.scrollWidth-rack.clientWidth;
+  if((e.deltaY>0&&rack.scrollLeft>=max-1)||(e.deltaY<0&&rack.scrollLeft<=0))return;rack.scrollLeft+=e.deltaY;e.preventDefault()},{passive:false});
 
 /* ---- main menu music: "Shelf Life", an original laid-back tune (electric-piano chords, boom-bap drums, plucked lead)
    played by a tiny synth in the browser. No sound files. ---- */
@@ -825,6 +906,112 @@ function tick(){
 }
 tick();clockTimer=setInterval(tick,15000);
 
+/* ---- below the shelf: achievements and game rows ---- */
+const IC={
+ play:'<path fill="currentColor" d="M8 5v14l11-7z"/>',
+ grid:'<g fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></g>',
+ stack:'<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="7" y="3" width="12" height="15" rx="2"/><path d="M5 6v13a2 2 0 0 0 2 2h10"/></g>',
+ crown:'<path fill="currentColor" d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+ shuffle:'<path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M3 7h3.5L17 17h4M3 17h3.5l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/>',
+ cube:'<path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5"/>',
+ heart:'<path fill="currentColor" d="M12 20.5S4 15.6 4 9.8A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 8 2.4c0 5.8-8 10.7-8 10.7z"/>',
+ star:'<path fill="currentColor" d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9z"/>',
+ flame:'<path fill="currentColor" d="M12 2.5c.8 3.4 5.5 5.4 5.5 11a5.5 5.5 0 0 1-11 0c0-2.8 1.6-4.4 2.7-5.5.3 2.1 1.4 3.2 2.6 3.2-.3-3.2-.8-5.7.2-8.7z"/>',
+ cal:'<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/></g><path fill="currentColor" d="M8 13h3v3H8z"/>',
+ spark:'<path fill="currentColor" d="M11 3l1.9 5.6L18.5 10.5l-5.6 1.9L11 18l-1.9-5.6L3.5 10.5l5.6-1.9zM18.5 14.5l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9z"/>',
+ moon:'<path fill="currentColor" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/>'};
+const ACHS=[
+ {id:'start',n:'Press Start',d:'Play your first game',ic:'play',p:s=>[s.uniq,1]},
+ {id:'explore',n:'Shelf Explorer',d:'Play 5 different games',ic:'grid',p:s=>[s.uniq,5]},
+ {id:'collect',n:'Collector',d:'Play 10 different games',ic:'stack',p:s=>[s.uniq,10]},
+ {id:'all',n:'Completionist',d:'Play every game on the shelf',ic:'crown',p:s=>[s.uniq,GAMES.length]},
+ {id:'genres',n:'Genre Hopper',d:'Play an Arcade, Action, Sim, Sports and Driving game',ic:'shuffle',p:s=>[s.cats,5]},
+ {id:'dims',n:'Both Worlds',d:'Play a 2D game and a 3D game',ic:'cube',p:s=>[s.dims,2]},
+ {id:'regular',n:'Regular',d:'Play one game 10 times',ic:'heart',p:s=>[s.top,10]},
+ {id:'superfan',n:'Superfan',d:'Play one game 25 times',ic:'star',p:s=>[s.top,25]},
+ {id:'marathon',n:'Marathon',d:'Play 50 times in all',ic:'flame',p:s=>[s.total,50]},
+ {id:'streak',n:'On a Roll',d:'Play 3 days in a row',ic:'cal',p:s=>[s.streak,3]},
+ {id:'fresh',n:'Fresh Off the Line',d:'Play a game while it is still marked NEW',ic:'spark',p:s=>[s.ev.fresh?1:0,1]},
+ {id:'owl',n:'Night Owl',d:'Play a game between midnight and 5 AM',ic:'moon',p:s=>[s.ev.owl?1:0,1]}];
+function stats(){
+  const P=plays(),ids=GAMES.map(g=>g.id).filter(id=>P[id]&&P[id].n>0);
+  const days=jget('gc.days',[]).slice().sort((a,b)=>a-b);let streak=days.length?1:0,run=1;
+  for(let i=1;i<days.length;i++){run=days[i]-days[i-1]===1?run+1:1;streak=Math.max(streak,run)}
+  return{uniq:ids.length,total:ids.reduce((a,id)=>a+P[id].n,0),top:Math.max(0,...ids.map(id=>P[id].n)),
+    cats:new Set(ids.map(id=>CATS[id])).size,dims:new Set(ids.map(id=>GAMES.find(g=>g.id===id).kind.slice(0,2)).filter(k=>k==='2D'||k==='3D')).size,streak,ev:jget('gc.ev',{})};
+}
+function svg(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>'}
+function renderAch(){
+  const st=stats(),got=jget('gc.ach',{}),box=$('achs');let n=0,fresh=false;box.textContent='';
+  for(const a of ACHS){
+    const [v,goal]=a.p(st),done=v>=goal;
+    if(done&&!got[a.id]){got[a.id]={t:Date.now(),seen:0};fresh=true}
+    const on=!!got[a.id];if(on)n++;
+    const el=document.createElement('div');el.className='ach'+(on?' on':'');
+    el.innerHTML='<span class="aic">'+svg(a.ic)+'</span><span class="atx"><b></b><small></small></span>';
+    el.querySelector('b').textContent=a.n;
+    el.querySelector('small').textContent=on?a.d+' · '+ago(got[a.id].t):a.d;
+    if(!on&&goal>1){const pb=document.createElement('span');pb.className='apb';const tr=document.createElement('span'),fi=document.createElement('i');
+      fi.style.width=Math.round(Math.min(v,goal)/goal*100)+'%';tr.append(fi);pb.append(tr,document.createTextNode(Math.min(v,goal)+' / '+goal));el.querySelector('.atx').append(pb)}
+    if(on&&!got[a.id].seen)el.append(span('anew','NEW'));
+    el.setAttribute('aria-label',a.n+(on?', unlocked':', locked')+'. '+a.d);
+    box.append(el);
+  }
+  jset('gc.ach',got);
+  $('achCount').innerHTML='<b>'+n+'</b> of '+ACHS.length+' unlocked';
+  /* NEW tags stay until you have scrolled down and seen them */
+  if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){
+    const g2=jget('gc.ach',{});for(const k in g2)g2[k].seen=1;jset('gc.ach',g2);io.disconnect()}},{threshold:.4});io.observe(box)}
+}
+function dayOf(str){const m=String(str).match(/(\d+)-(\d+)-(\d+)/);return m?new Date(+m[1],m[2]-1,+m[3]):new Date()}
+function fmtDay(str){return dayOf(str).toLocaleDateString([], {month:'short',day:'numeric'})}
+function tile(g,meta){
+  const b=document.createElement('button');b.type='button';b.className='tile';skin(b,g);
+  const im=span('tim'),img=document.createElement('img');img.src=art(g.id);img.alt='';img.loading='lazy';img.decoding='async';
+  im.append(img,span('tkd',g.kind),span('tnm',g.name));
+  const m=span('tmeta');m.innerHTML=meta;b.append(im,m);
+  b.setAttribute('aria-label',g.name+'. '+m.textContent);
+  b.addEventListener('click',()=>{
+    if(carts[g.id].hidden){$('q').value='';$('searchBar').hidden=true;setFilter('All')}
+    select(g,true);$('app').scrollTo({top:0,behavior:'smooth'});
+    setTimeout(()=>carts[g.id].focus({preventScroll:true}),400);
+  });
+  return b;
+}
+function fillRow(id,items,emptyText){
+  const r=$(id);r.textContent='';
+  if(!items.length){const p=document.createElement('p');p.className='empty';p.textContent=emptyText;r.append(p);return}
+  for(const [g,meta] of items)r.append(tile(g,meta));
+}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderRows(){
+  const P=plays(),played=GAMES.filter(g=>P[g.id]&&P[g.id].n>0),sub=g=>(g.kind.split('·')[1]||g.kind).trim();
+  /* stuff you might like: games you have played under 3 times, scored by how much they share with the games you do play */
+  const top=Math.max(1,...played.map(g=>P[g.id].n)),likes=[];
+  for(const g of GAMES){
+    const n=(P[g.id]||{}).n||0;if(n>=3||n>=top/2&&n>0)continue;
+    let sc=0,best=null,bs=0;
+    for(const h of played){if(h.id===g.id)continue;
+      let w=0;if(CATS[h.id]===CATS[g.id])w+=2;if(h.kind.slice(0,2)===g.kind.slice(0,2))w+=1;if(sub(h)===sub(g))w+=2;
+      const s2=w*P[h.id].n;sc+=s2;if(s2>bs){bs=s2;best=h}}
+    if(best)likes.push({g,sc:sc/(1+n),best,n});
+  }
+  likes.sort((a,b)=>b.sc-a.sc);
+  fillRow('rowLike',likes.slice(0,6).map(x=>[x.g,'Because you play <b>'+esc(x.best.name)+'</b>'+(x.n?'':' · never played')]),
+    played.length?'You have tried everything that matches your style. Nice.':'Play a few games and picks for you show up here.');
+  fillRow('rowRecent',played.slice().sort((a,b)=>P[b.id].t-P[a.id].t).slice(0,3)
+    .map(g=>[g,'Played <b>'+ago(P[g.id].t)+'</b> · '+P[g.id].n+(P[g.id].n===1?' time':' times')]),'Nothing yet. Pick a cartridge and play.');
+  fillRow('rowNew',GAMES.filter(g=>tagsOf(g).isNew).sort((a,b)=>dayOf(DATES[b.id][0])-dayOf(DATES[a.id][0]))
+    .map(g=>[g,'Added <b>'+fmtDay(DATES[g.id][0])+'</b>']),'No new games this week.');
+  fillRow('rowUpd',GAMES.filter(g=>tagsOf(g).isUpd).sort((a,b)=>dayOf(DATES[b.id][1])-dayOf(DATES[a.id][1]))
+    .map(g=>[g,'Updated <b>'+fmtDay(DATES[g.id][1])+'</b>']),'No updates this week.');
+}
+renderAch();renderRows();
+for(const r of document.querySelectorAll('.row'))r.addEventListener('wheel',e=>{
+  if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;const max=r.scrollWidth-r.clientWidth;
+  if(max<=0||(e.deltaY>0&&r.scrollLeft>=max-1)||(e.deltaY<0&&r.scrollLeft<=0))return;
+  r.scrollLeft+=e.deltaY;e.preventDefault()},{passive:false});
+
 apply();
 select(GAMES.find(g=>g.id===last)||shown[0],false);
 {const c0=cur&&carts[cur.id];const go=()=>{if(c0)rack.scrollLeft=c0.offsetLeft-(rack.clientWidth-c0.offsetWidth)/2};go();requestAnimationFrame(go)}
@@ -872,7 +1059,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16-crate5';
+  var V='2026-10-16-crate6';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
