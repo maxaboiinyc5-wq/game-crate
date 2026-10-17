@@ -1983,8 +1983,8 @@ function Starfall(api,opt){
       while(evI<events.length&&events[evI][0]<=st){events[evI][1]();evI++}
       if(!boss&&st>sec.len&&enemies.filter(e=>!e.obstacle).length===0){boss=makeBoss(sec.boss);state='boss';banner='WARNING  '+boss.name;bannerT=3;api.music.play(SONGS.boss);AU.tone({f:300,to:200,d:1.2,type:'sawtooth',v:.05,lp:900})}
       // ship
-      if(ship.alive){const s=api.stick();ship.vx=smooth(ship.vx,s.x*24,9,dt);ship.vy=smooth(ship.vy,-s.y*20,9,dt);ship.x=clamp(ship.x+ship.vx*dt,-sec.bx,sec.bx);ship.y=clamp(ship.y+ship.vy*dt,BY0,BY1);
-        if(ship.roll<=0){let dir=0;if(act.pressed('rollL'))dir=-1;if(act.pressed('rollR'))dir=1;if(act.pressed('roll'))dir=s.x<-.2?-1:1;if(dir){ship.roll=.55;ship.rollDir=dir;AU.noise({d:.3,v:.07,f:800,to:2600,type:'bandpass',q:2})}}
+      if(ship.alive){const s=api.stick();ship.vx=smooth(ship.vx,-s.x*24,9,dt);ship.vy=smooth(ship.vy,-s.y*20,9,dt);ship.x=clamp(ship.x+ship.vx*dt,-sec.bx,sec.bx);ship.y=clamp(ship.y+ship.vy*dt,BY0,BY1);
+        if(ship.roll<=0){let dir=0;if(act.pressed('rollL'))dir=1;if(act.pressed('rollR'))dir=-1;if(act.pressed('roll'))dir=s.x<-.2?1:-1;if(dir){ship.roll=.55;ship.rollDir=dir;AU.noise({d:.3,v:.07,f:800,to:2600,type:'bandpass',q:2})}}
         if(ship.roll>0){ship.roll-=dt;ship.x=clamp(ship.x+ship.rollDir*16*dt,-sec.bx,sec.bx)}
         ship.fireCD-=dt;const firing=api.touch||act.held('fire');if(firing&&ship.fireCD<=0){ship.fireCD=ship.weapon>=4?.1:.13;fireLasers()}
         if(act.pressed('bomb'))useBomb();ship.inv-=dt}
