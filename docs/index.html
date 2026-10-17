@@ -85,8 +85,8 @@ button{font:inherit;color:inherit}
 #q::placeholder{color:var(--mute)}
 
 /* hero */
-.hero{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;padding-block:18px 22px;max-width:760px}
-.hx{display:flex;flex-direction:column;gap:12px;transition:opacity .22s var(--ease),transform .22s var(--ease)}
+.hero{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding-block:14px 16px;max-width:700px}
+.hx{display:flex;flex-direction:column;gap:10px;transition:opacity .22s var(--ease),transform .22s var(--ease)}
 .hx.out{opacity:0;transform:translateY(10px)}
 .tags{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
 .pill{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;font-weight:700;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
@@ -96,15 +96,15 @@ button{font:inherit;color:inherit}
 .pill.upd{background:var(--text);border-color:transparent;color:var(--ground);font-family:var(--display);font-weight:900;letter-spacing:.06em}
 .pill.last{border-color:var(--led);color:var(--led)}
 .hname{margin:0;font-family:var(--hfont);font-weight:var(--hfw,400);font-style:var(--hfs,normal);text-transform:var(--htt,none);
-  font-size:calc(clamp(2.5rem,6.6vw,5.4rem) * var(--hsz,1));line-height:.95;color:var(--hfg);text-wrap:balance;overflow-wrap:anywhere;
+  font-size:calc(clamp(2.3rem,5.4vw,4.4rem) * var(--hsz,1));line-height:.95;color:var(--hfg);text-wrap:balance;overflow-wrap:anywhere;
   text-shadow:0 4px 30px rgba(0,0,0,.45)}
-.hblurb{margin:0;font-size:1.08rem;line-height:1.45;color:#e9e4f2;max-width:46ch;text-wrap:pretty}
+.hblurb{margin:0;font-size:1.02rem;line-height:1.4;color:#e9e4f2;max-width:46ch;text-wrap:pretty}
 .hstat{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:0;font-size:.86rem;color:var(--mute);font-variant-numeric:tabular-nums}
 .hstat b{color:var(--text);font-weight:700}
 .hstat .meter{display:inline-block;width:90px;height:4px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden;vertical-align:middle}
 .hstat .meter i{display:block;height:100%;background:rgb(var(--acrgb))}
-.acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px}
-#play{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 30px 0 24px;border:0;border-radius:999px;cursor:pointer;
+.acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:2px}
+#play{display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 28px 0 22px;border:0;border-radius:999px;cursor:pointer;
   background:var(--led);color:#1a1205;font:900 1.02rem var(--display);letter-spacing:.04em;
   box-shadow:0 10px 30px rgba(255,176,32,.32),inset 0 -3px 0 rgba(0,0,0,.18);transition:transform .15s var(--ease),box-shadow .15s}
 #play svg{width:18px;height:18px}
@@ -114,41 +114,50 @@ button{font:inherit;color:inherit}
 .hint kbd,.legend kbd{display:inline-block;min-width:22px;padding:2px 6px;border-radius:5px;border:1px solid rgba(255,255,255,.22);
   background:rgba(255,255,255,.07);font:700 .72rem var(--body);color:var(--text);text-align:center}
 
-/* the rack */
-.rackwrap{flex:none;display:flex;flex-direction:column;gap:8px}
+/* the rack: cartridges standing in a slotted shelf */
+.rackwrap{position:relative;flex:none;display:flex;flex-direction:column;gap:6px}
 .rackhead{position:relative;z-index:3;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .rackhead h2{margin:0;font:700 .74rem var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
 #count{font-size:.82rem;color:var(--mute);font-variant-numeric:tabular-nums}
-.rack{display:flex;gap:16px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;
-  padding:22px max(16px,3.2vw) 16px;margin-top:-8px;scroll-padding-inline:max(16px,3.2vw);
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 max(16px,3.2vw),#000 calc(100% - 60px),transparent);
-          mask-image:linear-gradient(90deg,transparent 0,#000 max(16px,3.2vw),#000 calc(100% - 60px),transparent)}
+.rack{position:relative;z-index:2;display:flex;gap:14px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;
+  padding:20px max(16px,3.2vw) 18px;margin-top:-6px;scroll-padding-inline:max(16px,3.2vw);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 max(16px,3.2vw),#000 calc(100% - 50px),transparent);
+          mask-image:linear-gradient(90deg,transparent 0,#000 max(16px,3.2vw),#000 calc(100% - 50px),transparent)}
 .rack::-webkit-scrollbar{display:none}
+/* the shelf the cartridges sit in: a lit top edge, a slot, and the front face */
+.ledge{position:relative;z-index:1;height:30px;margin:-30px max(8px,1.6vw) 0;border-radius:6px 6px 10px 10px;
+  background:linear-gradient(180deg,#3a3360 0,#2a2447 3px,#0c0a17 4px,#0c0a17 9px,#2a2447 10px,#1d1934 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 14px 30px rgba(0,0,0,.55)}
+.ledge::after{content:"";position:absolute;left:0;right:0;top:-40px;height:40px;pointer-events:none;
+  background:radial-gradient(60% 100% at 50% 100%,rgba(var(--acrgb),.22),transparent 70%)}
 .cart{position:relative;flex:none;width:var(--cw);scroll-snap-align:start;border:0;padding:0;background:none;cursor:pointer;
-  transition:transform .28s var(--ease),filter .28s var(--ease);filter:brightness(.8) saturate(.92)}
-.cart:hover{filter:brightness(.95)}
-.shell{display:flex;flex-direction:column;padding:0 7px 9px;border-radius:11px 11px 6px 6px;background:var(--plastic);
-  box-shadow:inset 0 -6px 0 var(--plastic-lo),0 8px 18px rgba(0,0,0,.45)}
-.grip{height:13px;margin:0 14px;background:repeating-linear-gradient(90deg,var(--plastic-lo) 0 3px,transparent 3px 7px);
-  background-size:100% 7px;background-repeat:no-repeat;background-position:0 3px}
-.lbl{position:relative;display:block;aspect-ratio:3/4;border-radius:5px;overflow:hidden;background:var(--bg)}
-.lbl img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.lbl::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--bgs) 0%,transparent 58%)}
-.lname{position:absolute;left:8px;right:8px;bottom:8px;z-index:1;font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);
-  text-transform:var(--tt,none);font-size:calc(var(--cw) * .118 * var(--sz,1));line-height:1;color:var(--lfg);text-align:left;text-wrap:balance;
-  overflow-wrap:anywhere;text-shadow:0 2px 8px rgba(0,0,0,.5)}
-.dot{position:absolute;right:12px;bottom:3px;width:7px;height:7px;border-radius:50%;background:var(--plastic-lo)}
+  transition:transform .28s var(--ease),filter .28s var(--ease);filter:brightness(.78) saturate(.9)}
+.cart:hover{filter:brightness(.97)}
+.shell{position:relative;display:flex;flex-direction:column;padding:0 6px 10px;border-radius:12px 12px 5px 5px;
+  background:linear-gradient(90deg,#c9c2b4 0,var(--plastic) 8%,#e6e0d4 50%,var(--plastic) 92%,#c9c2b4 100%);
+  box-shadow:inset 0 -6px 0 var(--plastic-lo),inset 0 1px 0 rgba(255,255,255,.7),0 6px 0 #0b0916}
+.grip{height:14px;margin:0 16%;background:repeating-linear-gradient(90deg,var(--plastic-lo) 0 2px,transparent 2px 6px);
+  background-size:100% 6px;background-repeat:no-repeat;background-position:0 4px}
+/* the label: screenshot on top, the game's name in its own colors and font underneath */
+.lbl{position:relative;display:flex;flex-direction:column;aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:var(--bgs);
+  box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.shot{position:relative;flex:1;min-height:0;overflow:hidden}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.shot::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.28),transparent 40%)}
+.strip{flex:none;height:calc(var(--cw) * .36);display:flex;align-items:center;padding:0 8px;background:var(--bg);border-top:3px solid var(--ac)}
+.lname{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);
+  text-transform:var(--tt,none);font-size:calc(var(--cw) * .108 * var(--sz,1));line-height:1.02;color:var(--fg);text-align:left;overflow-wrap:anywhere}
+.dot{position:absolute;right:11px;bottom:2px;width:6px;height:6px;border-radius:50%;background:var(--plastic-lo)}
 .cart:focus-visible{outline:none}
 .cart:focus-visible .shell{outline:3px solid #fff;outline-offset:3px}
 .cart.sel:focus-visible .shell{outline:none}
 .cart.last .dot{background:var(--led);box-shadow:0 0 6px var(--led)}
-.cart.sel{transform:translateY(-14px) scale(1.06);filter:none;z-index:2}
-.cart.sel .shell{box-shadow:inset 0 -6px 0 var(--plastic-lo),0 0 0 3px rgba(var(--acrgb),.95),0 16px 40px rgba(var(--acrgb),.45)}
+.cart.sel{transform:translateY(-12px);filter:none;z-index:2}
+.cart.sel .shell{box-shadow:inset 0 -6px 0 var(--plastic-lo),inset 0 1px 0 rgba(255,255,255,.7),0 0 0 3px rgb(var(--acrgb)),0 18px 36px rgba(var(--acrgb),.4)}
 .cart.in{transform:translateY(60px) scale(.96);opacity:0;transition:transform .45s cubic-bezier(.5,0,.75,0),opacity .4s .1s}
-.badge{position:absolute;top:-9px;right:-6px;z-index:3;padding:4px 8px;border-radius:5px;background:var(--led);color:var(--ground);
-  font:900 .54rem var(--display);letter-spacing:.07em;box-shadow:0 2px 0 rgba(0,0,0,.4);transform:rotate(3deg);white-space:nowrap}
+.badge{position:absolute;top:5px;left:5px;z-index:1;padding:3px 6px;border-radius:3px;background:var(--led);color:var(--ground);
+  font:900 calc(var(--cw) * .052) var(--display);letter-spacing:.06em;line-height:1.1;box-shadow:0 2px 6px rgba(0,0,0,.4);white-space:nowrap}
 .badge.upd{background:var(--text)}
-.badge.both{left:-6px;right:-6px;text-align:center;letter-spacing:.03em;transform:rotate(-1.5deg)}
 #none{margin:0;padding:10px max(16px,3.2vw) 30px;color:var(--mute)}
 .legend{display:flex;justify-content:flex-end;gap:18px;font-size:.78rem;color:var(--mute)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -220,7 +229,7 @@ button{font:inherit;color:inherit}
 @media (max-height:760px) and (min-width:700px){.app{--cw:128px}.hname{font-size:calc(clamp(2.2rem,5.4vw,4.2rem) * var(--hsz,1))}}
 @media (hover:none),(pointer:coarse){.legend,.kb{display:none}}
 @media (max-width:699px){
-  .app{--cw:112px;padding-top:calc(env(safe-area-inset-top,0px) + 10px);overflow-y:auto}
+  .app{--cw:clamp(112px,33vw,136px);padding-top:calc(env(safe-area-inset-top,0px) + 10px);overflow-y:auto}
   .top{gap:10px}
   .logo{font-size:1rem}
   #tabs{order:5;flex-basis:100%;border-radius:14px}
@@ -231,9 +240,16 @@ button{font:inherit;color:inherit}
   .tint{background:
     radial-gradient(120% 60% at 20% 75%,rgba(var(--acrgb),.32),transparent 60%),
     linear-gradient(180deg,rgba(15,12,29,.88) 0%,rgba(15,12,29,.15) 22%,rgba(15,12,29,.2) 32%,rgba(15,12,29,.92) 52%,var(--ground) 62%)}
-  .hero{padding-block:16px 14px;justify-content:flex-end;min-height:330px}
-  .hblurb{font-size:.98rem}
-  #play{height:50px;flex:1;justify-content:center;max-width:320px}
+  .hero{padding-block:10px 8px;justify-content:flex-end;min-height:250px;gap:8px}
+  .hx{gap:7px}
+  .tags{gap:5px}
+  .pill{height:22px;padding:0 8px;font-size:.6rem}
+  .hname{font-size:calc(clamp(2rem,9vw,2.6rem) * var(--hsz,1))}
+  .hblurb{font-size:.9rem;line-height:1.35;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .hstat{font-size:.8rem;gap:4px 12px}
+  .hstat .meter{width:60px}
+  #play{height:44px;flex:1;justify-content:center;max-width:260px;font-size:.92rem}
+  .hint{display:none}
   .rack{gap:12px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -275,6 +291,7 @@ button{font:inherit;color:inherit}
   <section class="rackwrap" aria-label="Cartridges">
     <div class="rackhead pad"><h2 id="rackTitle">All games</h2><span id="count"></span></div>
     <div class="rack" id="rack" role="listbox" aria-label="Games"></div>
+    <div class="ledge" aria-hidden="true"></div>
     <p id="none" hidden>No games match. Try another word or pick All.</p>
     <div class="legend pad"><span><kbd>&larr;</kbd><kbd>&rarr;</kbd> Choose</span><span><kbd>Enter</kbd> Play</span><span><kbd>Q</kbd><kbd>E</kbd> Filter</span><span><kbd>/</kbd> Search</span></div>
   </section>
@@ -601,15 +618,14 @@ for(const g of GAMES){
   skin(b,g);
   const shell=span('shell'),lbl=span('lbl'),img=document.createElement('img');
   img.src=thumb(g.id);img.alt='';img.loading='lazy';img.decoding='async';
-  lbl.append(img,span('lname',g.name));
+  const shot=span('shot'),strip=span('strip');shot.append(img);strip.append(span('lname',g.name));lbl.append(shot,strip);
   const grip=span('grip');grip.setAttribute('aria-hidden','true');
   shell.append(grip,lbl);b.append(shell,span('dot'));
   const {isNew,isUpd}=tagsOf(g),tags=[];
   if(isNew)tags.push('new');
   if(isUpd)tags.push('recently updated');
-  if(isNew&&isUpd)b.append(span('badge both','NEW · RECENTLY UPDATED'));
-  else if(isNew)b.append(span('badge','NEW'));
-  else if(isUpd)b.append(span('badge upd','RECENTLY UPDATED'));
+  if(isNew)lbl.append(span('badge','NEW'));
+  else if(isUpd)lbl.append(span('badge upd','UPDATED'));
   b.setAttribute('aria-label',g.name+(g.id===last?', last played':'')+(tags.length?', '+tags.join(', '):''));
   b.addEventListener('click',()=>{if(cur===g)launch(g,b);else select(g,true)});
   rack.appendChild(b);carts[g.id]=b;
@@ -646,7 +662,7 @@ function select(g,user){
   if(!g)return;const first=!cur;cur=g;
   for(const id in carts){const c=carts[id];const on=id===g.id;c.classList.toggle('sel',on);c.setAttribute('aria-selected',on)}
   const c=carts[g.id];
-  if(user||first)c.scrollIntoView({behavior:first?'auto':'smooth',block:'nearest',inline:'center'});
+  if(user||first){const go=()=>rack.scrollTo({left:c.offsetLeft-(rack.clientWidth-c.offsetWidth)/2,behavior:first?'auto':'smooth'});go();if(first)requestAnimationFrame(go)}
   /* room light */
   document.documentElement.style.setProperty('--acrgb',rgb(g.ac).join(','));
   /* backdrop crossfade */
@@ -670,13 +686,12 @@ function fill(g){
   const {isNew,isUpd}=tagsOf(g);
   if(isNew)T.append(span('pill new','NEW'));
   if(isUpd)T.append(span('pill upd','RECENTLY UPDATED'));
-  if(g.id===last)T.append(span('pill last','Last played'));
   const P=plays(),r=P[g.id],most=Math.max(1,...Object.values(P).map(x=>x.n||0));
   const st=$('hStat');st.textContent='';
   if(r&&r.n){
     const a=document.createElement('span');a.innerHTML='Played <b></b> '+(r.n===1?'time':'times');a.querySelector('b').textContent=r.n;
     const m=document.createElement('span');m.className='meter';m.title='Compared with your most played game';const mi=document.createElement('i');mi.style.width=Math.round(r.n/most*100)+'%';m.append(mi);
-    st.append(a,m,span('','Last played '+ago(r.t)));
+    st.append(a,m,span('',ago(r.t)[0].toUpperCase()+ago(r.t).slice(1)));
   }else st.append(span('','Never played yet'));
   $('playTx').textContent=g.id===last?'Continue':'Play';
   $('play').setAttribute('aria-label',(g.id===last?'Continue ':'Play ')+g.name);
@@ -811,6 +826,7 @@ tick();clockTimer=setInterval(tick,15000);
 
 apply();
 select(GAMES.find(g=>g.id===last)||shown[0],false);
+{const c0=cur&&carts[cur.id];const go=()=>{if(c0)rack.scrollLeft=c0.offsetLeft-(rack.clientWidth-c0.offsetWidth)/2};go();requestAnimationFrame(go)}
 
 function fail(msg){
   busy=false;
@@ -855,7 +871,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16-crate2';
+  var V='2026-10-16-crate3';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
