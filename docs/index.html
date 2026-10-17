@@ -23,6 +23,7 @@
   --text:#f6f2ea;
   --mute:#a9a3c4;
   --led:#ffb020;         /* power light, focus, play */
+  --ledrgb:255,176,32;   /* same as --led, for glows; themes change both */
   --acrgb:255,176,32;    /* selected game's accent, set from script */
   --display:"Unbounded","Arial Black",Impact,sans-serif;
   --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -80,6 +81,18 @@ button{font:inherit;color:inherit}
 #mus[aria-pressed="false"]{color:var(--mute)}
 #mus[aria-pressed="true"] svg{color:var(--led)}
 
+/* section shortcuts under the genre tabs */
+#jump{order:6;flex-basis:100%;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;min-width:0;
+  margin-inline:calc(-1 * max(16px,3.2vw));padding:2px max(16px,3.2vw)}
+#jump::-webkit-scrollbar{display:none}
+.jb{flex:none;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:999px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.14);background:rgba(15,12,29,.5);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  color:#ddd8ee;font-weight:600;font-size:.8rem;white-space:nowrap;transition:border-color .2s,color .2s}
+.jb:hover{border-color:var(--led);color:var(--text)}
+.jb b{font-weight:700;font-size:.7rem;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text);font-variant-numeric:tabular-nums}
+.jb b.hot{background:var(--led);color:var(--ground)}
+.jb i{width:7px;height:7px;border-radius:50%;background:var(--led);box-shadow:0 0 8px var(--led)}
+
 /* search */
 #searchBar{display:flex;align-items:center;gap:8px;flex-basis:100%}
 #q{flex:1;min-width:0;height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(15,12,29,.75);
@@ -108,11 +121,18 @@ button{font:inherit;color:inherit}
 .acts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:2px}
 #play{display:inline-flex;align-items:center;gap:10px;height:50px;padding:0 28px 0 22px;border:0;border-radius:999px;cursor:pointer;
   background:var(--led);color:#1a1205;font:900 1.02rem var(--display);letter-spacing:.04em;
-  box-shadow:0 10px 30px rgba(255,176,32,.32),inset 0 -3px 0 rgba(0,0,0,.18);transition:transform .15s var(--ease),box-shadow .15s}
+  box-shadow:0 10px 30px rgba(var(--ledrgb),.32),inset 0 -3px 0 rgba(0,0,0,.18);transition:transform .15s var(--ease),box-shadow .15s}
 #play svg{width:18px;height:18px}
-#play:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(255,176,32,.42),inset 0 -3px 0 rgba(0,0,0,.18)}
+#play:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(var(--ledrgb),.42),inset 0 -3px 0 rgba(0,0,0,.18)}
 #play:active{transform:translateY(1px)}
 .hint{color:var(--mute);font-size:.86rem}
+#fav{flex:none;display:grid;place-items:center;width:50px;height:50px;border-radius:50%;cursor:pointer;
+  border:1px solid rgba(255,255,255,.22);background:rgba(15,12,29,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:transform .15s}
+#fav svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2.2}
+#fav[aria-pressed="true"] svg{fill:#ff5d7a;stroke:#ff5d7a}
+#fav[aria-pressed="true"]{border-color:rgba(255,93,122,.6)}
+#fav:hover{border-color:rgba(255,255,255,.45)}#fav:active{transform:scale(.92)}
+#fav.pop svg{animation:pop .35s var(--ease)}
 .hint kbd,.legend kbd{display:inline-block;min-width:22px;padding:2px 6px;border-radius:5px;border:1px solid rgba(255,255,255,.22);
   background:rgba(255,255,255,.07);font:700 .72rem var(--body);color:var(--text);text-align:center}
 
@@ -175,10 +195,10 @@ button{font:inherit;color:inherit}
 .achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .ach{position:relative;display:flex;align-items:center;gap:12px;min-width:0;padding:12px 14px;border-radius:14px;
   background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
-.ach.on{background:rgba(255,176,32,.07);border-color:rgba(255,176,32,.28)}
+.ach.on{background:rgba(var(--ledrgb),.07);border-color:rgba(var(--ledrgb),.28)}
 .aic{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:#26213f;color:#6f6893}
 .aic svg{width:24px;height:24px}
-.ach.on .aic{background:linear-gradient(150deg,#ffd468,#ff9f1c);color:#2a1a02;box-shadow:0 6px 18px rgba(255,176,32,.28)}
+.ach.on .aic{background:var(--led);color:#160f04;box-shadow:0 6px 18px rgba(var(--ledrgb),.28)}
 .atx{min-width:0;flex:1}
 .atx b{display:block;font-weight:700;line-height:1.25}
 .ach:not(.on) .atx b{color:#cfc9e4}
@@ -202,6 +222,37 @@ button{font:inherit;color:inherit}
 .tkd{position:absolute;left:10px;top:10px;z-index:1;padding:3px 8px;border-radius:999px;background:var(--ac);color:var(--ci);font-weight:700;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
 .tmeta{display:block;margin-top:9px;font-size:.85rem;color:var(--mute);line-height:1.35}
 .tmeta b{color:var(--text);font-weight:600}
+.sec{scroll-margin-top:14px}
+.daily{position:relative;display:block;width:100%;max-width:820px;aspect-ratio:21/9;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;
+  background:var(--bgs);color:inherit;text-align:left;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 16px 40px rgba(0,0,0,.5)}
+.daily img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+.daily::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,6,16,.92) 0%,rgba(8,6,16,.55) 45%,rgba(8,6,16,0) 75%)}
+.daily:hover{box-shadow:0 0 0 2px var(--ac),0 18px 44px rgba(0,0,0,.55)}
+.dx{position:absolute;z-index:1;left:clamp(16px,3vw,32px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:60%}
+.dk{padding:4px 10px;border-radius:999px;background:var(--led);color:var(--ground);font:900 .62rem var(--display);letter-spacing:.1em}
+.dn{font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);font-size:calc(clamp(1.6rem,4vw,2.8rem) * var(--sz,1));line-height:1;color:var(--lfg);text-shadow:0 3px 18px rgba(0,0,0,.5)}
+.ds{font-size:.9rem;color:#e9e4f2}
+.ds.done{color:#7ef0b0;font-weight:700}
+.dd{font-size:.8rem;color:var(--mute)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:1100px}
+@media (max-width:899px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stat{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);min-width:0}
+.stat small{display:block;color:var(--mute);font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.stat b{display:block;margin-top:6px;font:900 1.7rem/1.05 var(--display);overflow-wrap:anywhere}
+.stat b.g{font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);font-size:calc(1.35rem * var(--sz,1));color:var(--lfg)}
+.stat span{display:block;margin-top:4px;color:var(--mute);font-size:.8rem}
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.th{display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);
+  color:inherit;font:inherit;text-align:left;cursor:pointer}
+.th:disabled{cursor:default}
+.th.on{border-color:var(--led);box-shadow:0 0 0 1px var(--led)}
+.tpv{position:relative;height:70px;border-radius:9px;overflow:hidden;background:var(--tg)}
+.tpv::before{content:"";position:absolute;left:10px;right:40%;top:12px;height:8px;border-radius:4px;background:var(--td)}
+.tpv::after{content:"";position:absolute;left:10px;bottom:12px;width:58px;height:18px;border-radius:999px;background:var(--tl);box-shadow:0 4px 14px var(--tl)}
+.tpv i{position:absolute;right:12px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--tl);box-shadow:0 0 10px var(--tl)}
+.th b{font-weight:700}
+.th small{display:block;color:var(--mute);font-size:.78rem;margin-top:1px}
+.th.lock .tpv{filter:grayscale(.85) brightness(.6)}
 .empty{margin:0;padding:18px;border-radius:14px;border:1px dashed rgba(255,255,255,.14);color:var(--mute);font-size:.92rem}
 
 /* ---- title screen: a wall of every game drifting behind the logo ---- */
@@ -275,6 +326,7 @@ button{font:inherit;color:inherit}
   .top{gap:10px}
   .logo{font-size:1rem}
   #tabs{order:5;flex-basis:100%;border-radius:14px}
+  .jb{height:30px;padding:0 11px;font-size:.76rem}
   .clock{display:none}
   .ib .tx{display:none}
   .ib{padding:0;width:38px}
@@ -291,6 +343,7 @@ button{font:inherit;color:inherit}
   .hstat{font-size:.8rem;gap:4px 12px}
   .hstat .meter{width:60px}
   #play{height:44px;flex:1;justify-content:center;max-width:260px;font-size:.92rem}
+  #fav{width:44px;height:44px}
   .hint{display:none}
   .rack{gap:12px}
   .more{gap:32px}
@@ -298,6 +351,12 @@ button{font:inherit;color:inherit}
   .ach{flex-direction:column;align-items:flex-start;gap:9px;padding:12px}
   .aic{width:40px;height:40px;border-radius:11px}.aic svg{width:21px;height:21px}
   .tile{width:68vw;max-width:260px}
+  .daily{aspect-ratio:16/10}
+  .daily::after{background:linear-gradient(0deg,rgba(8,6,16,.95) 0%,rgba(8,6,16,.5) 55%,rgba(8,6,16,.1) 100%)}
+  .dx{top:auto;bottom:16px;transform:none;max-width:none;right:16px;gap:7px}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:12px}.stat b{font-size:1.35rem}
+  .themes{grid-template-columns:1fr 1fr;gap:10px}
 }
 @media (prefers-reduced-motion:reduce){
   .wrow,.istart{animation:none}.wall{animation:none;opacity:.5}.icart{animation:none;transform:none}.isub,.istart{opacity:1}
@@ -307,6 +366,20 @@ button{font:inherit;color:inherit}
 }
 </style>
 
+<script>
+/* menu color themes, unlocked with achievements */
+window.GC_THEMES=[
+ {id:'amber',n:'Amber',need:0,led:'#ffb020',ground:'#0f0c1d',deck:'#1b1730',seam:'#2e2850'},
+ {id:'mint',n:'Mint',need:3,led:'#3ee6a8',ground:'#091613',deck:'#12241f',seam:'#21403a'},
+ {id:'bubblegum',n:'Bubblegum',need:6,led:'#ff6fae',ground:'#190b17',deck:'#2a1428',seam:'#46223f'},
+ {id:'ocean',n:'Ocean',need:9,led:'#4cc3ff',ground:'#08111e',deck:'#101f34',seam:'#1d3555'},
+ {id:'royal',n:'Royal',need:12,led:'#c9a6ff',ground:'#110b21',deck:'#1f1638',seam:'#352760'},
+ {id:'gold',n:'Gold',need:14,led:'#ffd84a',ground:'#13100a',deck:'#221d10',seam:'#3d3418'}];
+window.gcTheme=function(id){const t=GC_THEMES.find(x=>x.id===id)||GC_THEMES[0],r=document.documentElement.style,h=t.led.slice(1);
+  r.setProperty('--led',t.led);r.setProperty('--ledrgb',[0,2,4].map(i=>parseInt(h.substr(i,2),16)).join(','));
+  r.setProperty('--ground',t.ground);r.setProperty('--deck',t.deck);r.setProperty('--seam',t.seam);return t};
+try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
+</script>
 <div class="bg" aria-hidden="true"><img class="bgimg" id="bgA" alt=""><img class="bgimg" id="bgB" alt=""><div class="tint"></div><div class="grain"></div></div>
 
 <div class="app" id="app">
@@ -321,6 +394,7 @@ button{font:inherit;color:inherit}
       <button class="ib" id="helpBtn" type="button" aria-label="Help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5v.6"/><path d="M12 17h.01"/></svg></button>
     </div>
     <div id="searchBar" hidden><input id="q" type="search" placeholder="Search games" aria-label="Search games" autocomplete="off"><button class="ib" id="qx" type="button">Close</button></div>
+    <nav id="jump" aria-label="Go to a section"></nav>
   </header>
 
   <main class="hero pad" id="hero" aria-live="polite">
@@ -331,6 +405,7 @@ button{font:inherit;color:inherit}
       <p class="hstat" id="hStat"></p>
       <div class="acts">
         <button id="play" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><span id="playTx">Play</span></button>
+        <button id="fav" type="button" aria-pressed="false" aria-label="Add to favorites" title="Favorite"><svg viewBox="0 0 24 24"><path d="M12 20.5S4 15.6 4 9.8A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 8 2.4c0 5.8-8 10.7-8 10.7z"/></svg></button>
         <span class="hint" id="hint"></span>
       </div>
     </div>
@@ -346,25 +421,45 @@ button{font:inherit;color:inherit}
  </div>
 
  <div class="more" id="more">
-  <section class="sec" aria-labelledby="hAch">
+  <section class="sec" id="secAch" aria-labelledby="hAch">
     <div class="sech pad"><h2 id="hAch">Achievements</h2><span class="sn" id="achCount"></span><p>Earned by playing games on this console.</p></div>
     <div class="achs pad" id="achs"></div>
   </section>
-  <section class="sec" aria-labelledby="hLike">
+  <section class="sec" id="secLike" aria-labelledby="hLike">
     <div class="sech pad"><h2 id="hLike">Stuff you might like</h2><p>Games you have not played much that match the ones you play most.</p></div>
     <div class="row" id="rowLike"></div>
   </section>
-  <section class="sec" aria-labelledby="hRecent">
+  <section class="sec" id="secRecent" aria-labelledby="hRecent">
     <div class="sech pad"><h2 id="hRecent">Recently played</h2><p>Your last 3 games.</p></div>
     <div class="row" id="rowRecent"></div>
   </section>
-  <section class="sec" aria-labelledby="hNew">
+  <section class="sec" id="secNew" aria-labelledby="hNew">
     <div class="sech pad"><h2 id="hNew">New games</h2><p>Added in the last week.</p></div>
     <div class="row" id="rowNew"></div>
   </section>
-  <section class="sec" aria-labelledby="hUpd">
+  <section class="sec" id="secUpd" aria-labelledby="hUpd">
     <div class="sech pad"><h2 id="hUpd">Recently updated</h2><p>Games that got new stuff in the last week.</p></div>
     <div class="row" id="rowUpd"></div>
+  </section>
+  <section class="sec" id="secFav" aria-labelledby="hFav">
+    <div class="sech pad"><h2 id="hFav">Favorites</h2><p>Tap the heart next to Play to pin a game here.</p></div>
+    <div class="row" id="rowFav"></div>
+  </section>
+  <section class="sec" id="secDaily" aria-labelledby="hDaily">
+    <div class="sech pad"><h2 id="hDaily">Daily challenge</h2><span class="sn" id="dailyLeft"></span><p>A new game every day. Play it before midnight to finish the challenge.</p></div>
+    <div class="pad"><button type="button" class="daily" id="daily"></button></div>
+  </section>
+  <section class="sec" id="secStats" aria-labelledby="hStats">
+    <div class="sech pad"><h2 id="hStats">Your stats</h2><p>Everything you have played on this console.</p></div>
+    <div class="stats pad" id="stats"></div>
+  </section>
+  <section class="sec" id="secTheme" aria-labelledby="hTheme">
+    <div class="sech pad"><h2 id="hTheme">Themes</h2><p>Earn achievements to unlock new menu colors.</p></div>
+    <div class="themes pad" id="themes"></div>
+  </section>
+  <section class="sec" id="secSoon" aria-labelledby="hSoon">
+    <div class="sech pad"><h2 id="hSoon">Coming soon</h2><p>Games on the way to the shelf.</p></div>
+    <div class="pad"><p class="empty">New games are on the way. Check back soon.</p></div>
   </section>
  </div>
 </div>
@@ -664,7 +759,11 @@ function countPlay(id){const p=plays(),r=p[id]||{n:0,t:0};r.n++;r.t=Date.now();p
   const ds=jget('gc.days',[]);if(!ds.includes(day)){ds.push(day);jset('gc.days',ds.slice(-60))}
   const ev=jget('gc.ev',{}),g=GAMES.find(x=>x.id===id);
   if(now.getHours()<5)ev.owl=1;if(g&&tagsOf(g).isNew)ev.fresh=1;jset('gc.ev',ev);
+  if(dailyGame(day).id===id){const dc=jget('gc.daily',[]);if(!dc.includes(day)){dc.push(day);jset('gc.daily',dc.slice(-400))}}
+  const lg=jget('gc.log',[]);lg.push([id,Date.now()]);jset('gc.log',lg.slice(-400));
 }
+function today(){const n=new Date();return Math.round(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/864e5)}
+function dailyGame(day){return GAMES[((day*7+3)%GAMES.length+GAMES.length)%GAMES.length]}
 function jget(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}}
 function jset(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function ago(t){
@@ -775,6 +874,7 @@ function fill(g){
     st.append(a,m,span('',ago(r.t)[0].toUpperCase()+ago(r.t).slice(1)));
   }else st.append(span('','Never played yet'));
   $('playTx').textContent=g.id===last?'Continue':'Play';
+  if($('fav')&&typeof favBtn==='function')try{favBtn()}catch(e){}
   $('play').setAttribute('aria-label',(g.id===last?'Continue ':'Play ')+g.name);
   const touch=matchMedia('(hover:none),(pointer:coarse)').matches;
   $('hint').innerHTML=touch?'or tap the cartridge again':'or press <kbd>Enter</kbd>';
@@ -919,7 +1019,9 @@ const IC={
  flame:'<path fill="currentColor" d="M12 2.5c.8 3.4 5.5 5.4 5.5 11a5.5 5.5 0 0 1-11 0c0-2.8 1.6-4.4 2.7-5.5.3 2.1 1.4 3.2 2.6 3.2-.3-3.2-.8-5.7.2-8.7z"/>',
  cal:'<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/></g><path fill="currentColor" d="M8 13h3v3H8z"/>',
  spark:'<path fill="currentColor" d="M11 3l1.9 5.6L18.5 10.5l-5.6 1.9L11 18l-1.9-5.6L3.5 10.5l5.6-1.9zM18.5 14.5l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9z"/>',
- moon:'<path fill="currentColor" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/>'};
+ moon:'<path fill="currentColor" d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"/>',
+ check:'<g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.7 2.7L16.2 9.5"/></g>',
+ target:'<g fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/></g><circle cx="12" cy="12" r="1.6" fill="currentColor"/>'};
 const ACHS=[
  {id:'start',n:'Press Start',d:'Play your first game',ic:'play',p:s=>[s.uniq,1]},
  {id:'explore',n:'Shelf Explorer',d:'Play 5 different games',ic:'grid',p:s=>[s.uniq,5]},
@@ -932,13 +1034,15 @@ const ACHS=[
  {id:'marathon',n:'Marathon',d:'Play 50 times in all',ic:'flame',p:s=>[s.total,50]},
  {id:'streak',n:'On a Roll',d:'Play 3 days in a row',ic:'cal',p:s=>[s.streak,3]},
  {id:'fresh',n:'Fresh Off the Line',d:'Play a game while it is still marked NEW',ic:'spark',p:s=>[s.ev.fresh?1:0,1]},
- {id:'owl',n:'Night Owl',d:'Play a game between midnight and 5 AM',ic:'moon',p:s=>[s.ev.owl?1:0,1]}];
+ {id:'owl',n:'Night Owl',d:'Play a game between midnight and 5 AM',ic:'moon',p:s=>[s.ev.owl?1:0,1]},
+ {id:'daily',n:'Challenge Accepted',d:'Finish a daily challenge',ic:'check',p:s=>[s.daily,1]},
+ {id:'daily5',n:'Daily Grinder',d:'Finish 5 daily challenges',ic:'target',p:s=>[s.daily,5]}];
 function stats(){
   const P=plays(),ids=GAMES.map(g=>g.id).filter(id=>P[id]&&P[id].n>0);
   const days=jget('gc.days',[]).slice().sort((a,b)=>a-b);let streak=days.length?1:0,run=1;
   for(let i=1;i<days.length;i++){run=days[i]-days[i-1]===1?run+1:1;streak=Math.max(streak,run)}
   return{uniq:ids.length,total:ids.reduce((a,id)=>a+P[id].n,0),top:Math.max(0,...ids.map(id=>P[id].n)),
-    cats:new Set(ids.map(id=>CATS[id])).size,dims:new Set(ids.map(id=>GAMES.find(g=>g.id===id).kind.slice(0,2)).filter(k=>k==='2D'||k==='3D')).size,streak,ev:jget('gc.ev',{})};
+    cats:new Set(ids.map(id=>CATS[id])).size,dims:new Set(ids.map(id=>GAMES.find(g=>g.id===id).kind.slice(0,2)).filter(k=>k==='2D'||k==='3D')).size,streak,ev:jget('gc.ev',{}),daily:jget('gc.daily',[]).length,days:days.length};
 }
 function svg(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>'}
 function renderAch(){
@@ -971,11 +1075,7 @@ function tile(g,meta){
   im.append(img,span('tkd',g.kind),span('tnm',g.name));
   const m=span('tmeta');m.innerHTML=meta;b.append(im,m);
   b.setAttribute('aria-label',g.name+'. '+m.textContent);
-  b.addEventListener('click',()=>{
-    if(carts[g.id].hidden){$('q').value='';$('searchBar').hidden=true;setFilter('All')}
-    select(g,true);$('app').scrollTo({top:0,behavior:'smooth'});
-    setTimeout(()=>carts[g.id].focus({preventScroll:true}),400);
-  });
+  b.addEventListener('click',()=>goTo(g));
   return b;
 }
 function fillRow(id,items,emptyText){
@@ -1006,7 +1106,84 @@ function renderRows(){
   fillRow('rowUpd',GAMES.filter(g=>tagsOf(g).isUpd).sort((a,b)=>dayOf(DATES[b.id][1])-dayOf(DATES[a.id][1]))
     .map(g=>[g,'Updated <b>'+fmtDay(DATES[g.id][1])+'</b>']),'No updates this week.');
 }
-renderAch();renderRows();
+/* favorites */
+const favs=()=>jget('gc.favs',[]);
+function favBtn(){const on=!!cur&&favs().includes(cur.id),b=$('fav');b.setAttribute('aria-pressed',on);
+  b.setAttribute('aria-label',(on?'Remove ':'Add ')+(cur?cur.name:'')+(on?' from favorites':' to favorites'))}
+$('fav').addEventListener('click',()=>{if(!cur)return;let f=favs();const on=f.includes(cur.id);f=on?f.filter(x=>x!==cur.id):[cur.id].concat(f);jset('gc.favs',f);
+  const b=$('fav');b.classList.remove('pop');void b.offsetWidth;if(!on)b.classList.add('pop');favBtn();renderFav();renderJump()});
+function renderFav(){const P=plays();
+  fillRow('rowFav',favs().map(id=>GAMES.find(g=>g.id===id)).filter(Boolean).map(g=>[g,P[g.id]?'Played <b>'+P[g.id].n+'</b> '+(P[g.id].n===1?'time':'times')+' · '+ago(P[g.id].t):'Not played yet']),
+    'No favorites yet. Tap the heart next to Play on any game.')}
+
+/* daily challenge */
+function renderDaily(){
+  const d=today(),g=dailyGame(d),done=jget('gc.daily',[]),b=$('daily');skin(b,g);b.textContent='';
+  const img=document.createElement('img');img.src=art(g.id);img.alt='';img.loading='lazy';
+  const x=span('dx'),ok=done.includes(d);
+  x.append(span('dk',"TODAY'S CHALLENGE"),span('dn',g.name),span('ds'+(ok?' done':''),ok?'Done for today. Nice.':'Play '+g.name+' today to finish it.'),
+    span('dd',done.length+(done.length===1?' challenge':' challenges')+' finished'));
+  b.append(img,x);b.setAttribute('aria-label',"Today's challenge: "+g.name+(ok?', done':''));
+  b.onclick=()=>goTo(g);
+  const n=new Date(),mid=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1),m=Math.max(1,Math.round((mid-n)/6e4));
+  $('dailyLeft').textContent='New one in '+(m>=60?Math.floor(m/60)+'h ':'')+(m%60)+'m';
+}
+
+/* stats */
+function renderStats(){
+  const P=plays(),st=stats(),box=$('stats');box.textContent='';
+  const played=GAMES.filter(g=>P[g.id]&&P[g.id].n>0),top=played.slice().sort((a,b)=>P[b.id].n-P[a.id].n)[0];
+  const wk={},cut=Date.now()-7*864e5;for(const [id,t] of jget('gc.log',[]))if(t>=cut)wk[id]=(wk[id]||0)+1;
+  const wkId=Object.keys(wk).sort((a,b)=>wk[b]-wk[a])[0],wkG=GAMES.find(g=>g.id===wkId);
+  const cat={};for(const g of played)cat[CATS[g.id]]=(cat[CATS[g.id]]||0)+P[g.id].n;const fav=Object.keys(cat).sort((a,b)=>cat[b]-cat[a])[0];
+  const got=Object.keys(jget('gc.ach',{})).length;
+  const card=(label,val,sub,g)=>{const c=document.createElement('div');c.className='stat';
+    const sm=document.createElement('small');sm.textContent=label;const v=document.createElement('b');v.textContent=val;
+    if(g){skin(c,g);v.className='g'}c.append(sm,v);
+    if(sub){const s2=document.createElement('span');s2.textContent=sub;c.append(s2)}box.append(c)};
+  card('Total plays',st.total);
+  card('Games tried',st.uniq+' / '+GAMES.length);
+  card('Most played',top?top.name:'None yet',top?P[top.id].n+(P[top.id].n===1?' play':' plays'):'',top);
+  card('Top this week',wkG?wkG.name:'None yet',wkG?wk[wkId]+(wk[wkId]===1?' play':' plays')+' in 7 days':'',wkG);
+  card('Favorite type',fav||'None yet',fav?cat[fav]+' plays':'');
+  card('Days played',st.days);
+  card('Achievements',got+' / '+ACHS.length);
+  card('Daily challenges',st.daily);
+}
+
+/* themes */
+function renderThemes(){
+  const got=Object.keys(jget('gc.ach',{})).length,curT=jget('gc.theme','amber'),box=$('themes');box.textContent='';
+  for(const t of GC_THEMES){
+    const open=got>=t.need,b=document.createElement('button');b.type='button';b.className='th'+(t.id===curT?' on':'')+(open?'':' lock');b.disabled=!open;
+    const pv=span('tpv');pv.append(document.createElement('i'));pv.style.setProperty('--tg',t.ground);pv.style.setProperty('--td',t.deck);pv.style.setProperty('--tl',t.led);
+    const tx=span('');const nb=document.createElement('b');nb.textContent=t.n;const sm=document.createElement('small');
+    sm.textContent=t.id===curT?'In use':open?'Tap to use':'Unlocks at '+t.need+' achievements ('+Math.min(got,t.need)+'/'+t.need+')';
+    tx.append(nb,sm);b.append(pv,tx);
+    b.setAttribute('aria-label',t.n+' theme. '+sm.textContent);
+    b.addEventListener('click',()=>{if(!open)return;jset('gc.theme',t.id);gcTheme(t.id);renderThemes()});
+    box.append(b);
+  }
+}
+
+/* shortcuts under the genre tabs */
+function goTo(g){
+  if(carts[g.id].hidden){$('q').value='';$('searchBar').hidden=true;setFilter('All')}
+  select(g,true);$('app').scrollTo({top:0,behavior:'smooth'});
+  setTimeout(()=>carts[g.id].focus({preventScroll:true}),400);
+}
+function renderJump(){
+  const got=Object.keys(jget('gc.ach',{})).length,fresh=Object.values(jget('gc.ach',{})).some(a=>!a.seen),dOk=jget('gc.daily',[]).includes(today());
+  const nNew=GAMES.filter(g=>tagsOf(g).isNew).length,nUpd=GAMES.filter(g=>tagsOf(g).isUpd).length,nFav=favs().length;
+  const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+ACHS.length+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
+    ['secNew','New games',nNew?'<b class="hot">'+nNew+'</b>':''],['secUpd','Recently updated',nUpd?'<b>'+nUpd+'</b>':''],['secFav','Favorites',nFav?'<b>'+nFav+'</b>':''],
+    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','']];
+  const box=$('jump');box.textContent='';
+  for(const [id,label,extra] of J){const b=document.createElement('button');b.type='button';b.className='jb';b.innerHTML='<span></span>'+extra;b.firstChild.textContent=label;
+    b.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}));box.append(b)}
+}
+renderAch();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
+setInterval(renderDaily,60000);
 for(const r of document.querySelectorAll('.row'))r.addEventListener('wheel',e=>{
   if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;const max=r.scrollWidth-r.clientWidth;
   if(max<=0||(e.deltaY>0&&r.scrollLeft>=max-1)||(e.deltaY<0&&r.scrollLeft<=0))return;
@@ -1059,7 +1236,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16-crate6';
+  var V='2026-10-16-crate7';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
