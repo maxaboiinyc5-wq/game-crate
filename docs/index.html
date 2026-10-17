@@ -314,8 +314,10 @@ button{font:inherit;color:inherit}
 .hsheet h2{margin:0;font:900 1.1rem var(--display);letter-spacing:.04em}
 .hsheet ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;color:#e9e4f2}
 .hsheet p{margin:0;color:var(--mute);font-size:.88rem}
-.hsheet .pin{width:100%;height:52px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:var(--text);
-  font:700 1.5rem var(--body);letter-spacing:.5em;text-align:center;padding:0 0 0 .5em}
+.hsheet form{display:flex;flex-direction:column;gap:14px;margin:0}
+.hsheet .pin{width:100%;height:50px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:var(--text);
+  font:600 1.05rem var(--body);letter-spacing:.06em;padding:0 16px}
+.hsheet .uname{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
 .hsheet .pin:focus{outline:2px solid var(--led);outline-offset:1px}
 .hsheet label{font-weight:600;font-size:.86rem;color:#e9e4f2;margin-bottom:-6px}
 .shbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -1207,36 +1209,41 @@ const RESET_KEYS=['gc.plays','gc.ach','gc.days','gc.ev','gc.daily','gc.log','gc.
 function hashCode(c){let h=5381;for(const ch of 'gc:'+c)h=((h<<5)+h+ch.charCodeAt(0))|0;return 'h'+(h>>>0).toString(36)}
 const hasCode=()=>!!jget('gc.code',null);
 function sheet(html,esc){const b=$('shBox');b.innerHTML=html;$('sheet').hidden=false;sheetEsc=esc||null;
-  const f=b.querySelector('input,button');if(f)setTimeout(()=>f.focus(),30);return b}
+  const f=b.querySelector('input:not(.uname),button');if(f)setTimeout(()=>f.focus(),30);return b}
 function closeSheet(){$('sheet').hidden=true;sheetEsc=null;if(cur)carts[cur.id].focus({preventScroll:true})}
 $('sheet').addEventListener('click',e=>{if(e.target.id==='sheet'&&sheetEsc)sheetEsc()});
-function pinField(id,label){return '<label for="'+id+'">'+label+'</label><input class="pin" id="'+id+'" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">'}
-function digits(el){el.value=el.value.replace(/\D/g,'').slice(0,4)}
+/* the reset code works like a website password, so the phone's Passwords app can make one, save it and fill it in */
+const UNAME='<input class="uname" type="text" name="username" autocomplete="username" value="Game Crate" readonly tabindex="-1" aria-hidden="true">';
+function passField(id,label,mode){return '<label for="'+id+'">'+label+'</label><input class="pin" id="'+id+'" name="'+(mode==='new-password'?'new-password':'password')+'" type="password" autocomplete="'+mode+'" minlength="4" autocapitalize="off" spellcheck="false">'}
 function bad(box,msg){const e=box.querySelector('.err');e.textContent=msg;box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake')}
 
 /* pick a new code. first=true is the first-time screen with Skip */
 function setCodeSheet(first,after){
-  const b=sheet('<h2 id="shT">'+(first?'Protect your progress':'New reset code')+'</h2>'
-    +'<p>Pick a 4-digit reset code. Nobody can reset your achievements, stats, favorites or challenges without it.</p>'
-    +pinField('pA','Reset code')+pinField('pB','Type it again')+'<p class="err"></p>'
+  const b=sheet('<form id="codeForm" method="post" action="#" autocomplete="on">'
+    +'<h2 id="shT">'+(first?'Protect your progress':'New reset code')+'</h2>'
+    +'<p>Pick a reset code, at least 4 characters. Nobody can reset your achievements, stats, favorites or challenges without it.</p>'
+    +'<p>Your phone can suggest a strong code and save it in the Passwords app. Tap the box and pick the suggested one.</p>'
+    +UNAME+passField('pA','Reset code','new-password')+passField('pB','Type it again','new-password')+'<p class="err"></p>'
     +(first?'<p class="warn">You can skip this, but we do not recommend it. If your brother sneaks on, he could wipe everything.</p>':'')
-    +'<div class="shbtns"><button type="button" class="pri" id="pSave">Save code</button><button type="button" class="ghost" id="pSkip">'+(first?'Skip':'Cancel')+'</button></div>',
+    +'<div class="shbtns"><button type="submit" class="pri" id="pSave">Save code</button><button type="button" class="ghost" id="pSkip">'+(first?'Skip':'Cancel')+'</button></div></form>',
     first?null:()=>{closeSheet();after&&after()});
   const A=b.querySelector('#pA'),B=b.querySelector('#pB');
-  [A,B].forEach(x=>x.addEventListener('input',()=>{digits(x);if(x===A&&A.value.length===4)B.focus()}));
-  const save=()=>{if(A.value.length!==4){bad(b,'The code needs 4 numbers.');A.focus();return}
+  b.querySelector('#codeForm').addEventListener('submit',e=>{e.preventDefault();
+    if(A.value.length<4){bad(b,'The code needs at least 4 characters.');A.focus();return}
     if(A.value!==B.value){bad(b,'The two codes do not match.');B.value='';B.focus();return}
-    jset('gc.code',hashCode(A.value));jset('gc.codeAsked',1);closeSheet();toastMsg('Reset code saved');after&&after()};
-  b.querySelector('#pSave').addEventListener('click',save);B.addEventListener('keydown',e=>{if(e.key==='Enter')save()});
+    jset('gc.code',hashCode(A.value));jset('gc.codeAsked',1);
+    /* give the Passwords app a moment to offer saving before the form goes away */
+    setTimeout(()=>{closeSheet();$('shBox').textContent='';toastMsg('Reset code saved');after&&after()},350)});
   b.querySelector('#pSkip').addEventListener('click',()=>{jset('gc.codeAsked',1);closeSheet();after&&after()});
 }
 /* ask for the current code, then run ok() */
 function askCode(title,ok){
-  const b=sheet('<h2 id="shT">'+title+'</h2><p>Enter your reset code.</p>'+pinField('pC','Reset code')+'<p class="err"></p>'
-    +'<div class="shbtns"><button type="button" class="pri" id="pGo">Continue</button><button type="button" class="ghost" id="pX">Cancel</button></div>',()=>openSettings());
-  const C=b.querySelector('#pC'),go=()=>{if(hashCode(C.value)===jget('gc.code',null))ok();else{bad(b,'Wrong code.');C.value='';C.focus()}};
-  C.addEventListener('input',()=>{digits(C);if(C.value.length===4)go()});
-  b.querySelector('#pGo').addEventListener('click',go);b.querySelector('#pX').addEventListener('click',()=>openSettings());
+  const b=sheet('<form id="askForm" method="post" action="#" autocomplete="on"><h2 id="shT">'+title+'</h2><p>Enter your reset code. If you saved it in the Passwords app, tap the box to fill it in.</p>'
+    +UNAME+passField('pC','Reset code','current-password')+'<p class="err"></p>'
+    +'<div class="shbtns"><button type="submit" class="pri" id="pGo">Continue</button><button type="button" class="ghost" id="pX">Cancel</button></div></form>',()=>openSettings());
+  const C=b.querySelector('#pC');
+  b.querySelector('#askForm').addEventListener('submit',e=>{e.preventDefault();if(hashCode(C.value)===jget('gc.code',null))ok();else{bad(b,'Wrong code.');C.value='';C.focus()}});
+  b.querySelector('#pX').addEventListener('click',()=>openSettings());
 }
 function confirmReset(){
   const b=sheet('<h2 id="shT">Reset everything?</h2><p>This wipes your achievements, stats, favorites, daily challenges and theme on this device. It cannot be undone.</p>'
@@ -1316,7 +1323,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-16-crate8';
+  var V='2026-10-16-crate9';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
