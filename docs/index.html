@@ -916,7 +916,7 @@ let introUp=false;
   for(let r=0;r<rows;r++){
     const row=document.createElement('div');row.className='wrow';
     const order=ids.slice(r*5%ids.length).concat(ids.slice(0,r*5%ids.length));
-    for(const id of order.concat(order)){const im=document.createElement('img');im.src='art/'+id+'.jpg?5';im.loading=r<5?'eager':'lazy';im.alt='';im.decoding='async';row.appendChild(im)}
+    for(const id of order.concat(order)){const im=document.createElement('img');im.src='art/'+id+'.jpg?6';im.loading=r<5?'eager':'lazy';im.alt='';im.decoding='async';row.appendChild(im)}
     W.appendChild(row);
   }
   it.hidden=false;
@@ -969,7 +969,7 @@ function tagsOf(g){
   const D=DATES[g.id],WEEK=7*864e5,now=Date.now();if(!D)return{isNew:false,isUpd:false};
   return{isNew:now-Date.parse(D[0])<WEEK,isUpd:D[1]!==D[0]&&now-Date.parse(D[1])<WEEK};
 }
-const art=id=>'art/'+id+'.jpg?5',thumb=id=>'art/t/'+id+'.jpg?5';
+const art=id=>'art/'+id+'.jpg?6',thumb=id=>'art/t/'+id+'.jpg?6';
 
 let last=null;try{last=localStorage.getItem(LAST)}catch(e){}
 const carts={};
@@ -1514,7 +1514,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-17-crate18';
+  var V='2026-10-17-crate19';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
