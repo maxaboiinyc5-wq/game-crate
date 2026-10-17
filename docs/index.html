@@ -530,6 +530,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
       <li>Scroll down for achievements, picks for you, favorites, the daily challenge, your stats and more. The buttons under the genres jump straight to each one.</li>
       <li>Tap the heart next to Play to add a game to Favorites.</li>
       <li>Daily challenge: just play that day's game before midnight. You do not have to beat it. A new one shows up every day.</li>
+      <li>Earn achievements on the console and inside each game. A notification pops up in the game the moment you get one.</li>
       <li>Earn achievements to unlock new menu colors in Themes.</li>
     </ul>
     <h3>Saving and reset</h3>
@@ -1539,7 +1540,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-17-crate13';
+  var V='2026-10-17-crate14';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
