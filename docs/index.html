@@ -227,6 +227,7 @@ button{font:inherit;color:inherit}
 .tkd{position:absolute;left:10px;top:10px;z-index:1;padding:3px 8px;border-radius:999px;background:var(--ac);color:var(--ci);font-weight:700;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase}
 .tmeta{display:block;margin-top:9px;font-size:.85rem;color:var(--mute);line-height:1.35}
 .tmeta b{color:var(--text);font-weight:600}
+.sdate{position:absolute;right:10px;top:10px;z-index:1;padding:4px 9px;border-radius:6px;background:var(--led);color:var(--ground);font:900 .66rem var(--display);letter-spacing:.08em;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 .sec{scroll-margin-top:14px}
 .daily{position:relative;display:block;width:100%;max-width:820px;aspect-ratio:21/9;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;
   background:var(--bgs);color:inherit;text-align:left;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 16px 40px rgba(0,0,0,.5)}
@@ -485,7 +486,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   </section>
   <section class="sec" id="secSoon" aria-labelledby="hSoon">
     <div class="sech pad"><h2 id="hSoon">Coming soon</h2><p>Games on the way to the shelf.</p></div>
-    <div class="row" id="rowSoon"><div class="tile soon" role="group" aria-label="Lockup Tycoon, coming soon" style="--bgs:#141925;--ac:#f2c230;--ci:#141925;--lfg:#f2c230;--font:'Barlow Condensed','Arial Narrow',sans-serif;--fw:700;--tt:uppercase;--sz:1.3;cursor:default"><span class="tim"><img src="art/soon-lockup-tycoon.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · tycoon</span><span class="tnm">Lockup Tycoon</span></span><span class="tmeta"><b>Coming soon</b> · Own a jail and catch criminals in your cop car.</span></div></div>
+    <div class="row" id="rowSoon"><div class="tile soon" role="group" aria-label="Lockup Tycoon, comes out October 19" style="--bgs:#141925;--ac:#f2c230;--ci:#141925;--lfg:#f2c230;--font:'Barlow Condensed','Arial Narrow',sans-serif;--fw:700;--tt:uppercase;--sz:1.3;cursor:default"><span class="tim"><img src="art/soon-lockup-tycoon.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · tycoon</span><span class="sdate">OCT 19</span><span class="tnm">Lockup Tycoon</span></span><span class="tmeta"><b>Releases Oct 19</b> · Own a jail and catch criminals in your cop car.</span></div></div>
   </section>
  </div>
 </div>
