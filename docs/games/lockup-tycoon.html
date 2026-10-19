@@ -76,7 +76,7 @@
 })();
 </script>
 <title>Lockup Tycoon</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Paytone+One&family=Bowlby+One&family=Inter:wght@400;500;600;700;800&display=swap">
 <style>:root{color-scheme:dark;--ink:#f3f1ea;--mute:#a7adbb;--glass:rgba(16,20,30,.72);--glass2:rgba(26,32,46,.9);--line:rgba(255,255,255,.12);--gold:#f2c230;--blue:#3d7bff;--red:#ff4d5e;--green:#3ee6a8;
   --disp:"Barlow Condensed",Impact,"Arial Narrow",sans-serif;--body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
@@ -977,15 +977,19 @@ function buildCity() {
   const signs = [];
   for (const r of blocks) {
     if (r.jail) continue;
-    if (isSpec(r, 'park')) { r.park = true; B.hplane('grass', r.x0, r.z0, r.x1, r.z1, 0.16, 6, 6); buildPark(r, B, city); continue; }
+    if (isSpec(r, 'park')) { r.park = true; B.hplane('grass', r.x0, r.z0, r.x1, r.z1, 0.16, 6, 6); r.court = { x: r.x0 + 10, z: r.z1 - 7.5 }; buildCourt(r.court.x, r.court.z, city); buildPark(r, B, city); continue; } // the court sits across the street from Aisle Nine, like in that game
     const W = r.x1 - r.x0, D = r.z1 - r.z0;
     // ring of buildings facing streets, courtyard inside
     const lots = [];
     const depth = 22, gap = 3;
     const along = (x0, x1, z, face) => { let x = x0; while (x < x1 - 8) { const w = Math.min(x1 - x, rnd(14, 26)); if (x1 - (x + w) < 9) { lots.push({ x0: x, x1: x1, face, z }); break; } lots.push({ x0: x, x1: x + w, face, z }); x += w + gap; } };
-    along(r.x0, r.x1, r.z0, 'n'); along(r.x0, r.x1, r.z1, 's');
+    const eggKind = r.i === 3 && r.k === 3 ? 'aisle9' : r.i === 1 && r.k === 3 ? 'postoffice' : null;
+    if (eggKind) { const ew = EGG_SIZE[eggKind][0] + 4; lots.push({ x0: r.x0, x1: r.x0 + ew, face: 'n', egg: eggKind }); along(r.x0 + ew + gap, r.x1, r.z0, 'n'); }
+    else along(r.x0, r.x1, r.z0, 'n');
+    along(r.x0, r.x1, r.z1, 's');
     for (const l of lots) {
       const z0 = l.face === 'n' ? r.z0 : r.z1 - depth, z1 = l.face === 'n' ? r.z0 + depth : r.z1;
+      if (l.egg) { buildEgg(l.egg, l.x0 + 0.5, z0 + 0.5, l.x1 - 0.5, z1 - 0.5, city); continue; }
       let h = rnd(9, 30); if (Math.random() < 0.18) h = rnd(34, 56);
       let fac = pick(FAC);
       let type = 'shop';
@@ -1057,6 +1061,90 @@ function buildCity() {
   buildRoadGraph();
   return city;
 }
+/* ---------- easter eggs: the real stores from Aisle Nine Market and Post Office Tycoon ----------
+   Built the same way those games build them (same sizes, colors and signs). You can walk inside. */
+const EGGS = [];
+const EGG_SIZE = { aisle9: [16, 12], postoffice: [29, 16] };
+function buildEgg(kind, x0, z0, x1, z1, city) {
+  const [W, D] = EGG_SIZE[kind], cx = (x0 + x1) / 2, cz = z0 + D / 2 + 1.5;
+  const g = new T.Group(); g.position.set(cx, 0.14, cz); g.rotation.y = Math.PI; city.add(g); // local +z = the street side
+  const mats = {}, M = (c, o) => { const k = c + JSON.stringify(o || {}); if (!mats[k]) { mats[k] = L(Object.assign({ color: c }, o || {})); } return mats[k]; };
+  const bx = (w, h, d, c, x, y, z, o, solid) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), c.isMaterial ? c : M(c, o)); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; g.add(m);
+    if (solid) COLL.boxes.push({ x0: cx - (x + w / 2), x1: cx - (x - w / 2), z0: cz - (z + d / 2), z1: cz - (z - d / 2), h: y + h / 2 }); return m; };
+  const signTex2 = (draw) => canvasTex(1024, 192, draw);
+  if (kind === 'aisle9') {
+    const wc = 0xf2ead8, xl = -W / 2, XR = W / 2, h = D / 2;
+    bx(W, 0.04, D, 0xe6e0cf, 0, 0.02, 0);
+    for (let x = xl + 2; x < XR; x += 4) bx(0.08, 0.045, D, 0xcfc7b0, x, 0.03, 0);
+    bx(W + 0.6, 3.4, 0.3, wc, 0, 1.7, -h - 0.15, null, true);
+    bx(0.3, 3.4, D + 0.6, wc, xl - 0.15, 1.7, 0, null, true); bx(0.3, 3.4, D + 0.6, wc, XR + 0.15, 1.7, 0, null, true);
+    for (const [a, b2] of [[xl, -1.3], [1.3, XR]]) { const sw = b2 - a, sx = (a + b2) / 2; bx(sw, 0.8, 0.3, wc, sx, 0.4, h + 0.15, null, true); bx(sw, 1.8, 0.1, 0xa9dcec, sx, 1.7, h + 0.15, { transparent: true, opacity: 0.28 }, true); }
+    bx(W + 0.6, 0.8, 0.3, wc, 0, 3.0, h + 0.15); bx(W + 0.6, 1.3, 0.34, 0xe63946, 0, 4.05, h + 0.15);
+    bx(W + 0.6, 0.2, D + 0.6, 0xfaf6ea, 0, 3.5, 0);
+    bx(W + 0.6, 0.12, D + 0.6, 0xd8d2c2, 0, 3.66, 0);
+    for (let x = xl + 2; x < XR; x += 4) bx(0.35, 0.05, 8, 0xffffff, x, 3.38, 0, { emissive: 0xffffff });
+    const sign = new T.Mesh(new T.PlaneGeometry(7.4, 1.08), new T.MeshBasicMaterial({ map: canvasTex(768, 112, (c) => { c.fillStyle = '#e63946'; c.fillRect(0, 0, 768, 112); c.fillStyle = '#fff8e8'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '78px "Paytone One","Arial Black",sans-serif'; c.fillText('AISLE NINE', 384, 60); }) }));
+    sign.position.set(0, 4.05, h + 0.34); g.add(sign);
+    // checkout + shelves full of products, like the game
+    bx(2.2, 0.95, 0.9, 0x4a5568, 4.5, 0.48, 3.2, null, true); bx(2.3, 0.06, 1, 0xf5f0e6, 4.5, 0.98, 3.2); bx(1.1, 0.02, 0.5, 0x22262e, 4.1, 1.02, 3.2); bx(0.5, 0.34, 0.4, 0x22262e, 5.15, 1.18, 3.3); bx(0.4, 0.26, 0.04, 0x7bdff2, 5.15, 1.22, 3.52, { emissive: 0x2a6f80 });
+    const prod = [0xe63946, 0xff9f1c, 0x2a6fd6, 0xffc93c, 0x7b2cbf, 0x2ec4b6, 0xfafcff, 0xe85d04, 0xc81d25, 0xf5d936];
+    const shelf = (x, z, fridge) => {
+      bx(2, 1.7, 0.5, fridge ? 0xd9d9d9 : 0xc9ccd1, x, 0.85, z, null, true);
+      if (fridge) bx(2, 0.25, 0.52, 0x0a6cc4, x, 1.82, z);
+      for (let t = 0; t < 3; t++) { bx(1.9, 0.04, 0.42, fridge ? 0xf2f4f7 : 0xdfe3ea, x, 0.25 + t * 0.55, z + 0.06);
+        for (let k = 0; k < 6; k++) bx(0.22, 0.26, 0.2, prod[(((k * 3 + t + Math.round(x)) % prod.length) + prod.length) % prod.length], x - 0.8 + k * 0.32, 0.4 + t * 0.55, z + 0.12); }
+      if (fridge) bx(1.96, 1.5, 0.04, 0xa9dcf5, x, 0.85, z + 0.28, { transparent: true, opacity: 0.3 });
+    };
+    for (let i = 0; i < 6; i++) shelf(6.4 - 2.2 * i, -5.6, i % 3 === 2);
+    for (let i = 0; i < 5; i++) { shelf(5.5 - 2.2 * i - 2.2, -1.2, false); shelf(5.5 - 2.2 * i - 2.2, -1.8, i === 1); }
+    bx(4.6, 0.04, 2.8, 0xffd23f, 4.2, 0.04, h + 2.1);
+    EGGS.push({ kind, x: cx, z: cz - h - 1.5, name: 'Aisle Nine Market' });
+  } else {
+    const BROWN = 0x5a3418, GOLD = 0xffb500, WALL = 0x4a2c17, DARKB = 0x3d2210, xl = -10, xr = 19, ox = -4.5; // shift so the building is centred
+    const wallX = (a, b2, z) => { bx(b2 - a, 4.5, 0.3, WALL, (a + b2) / 2 + ox, 2.25, z, null, true); bx(b2 - a, 0.28, 0.38, GOLD, (a + b2) / 2 + ox, 1.15, z); bx(b2 - a, 0.22, 0.38, GOLD, (a + b2) / 2 + ox, 4.15, z); };
+    const wallZ = (a, b2, x) => { bx(0.3, 4.5, b2 - a, WALL, x + ox, 2.25, (a + b2) / 2, null, true); bx(0.38, 0.28, b2 - a, GOLD, x + ox, 1.15, (a + b2) / 2); bx(0.38, 0.22, b2 - a, GOLD, x + ox, 4.15, (a + b2) / 2); };
+    wallX(-10, -1.4, 8); wallX(1.4, 19, 8); bx(2.8, 1.3, 0.3, WALL, ox, 3.85, 8);
+    wallX(-10, 19, -8); wallZ(-8, 8, -10); wallZ(-8, 8, 19);
+    bx(0.2, 3.2, 0.4, GOLD, -1.4 + ox, 1.6, 8); bx(0.2, 3.2, 0.4, GOLD, 1.4 + ox, 1.6, 8); bx(3, 0.2, 0.4, GOLD, ox, 3.2, 8);
+    for (const wx of [5.5, 14.5]) { bx(4, 1.9, 0.36, 0x2a4a66, wx + ox, 2.2, 8); bx(4.3, 0.15, 0.42, GOLD, wx + ox, 3.2, 8); bx(4.3, 0.15, 0.42, GOLD, wx + ox, 1.2, 8); }
+    bx(4, 0.15, 1.6, GOLD, ox, 3.45, 8.85);
+    bx(29.6, 0.35, 16.6, DARKB, 4.5 + ox, 4.68, 0);
+    for (const lx of [-6, 0, 6, 14]) for (const lz of [-4, 3]) bx(2.4, 0.06, 0.5, 0xfff6d8, lx + ox, 4.45, lz, { emissive: 0xfff6d8 });
+    bx(12.4, 2.3, 0.4, DARKB, ox, 5.95, 8.05);
+    const nameT = canvasTex(1024, 192, (c) => { c.fillStyle = '#3d2210'; c.fillRect(0, 0, 1024, 192); c.strokeStyle = '#ffb500'; c.lineWidth = 10; c.strokeRect(10, 10, 1004, 172);
+      const t = 'POST OFFICE'; let fs = 112; c.font = '900 ' + fs + 'px "Arial Black", Arial, sans-serif'; while (c.measureText(t).width > 930 && fs > 28) { fs -= 4; c.font = '900 ' + fs + 'px "Arial Black", Arial, sans-serif'; }
+      c.fillStyle = '#ffb500'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, 512, 100); });
+    const nameMat = new T.MeshBasicMaterial({ map: nameT });
+    const sign = new T.Mesh(new T.PlaneGeometry(11.6, 2.17), nameMat); sign.position.set(ox, 5.95, 8.27); g.add(sign);
+    const floorT = canvasTex(128, 128, (c) => { c.fillStyle = '#d9c29a'; c.fillRect(0, 0, 128, 128); c.fillStyle = '#c4a679'; c.fillRect(0, 0, 64, 64); c.fillRect(64, 64, 64, 64); }, true); floorT.repeat.set(14.5, 8);
+    const fl = new T.Mesh(new T.PlaneGeometry(29, 16), new T.MeshLambertMaterial({ map: floorT })); fl.rotation.x = -Math.PI / 2; fl.position.set(4.5 + ox, 0.02, 0); g.add(fl);
+    bx(2.4, 0.03, 1.2, 0x7a1f1f, ox, 0.03, 7); bx(3, 0.1, 1.2, GOLD, ox, 0.05, 8.8 + 0.7);
+    for (let i = 0; i < 3; i++) { const dx = -6 + i * 4 + ox; bx(3, 0.9, 1, 0x5a3418, dx, 0.45, -2, null, true); bx(3.1, 0.08, 1.1, 0xffd23f, dx, 0.94, -2); }
+    // a delivery truck parked out front, exactly like the game's
+    const tg = new T.Group(); g.add(tg); tg.position.set(9 + ox, 0, 11.2); tg.rotation.y = Math.PI / 2;
+    const tb = (w, h2, d, c, x, y, z, m) => { const mm = new T.Mesh(new T.BoxGeometry(w, h2, d), m || M(c)); mm.position.set(x, y, z); mm.castShadow = true; tg.add(mm); };
+    tb(2.4, 2.6, 4.0, BROWN, 0, 1.75, -0.7); tb(2.42, 0.28, 4.02, GOLD, 0, 1.05, -0.7); tb(2.42, 0.12, 4.02, GOLD, 0, 3.0, -0.7);
+    tb(2.3, 1.9, 1.6, BROWN, 0, 1.4, 2.05); tb(2.0, 0.85, 0.05, 0x1d2c3a, 0, 1.85, 2.86); tb(2.32, 0.2, 0.1, GOLD, 0, 0.75, 2.86);
+    for (const sd of [1, -1]) { const pl = new T.Mesh(new T.PlaneGeometry(3.6, 0.68), nameMat); pl.position.set(sd * 1.215, 2.1, -0.7); pl.rotation.y = sd * Math.PI / 2; tg.add(pl); }
+    for (const [wx, wz] of [[1.1, 1.9], [-1.1, 1.9], [1.1, -1.8], [-1.1, -1.8]]) { const wh = new T.Mesh(new T.CylinderGeometry(0.45, 0.45, 0.35, 12), M(0x151515)); wh.rotation.z = Math.PI / 2; wh.position.set(wx, 0.45, wz); tg.add(wh); }
+    const tx = cx - (9 + ox), tz = cz - 11.2; COLL.boxes.push({ x0: tx - 3, x1: tx + 3, z0: tz - 1.3, z1: tz + 1.3, h: 3 });
+    EGGS.push({ kind, x: cx - ox, z: cz - 8 - 1.5, name: 'the Post Office' });
+  }
+}
+/* the park basketball court from Aisle Nine Market (same size, colors and hoop) */
+function buildCourt(cx, cz, city) {
+  const g = new T.Group(); g.position.set(cx, 0.14, cz); g.rotation.y = Math.PI; city.add(g); // local +z points away from the road, hoop at the far end
+  const bx = (w, h, d, c, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), L({ color: c })); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+  // in Aisle Nine the court centre is z=28 and the hoop is at z=34.5; here local z=0 is the centre
+  bx(16, 0.08, 14, 0xc96f4a, 0, 0.04, 0);
+  bx(6, 0.09, 0.12, 0xfff8e8, 0, 0.045, -2.5 + 5); bx(0.12, 0.09, 4, 0xfff8e8, -3, 0.045, 4.5); bx(0.12, 0.09, 4, 0xfff8e8, 3, 0.045, 4.5);
+  bx(0.2, 3.4, 0.2, 0x4a5568, 0, 1.7, 6.5); bx(0.2, 0.2, 0.7, 0x4a5568, 0, 3.3, 6.2); bx(1.8, 1.1, 0.08, 0xfff8e8, 0, 3.5, 5.9);
+  const rim = new T.Mesh(new T.TorusGeometry(0.3, 0.035, 6, 16), L({ color: 0xe85d04 })); rim.rotation.x = Math.PI / 2; rim.position.set(0, 3.05, 5.45); g.add(rim);
+  const ball = new T.Mesh(new T.SphereGeometry(0.12, 14, 10), L({ color: 0xd06a20 })); ball.position.set(1.2, 0.2, 3.2); ball.castShadow = true; g.add(ball);
+  COLL.boxes.push({ x0: cx - 0.2, x1: cx + 0.2, z0: cz - 6.7, z1: cz - 6.3, h: 3.4 });
+  const t = []; for (const [x, z] of [[-11, -4], [-11, 3], [11, -4], [11, 3], [-13, 9], [13, 9], [0, 10]]) t.push([cx - x, cz - z]);
+  plantTrees(t.filter(p => p[1] > cz - 9), city);
+}
 function addBuilding(B, x0, z0, x1, z1, h, fac) {
   B.box(fac, 'roof', x0, 0.14, z0, x1, h, z1, 8, 7);
   // parapet + roof boxes
@@ -1079,7 +1167,7 @@ function buildPark(r, B, city) {
   const cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2;
   B.hplane('walk', r.x0, cz - 2, r.x1, cz + 2, 0.17, 6, 6); B.hplane('walk', cx - 2, r.z0, cx + 2, r.z1, 0.17, 6, 6);
   B.box('concrete', 'concrete', cx - 4, 0.15, cz - 4, cx + 4, 0.7, cz + 4);
-  const t = []; for (let i = 0; i < 30; i++) { const x = rnd(r.x0 + 3, r.x1 - 3), z = rnd(r.z0 + 3, r.z1 - 3); if (Math.abs(x - cx) < 5 || Math.abs(z - cz) < 5) continue; t.push([x, z]); }
+  const t = []; for (let i = 0; i < 30; i++) { const x = rnd(r.x0 + 3, r.x1 - 3), z = rnd(r.z0 + 3, r.z1 - 3); if (Math.abs(x - cx) < 5 || Math.abs(z - cz) < 5) continue; if (r.court && Math.abs(x - r.court.x) < 11 && Math.abs(z - r.court.z) < 9) continue; t.push([x, z]); }
   plantTrees(t, city);
   SPOTS.push({ x: cx + 5, z: cz + 2.5, type: 'park', face: 0 }, { x: cx - 2.5, z: cz - 6, type: 'park', face: Math.PI / 2 }, { x: r.x0 - 1.4, z: cz, type: 'park', face: -Math.PI / 2 });
 }
@@ -3295,7 +3383,10 @@ const UI = {
     while (box.children.length > 3) box.removeChild(box.firstChild);
     setTimeout(() => { t.style.transition = 'opacity .4s'; t.style.opacity = 0; setTimeout(() => t.remove(), 400); }, 3200);
   },
-  event(msg, person, bad) {
+  event(msg, person, bad, hold) {
+    const now = performance.now();
+    if (!bad && !person && !hold && now < (this._hold || 0)) { this.toast(msg); return; }
+    this._hold = hold ? now + hold * 1000 : 0;
     const e = $('event'); $('evTxt').innerHTML = msg; e.hidden = false; e.className = bad ? '' : 'info';
     this.evTarget = person || null; $('evGo').hidden = !person;
     clearTimeout(this._evT); this._evT = setTimeout(() => e.hidden = true, 9000);
@@ -4201,7 +4292,7 @@ function frame(now) {
   updateGps();
   renderer.render(scene, camera);
   hudT -= dt;
-  if (hudT <= 0) { hudT = 0.25; UI.clock(); buildActionButtons(); if (MODE.cur !== 'build') drawMinimap(); tutTick(); hudCarInfo(); promptText(); if (Math.random() < 0.1) UI.refresh(); if (Math.random() < 0.08) setTimeOfDay(G.hour); }
+  if (hudT <= 0) { hudT = 0.25; eggCheck(); UI.clock(); buildActionButtons(); if (MODE.cur !== 'build') drawMinimap(); tutTick(); hudCarInfo(); promptText(); if (Math.random() < 0.1) UI.refresh(); if (Math.random() < 0.08) setTimeOfDay(G.hour); }
 }
 function hudCarInfo() {
   const c = PLAYER.car, box = $('carhp');
@@ -4218,6 +4309,21 @@ function promptText() {
   else if (g) t = '📍 ' + Math.round(dist(pl.x, pl.z, g.x, g.z)) + ' m';
   if (pl.custody.length && !pl.car) t = '🔗 ' + pl.custody.length + ' in cuffs. Get in your car (or walk them to the gate).';
   el.hidden = !t; el.innerHTML = t;
+}
+
+/* ---------- easter eggs ---------- */
+function eggCheck() {
+  G.eggs = G.eggs || {}; const near = eggCheck.near || (eggCheck.near = {});
+  for (const e of EGGS) {
+    const d = dist(PLAYER.x, PLAYER.z, e.x, e.z);
+    if (d > 45) { near[e.kind] = 0; continue; }
+    if (d > 26 || near[e.kind]) continue;
+    near[e.kind] = 1;
+    if (G.eggs[e.kind]) { UI.toast('🥚 ' + e.name); continue; }
+    G.eggs[e.kind] = 1; SFX.cash(); addXp(25);
+    UI.event('🥚 Easter egg! You found <b>' + e.name + '</b>. Walk inside! (' + Object.keys(G.eggs).length + '/' + EGGS.length + ' found)', null, false, 8);
+    saveGame();
+  }
 }
 
 /* ---------- title ---------- */
@@ -4251,7 +4357,5 @@ function boot() {
   ['gesturestart', 'gesturechange', 'gestureend'].forEach(n => document.addEventListener(n, e => e.preventDefault(), { passive: false }));
   document.addEventListener('dblclick', e => { if (e.target && e.target.tagName !== 'INPUT') e.preventDefault(); }, { passive: false });
 })();
-Promise.race([document.fonts ? document.fonts.load('900 64px "Barlow Condensed"') : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).catch(() => { }).then(boot);
+Promise.race([document.fonts ? Promise.all(['900 64px "Barlow Condensed"', '64px "Paytone One"', '64px "Bowlby One"'].map(f => document.fonts.load(f))) : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).catch(() => { }).then(boot);
 </script>
-
-</body></html>
