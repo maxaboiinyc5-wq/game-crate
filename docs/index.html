@@ -237,6 +237,7 @@ button{font:inherit;color:inherit}
 .dx{position:absolute;z-index:1;left:clamp(16px,3vw,32px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:60%}
 .dk{padding:4px 10px;border-radius:999px;background:var(--led);color:var(--ground);font:900 .62rem var(--display);letter-spacing:.1em}
 .dn{font-family:var(--font);font-weight:var(--fw,400);font-style:var(--fs,normal);text-transform:var(--tt,none);font-size:calc(clamp(1.6rem,4vw,2.8rem) * var(--sz,1));line-height:1;color:var(--lfg);text-shadow:0 3px 18px rgba(0,0,0,.5)}
+.dgoal{font-weight:800;font-size:clamp(1rem,2.2vw,1.25rem);color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.6)}
 .ds{font-size:.9rem;color:#e9e4f2}
 .ds.done{color:#7ef0b0;font-weight:700}
 .dd{font-size:.8rem;color:var(--mute)}
@@ -395,11 +396,11 @@ button{font:inherit;color:inherit}
 /* menu color themes, unlocked with achievements */
 window.GC_THEMES=[
  {id:'amber',n:'Amber',need:0,led:'#ffb020',ground:'#0f0c1d',deck:'#1b1730',seam:'#2e2850'},
- {id:'mint',n:'Mint',need:3,led:'#3ee6a8',ground:'#091613',deck:'#12241f',seam:'#21403a'},
- {id:'bubblegum',n:'Bubblegum',need:6,led:'#ff6fae',ground:'#190b17',deck:'#2a1428',seam:'#46223f'},
- {id:'ocean',n:'Ocean',need:9,led:'#4cc3ff',ground:'#08111e',deck:'#101f34',seam:'#1d3555'},
- {id:'royal',n:'Royal',need:12,led:'#c9a6ff',ground:'#110b21',deck:'#1f1638',seam:'#352760'},
- {id:'gold',n:'Gold',need:14,led:'#ffd84a',ground:'#13100a',deck:'#221d10',seam:'#3d3418'}];
+ {id:'mint',n:'Mint',need:8,led:'#3ee6a8',ground:'#091613',deck:'#12241f',seam:'#21403a'},
+ {id:'bubblegum',n:'Bubblegum',need:16,led:'#ff6fae',ground:'#190b17',deck:'#2a1428',seam:'#46223f'},
+ {id:'ocean',n:'Ocean',need:26,led:'#4cc3ff',ground:'#08111e',deck:'#101f34',seam:'#1d3555'},
+ {id:'royal',n:'Royal',need:40,led:'#c9a6ff',ground:'#110b21',deck:'#1f1638',seam:'#352760'},
+ {id:'gold',n:'Gold',need:0,all:1,led:'#ffd84a',ground:'#13100a',deck:'#221d10',seam:'#3d3418'}];
 window.gcTheme=function(id){const t=GC_THEMES.find(x=>x.id===id)||GC_THEMES[0],r=document.documentElement.style,h=t.led.slice(1);
   r.setProperty('--led',t.led);r.setProperty('--ledrgb',[0,2,4].map(i=>parseInt(h.substr(i,2),16)).join(','));
   r.setProperty('--ground',t.ground);r.setProperty('--deck',t.deck);r.setProperty('--seam',t.seam);return t};
@@ -473,7 +474,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     <div class="row" id="rowFav"></div>
   </section>
   <section class="sec" id="secDaily" aria-labelledby="hDaily">
-    <div class="sech pad"><h2 id="hDaily">Daily challenge</h2><span class="sn" id="dailyLeft"></span><p>A new game every day. Just play it before midnight. You do not have to beat it.</p></div>
+    <div class="sech pad"><h2 id="hDaily">Daily challenge</h2><span class="sn" id="dailyLeft"></span><p>A new goal every day, inside a game. It is always something you have not done yet.</p></div>
     <div class="pad"><button type="button" class="daily" id="daily"></button></div>
   </section>
   <section class="sec" id="secStats" aria-labelledby="hStats">
@@ -506,7 +507,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     <ul>
       <li>Scroll down for achievements, picks for you, favorites, the daily challenge, your stats and more. The buttons under the genres jump straight to each one.</li>
       <li>Tap the heart next to Play to add a game to Favorites.</li>
-      <li>Daily challenge: just play that day's game before midnight. You do not have to beat it. A new one shows up every day.</li>
+      <li>Daily challenge: a goal inside one game that you have not done yet, like reaching a level. Finish it before midnight. A new one shows up every day.</li>
       <li>Earn achievements on the console and inside each game. A notification pops up in the game the moment you get one.</li>
       <li>Earn achievements to unlock new menu colors in Themes.</li>
     </ul>
@@ -654,6 +655,20 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     ['b25','Trophy Room','Earn 25 Brokebox trophies',function(){return bbTro()>=25}]]
   };
   window.GC_GACH=A;
+  function today(){var n=new Date();return Math.round(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/864e5)}
+  function gotMap(){try{return JSON.parse(localStorage.getItem('gc.gach')||'{}')||{}}catch(e){return {}}}
+  /* today's challenge: the next goal you have NOT done yet in one game. It is picked once per day and kept */
+  window.GC_DAILY_PICK=function(){
+    var d=today(),cur;try{cur=JSON.parse(localStorage.getItem('gc.dailyPick')||'null')}catch(e){}
+    if(cur&&cur.day===d)return cur;
+    var got=gotMap(),pool=[];
+    for(var g in A){var mine=got[g]||{};for(var i=0;i<A[g].length;i++){var a=A[g][i];if(mine[a[0]])continue;
+      var ok=false;try{ok=!!a[3]()}catch(e){}if(!ok){pool.push({g:g,id:a[0]});break}}}
+    var pick=pool.length?pool[((d*7+3)%pool.length+pool.length)%pool.length]:null;
+    cur={day:d,g:pick&&pick.g,id:pick&&pick.id};try{localStorage.setItem('gc.dailyPick',JSON.stringify(cur))}catch(e){}
+    return cur;
+  };
+  function dailyDone(){var d=today();try{var a=JSON.parse(localStorage.getItem('gc.daily')||'[]')||[];if(a.indexOf(d)<0){a.push(d);localStorage.setItem('gc.daily',JSON.stringify(a.slice(-400)))}}catch(e){}}
   /* record anything newly earned. Returns the list of [game,achievement] that just unlocked */
   window.GC_GACH_CHECK=function(only){
     var got;try{got=JSON.parse(localStorage.getItem('gc.gach')||'{}')||{}}catch(e){got={}}
@@ -663,6 +678,9 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
         var ok=false;try{ok=!!a[3]()}catch(e){}
         if(ok){got[g]=got[g]||{};got[g][a[0]]={t:Date.now(),seen:0};fresh.push([g,a])}}}
     if(fresh.length)try{localStorage.setItem('gc.gach',JSON.stringify(got))}catch(e){}
+    /* finishing today's challenge goal also finishes the daily challenge */
+    var pk=window.GC_DAILY_PICK();
+    for(var j=0;j<fresh.length;j++)if(pk&&pk.g===fresh[j][0]&&pk.id===fresh[j][1][0]){dailyDone();fresh.daily=fresh[j]}
     return fresh;
   };
 
@@ -705,8 +723,8 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   if(window.__mxPending&&window.__mxPending.length){var pend=window.__mxPending;setTimeout(function(){GC_ACH_POP(pend)},1200)}
   if(!A[G])return;
   /* things already earned before this play session are saved quietly; only new ones pop up */
-  GC_GACH_CHECK(G);
-  setInterval(function(){var f=GC_GACH_CHECK(G);for(var i=0;i<f.length;i++)queue.push(f[i][1]);next()},1500);
+  GC_DAILY_PICK();GC_GACH_CHECK(G);
+  setInterval(function(){var f=GC_GACH_CHECK(G);for(var i=0;i<f.length;i++)queue.push(f[i][1]);if(f.daily)queue.push(['daily','Daily challenge complete',f.daily[1][1]+' done. Come back tomorrow for a new one']);next()},1500);
 })();
 </script>
 
@@ -950,7 +968,6 @@ function countPlay(id){const p=plays(),r=p[id]||{n:0,t:0};r.n++;r.t=Date.now();p
   const ds=jget('gc.days',[]);if(!ds.includes(day)){ds.push(day);jset('gc.days',ds.slice(-60))}
   const ev=jget('gc.ev',{}),g=GAMES.find(x=>x.id===id);
   if(now.getHours()<5)ev.owl=1;if(g&&tagsOf(g).isNew)ev.fresh=1;jset('gc.ev',ev);
-  if(dailyGame(day).id===id){const dc=jget('gc.daily',[]);if(!dc.includes(day)){dc.push(day);jset('gc.daily',dc.slice(-400))}}
   const lg=jget('gc.log',[]);lg.push([id,Date.now()]);jset('gc.log',lg.slice(-400));
 }
 function today(){const n=new Date();return Math.round(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/864e5)}
@@ -1227,8 +1244,8 @@ const ACHS=[
  {id:'streak',n:'On a Roll',d:'Play 3 days in a row',ic:'cal',p:s=>[s.streak,3]},
  {id:'fresh',n:'Fresh Off the Line',d:'Play a game while it is still marked NEW',ic:'spark',p:s=>[s.ev.fresh?1:0,1]},
  {id:'owl',n:'Night Owl',d:'Play a game between midnight and 5 AM',ic:'moon',p:s=>[s.ev.owl?1:0,1]},
- {id:'daily',n:'Challenge Accepted',d:'Do a daily challenge',ic:'check',p:s=>[s.daily,1]},
- {id:'daily5',n:'Daily Grinder',d:'Do 5 daily challenges',ic:'target',p:s=>[s.daily,5]}];
+ {id:'daily',n:'Challenge Accepted',d:'Finish a daily challenge',ic:'check',p:s=>[s.daily,1]},
+ {id:'daily5',n:'Daily Grinder',d:'Finish 5 daily challenges',ic:'target',p:s=>[s.daily,5]}];
 function stats(){
   const P=plays(),ids=GAMES.map(g=>g.id).filter(id=>P[id]&&P[id].n>0);
   const days=jget('gc.days',[]).slice().sort((a,b)=>a-b);let streak=days.length?1:0,run=1;
@@ -1329,13 +1346,18 @@ function renderFav(){const P=plays();
 
 /* daily challenge */
 function renderDaily(){
-  const d=today(),g=dailyGame(d),done=jget('gc.daily',[]),b=$('daily');skin(b,g);b.textContent='';
-  const img=document.createElement('img');img.src=art(g.id);img.alt='';img.loading='lazy';
-  const x=span('dx'),ok=done.includes(d);
-  x.append(span('dk',"TODAY'S CHALLENGE"),span('dn',g.name),span('ds'+(ok?' done':''),ok?'Done for today. Nice.':'Just play '+g.name+' today. You do not have to beat it.'),
-    span('dd',done.length+(done.length===1?' challenge':' challenges')+' done'));
-  b.append(img,x);b.setAttribute('aria-label',"Today's challenge: "+g.name+(ok?', done':''));
-  b.onclick=()=>goTo(g);
+  const pk=window.GC_DAILY_PICK?GC_DAILY_PICK():null,d=today(),done=jget('gc.daily',[]),ok=done.includes(d),b=$('daily');b.textContent='';
+  const g=pk&&pk.g?GAMES.find(x=>x.id===pk.g):null,a=g&&(GC_GACH[g.id]||[]).find(x=>x[0]===pk.id);
+  const x=span('dx');
+  if(!g||!a){skin(b,GAMES[0]);x.append(span('dk',"TODAY'S CHALLENGE"),span('dn','All done'),span('ds','You have finished every goal there is. Nice.'));b.append(x);b.onclick=null;}
+  else{
+    skin(b,g);const img=document.createElement('img');img.src=art(g.id);img.alt='';img.loading='lazy';
+    x.append(span('dk',"TODAY'S CHALLENGE"),span('dn',g.name),span('dgoal',a[2]),
+      span('ds'+(ok?' done':''),ok?'Done for today. Nice.':'Do it before midnight.'),
+      span('dd',done.length+(done.length===1?' challenge':' challenges')+' done'));
+    b.append(img,x);b.setAttribute('aria-label',"Today's challenge: "+g.name+', '+a[2]+(ok?', done':''));
+    b.onclick=()=>goTo(g);
+  }
   const n=new Date(),mid=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1),m=Math.max(1,Math.round((mid-n)/6e4));
   $('dailyLeft').textContent='New one in '+(m>=60?Math.floor(m/60)+'h ':'')+(m%60)+'m';
 }
@@ -1366,10 +1388,10 @@ function renderStats(){
 function renderThemes(){
   const got=achGot(),curT=jget('gc.theme','amber'),box=$('themes');box.textContent='';
   for(const t of GC_THEMES){
-    const open=got>=t.need,b=document.createElement('button');b.type='button';b.className='th'+(t.id===curT?' on':'')+(open?'':' lock');b.disabled=!open;
+    const need=t.all?achAll():t.need,open=got>=need,b=document.createElement('button');b.type='button';b.className='th'+(t.id===curT?' on':'')+(open?'':' lock');b.disabled=!open;
     const pv=span('tpv');pv.append(document.createElement('i'));pv.style.setProperty('--tg',t.ground);pv.style.setProperty('--td',t.deck);pv.style.setProperty('--tl',t.led);
     const tx=span('');const nb=document.createElement('b');nb.textContent=t.n;const sm=document.createElement('small');
-    sm.textContent=t.id===curT?'In use':open?'Tap to use':'Unlocks at '+t.need+' achievements ('+Math.min(got,t.need)+'/'+t.need+')';
+    sm.textContent=t.id===curT?'In use':open?'Tap to use':(t.all?'Unlocks with every achievement (':'Unlocks at '+need+' achievements (')+Math.min(got,need)+'/'+need+')';
     tx.append(nb,sm);b.append(pv,tx);
     b.setAttribute('aria-label',t.n+' theme. '+sm.textContent);
     b.addEventListener('click',()=>{if(!open)return;jset('gc.theme',t.id);gcTheme(t.id);renderThemes()});
@@ -1464,7 +1486,7 @@ const gFresh=window.GC_GACH_CHECK?GC_GACH_CHECK():[];
 renderAch();renderRows();renderFav();renderDaily();renderStats();renderThemes();renderJump();
 setInterval(renderDaily,60000);
 /* achievements earned since the last visit to the menu */
-{const all=gFresh.map(x=>x[1]);
+{const all=gFresh.map(x=>x[1]);if(gFresh.daily)all.push(['daily','Daily challenge complete',gFresh.daily[1][1]+' done. Come back tomorrow for a new one']);
   if(all.length&&window.GC_ACH_POP){const list=all.length>3?all.slice(0,2).concat([['more','+'+(all.length-2)+' more achievements','Scroll down to Achievements to see them']]):all;
     setTimeout(()=>GC_ACH_POP(list),900)}}
 for(const r of document.querySelectorAll('.row'))r.addEventListener('wheel',e=>{
