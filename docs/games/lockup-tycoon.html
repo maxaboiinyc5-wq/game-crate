@@ -1296,10 +1296,10 @@ const ITEMS = {
     spots: [[0.5, 0.5, 0, -1, 0, -1, 'yard', 'pullup', 0.35]] },
   bench: { n: 'Bench', cat: 'yard', price: 110, w: 2, h: 1, block: true, lvl: 1, d: 'Seats 2. Good for yard and hallways.',
     spots: [[0.5, 0.42, 0, -1, 0, -1, 'yard', 'sit', 0.46], [1.5, 0.42, 0, -1, 1, -1, 'yard', 'sit', 0.46]] },
-  laundry: { n: 'Laundry Machine', cat: 'work', price: 700, w: 1, h: 1, block: true, lvl: 1, d: '1 worker, $30 every Work hour. Each job station you own also boosts ALL work pay by 10%.',
+  laundry: { n: 'Washer Dryer', cat: 'work', price: 700, w: 1, h: 1, block: true, lvl: 1, d: '1 worker, $30 every Work hour. Each one you own also boosts ALL work pay by 10%.',
     spots: [[0.5, -0.32, 0, 1, 0, -1, 'work', 'work']] },
-  workbench: { n: 'Workshop Bench', cat: 'work', price: 900, w: 2, h: 1, block: true, lvl: 3, d: '2 workers, $45 each every Work hour. Also boosts ALL work pay by 10%.',
-    spots: [[0.5, -0.32, 0, 1, 0, -1, 'work', 'work'], [1.5, -0.32, 0, 1, 1, -1, 'work', 'work']] },
+  workbench: { n: 'Workshop Bench', cat: 'work', price: 900, w: 2, h: 1, block: true, lvl: 3, d: 'Big bench: 3 workers, $45 each every Work hour. Also boosts ALL work pay by 20%.',
+    spots: [[0.3, -0.32, 0, 1, 0, -1, 'work', 'work'], [1.0, -0.32, 0, 1, 0, -1, 'work', 'work'], [1.7, -0.32, 0, 1, 1, -1, 'work', 'work']] },
   camera: { n: 'Security Camera', cat: 'sec', price: 350, w: 1, h: 1, block: true, lvl: 1, d: 'Spots escapes and fights within 13 m.', see: 13 },
   tower: { n: 'Guard Tower', cat: 'sec', price: 1800, w: 2, h: 2, block: true, lvl: 2, d: 'Spots escapes within 30 m and calls guards.', see: 30 },
   detector: { n: 'Metal Detector', cat: 'sec', price: 900, w: 1, h: 1, walk: true, lvl: 3, d: 'Walk-through. Fewer shanks and tunnels. Put it in a doorway.' },
@@ -2179,7 +2179,7 @@ const GEAR = {
 const STAFF_TYPES = {
   guard: { n: 'Guard', wage: 140, hire: 300, d: 'Patrols, serves food, stops fights and riots, catches escapes.' },
   janitor: { n: 'Janitor', wage: 90, hire: 150, d: 'Mops up dirt and fixes broken stuff.' },
-  officer: { n: 'Officer', wage: 220, hire: 600, d: 'Drives out and arrests criminals for you. Needs a patrol car ($4,000).', lvl: 2 },
+  officer: { n: 'Deputy', wage: 220, hire: 600, d: 'Drives out and arrests criminals for you. Needs a patrol car ($4,000).', lvl: 2 },
 };
 const OFFICER_CAR_PRICE = 4000;
 function level() { let l = 1; for (let i = 1; i < LEVEL_XP.length; i++) if (G.xp >= LEVEL_XP[i]) l = i + 1; return l; }
@@ -2266,9 +2266,9 @@ function payWorkHour() {
   earn(pay, 'Inmate work'); G.stats.workPay = (G.stats.workPay || 0) + pay;
   UI.toast('💼 Work hour: ' + n + ' inmate' + (n === 1 ? '' : 's') + ' earned you <b>+' + money(pay) + '</b>' + (st > 1 ? ' · stations +' + Math.round((st - 1) * 100) + '%' : '') + (bonus > 1 ? ' · crew bonus' : ''), 'cash'); SFX.cash();
 }
-/* every job station you own makes ALL work pay go up 10% */
+/* job stations make ALL work pay go up: washer dryer +10%, workshop bench +20% */
 function stationCount() { let n = 0; for (const rt of J.byUid.values()) if (rt.def.cat === 'work') n++; return n; }
-function stationBoost() { return 1 + stationCount() * 0.1; }
+function stationBoost() { let b = 1; for (const rt of J.byUid.values()) if (rt.def.cat === 'work') b += rt.data.type === 'workbench' ? 0.2 : 0.1; return b; }
 function onHour(h) {
   const act = curAct();
   // pay for the work hour that just ended: every inmate who worked earns you money
@@ -2609,8 +2609,8 @@ class Staff {
 }
 function hireStaff(kind) {
   const t = STAFF_TYPES[kind];
-  if (t.lvl && level() < t.lvl) return UI.toast('Reach level ' + t.lvl + ' to hire officers.'), false;
-  if (kind === 'officer' && G.cars.officerCars <= G.staff.filter(s => s.kind === 'officer').length) return UI.toast('Buy a patrol car for the officer first (Garage).'), false;
+  if (t.lvl && level() < t.lvl) return UI.toast('Reach level ' + t.lvl + ' to hire deputies.'), false;
+  if (kind === 'officer' && G.cars.officerCars <= G.staff.filter(s => s.kind === 'officer').length) return UI.toast('Buy a patrol car for the deputy first (Garage).'), false;
   if (!spend(t.hire, 'Hiring')) return UI.toast('Not enough money.'), false;
   const female = Math.random() < 0.4; let first = pick(STAFF_FIRST);
   const d = { uid: UID++, kind, name: first + ' ' + pick(LAST), duty: kind === 'guard' ? 'patrol' : null, female };
@@ -3338,7 +3338,7 @@ function officerUpdate(o, dt) {
           o.chase = null; o.state = 'return'; officerRoute(o, BOOK.x, BOOK.z);
         } else if (o.state === 'return') {
           // book cargo
-          for (const c of (o.cargo || [])) { if (freeBeds() <= 0) { UI.event('🛏 Officer is waiting: no free beds!', null, true); o.t = -6; return; } c.p.remove(); const k = CROOKS.indexOf(c); if (k >= 0) CROOKS.splice(k, 1); bookPrisoner(c.stars, c.crime.name, c.look, car.x + 1.5, car.z); const b = Math.round(BOUNTY[c.stars] * 0.8); earn(b, 'Arrest bounties'); addXp(c.stars * 12); G.stats.arrests++; c.state = 'booked'; }
+          for (const c of (o.cargo || [])) { if (freeBeds() <= 0) { UI.event('🛏 Deputy is waiting: no free beds!', null, true); o.t = -6; return; } c.p.remove(); const k = CROOKS.indexOf(c); if (k >= 0) CROOKS.splice(k, 1); bookPrisoner(c.stars, c.crime.name, c.look, car.x + 1.5, car.z); const b = Math.round(BOUNTY[c.stars] * 0.8); earn(b, 'Arrest bounties'); addXp(c.stars * 12); G.stats.arrests++; c.state = 'booked'; }
           if (o.returning) { const m = o.returning; m.p.remove(); bookPrisoner(m.d.stars, null, null, car.x + 1.5, car.z, m.d); o.returning = null; }
           if (o.crime) { removeCrime(o.crime); o.crime = null; }
           o.cargo = null; o.state = 'park'; const ps = PARK_SPOTS[o.spotIdx]; o.goal = { x: ps.x - 4, z: ps.z }; o.direct = true; car.ai = null;
@@ -3393,7 +3393,7 @@ const UI = {
     if (bad) SFX.bad(); else SFX.radio();
   },
   alertOnce(k, msg) { const now = performance.now(); if (this.once[k] && now - this.once[k] < 60000) return; this.once[k] = now; this.event(msg, null, false); },
-  levelUp(l) { this.event('⭐ Level ' + l + '! ' + (l === 2 ? '2★ crimes, bunk cells, solitary and officers unlocked.' : l === 3 ? '3★ car thieves are out. Spike strips and the van unlocked.' : l === 4 ? 'Interceptor and K9 unlocked.' : l === 5 ? '4★ armed robbers are out. Roadblocks unlocked.' : l === 7 ? '5★ bank heists can happen now!' : 'New stuff unlocked in Build.'), null, false); SFX.cash(); this.refresh(); },
+  levelUp(l) { this.event('⭐ Level ' + l + '! ' + (l === 2 ? '2★ crimes, bunk cells, solitary and deputies unlocked.' : l === 3 ? '3★ car thieves are out. Spike strips and the van unlocked.' : l === 4 ? 'Interceptor and K9 unlocked.' : l === 5 ? '4★ armed robbers are out. Roadblocks unlocked.' : l === 7 ? '5★ bank heists can happen now!' : 'New stuff unlocked in Build.'), null, false); SFX.cash(); this.refresh(); },
   actChanged(act) { const a = ACT[act]; this.toast(a.ic + ' Schedule: <b>' + a.n + '</b>'); },
   crimeAlert(cr) {
     SFX.radio(); $('radioDot').hidden = false;
@@ -3485,7 +3485,7 @@ const SHEETS = {
       '<div class="pal">' + ACT_KEYS.map(k => '<button class="pc' + (UI.brush === k ? ' on' : '') + '" data-brush="' + k + '" style="background:' + ACT[k].c + '">' + ACT[k].ic + ' ' + ACT[k].n + '</button>').join('') + '</div>' +
       '<div class="hours" id="hours">' + s.map((a, h) => '<div class="hr' + (d === today && h === nowH ? ' now' : '') + '" data-h="' + h + '" style="background:' + ACT[a].c + '">' + ACT[a].ic + '<small>' + ((h % 12) || 12) + (h < 12 ? 'a' : 'p') + '</small></div>').join('') + '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" data-sc="all">Copy ' + DAYS[d].slice(0, 3) + ' to every day</button><button class="btn" data-sc="wk">Copy to weekdays</button><button class="btn" data-sc="reset">Reset ' + DAYS[d].slice(0, 3) + '</button></div>' +
-      '<p class="note">Eat needs a counter with a guard on Food duty. Work earns you money every hour for each inmate working: $30 on a laundry machine, $45 at a workshop bench, $15 doing chores if no machine is free. 5+ workers get a crew bonus. Yard uses yard stuff and grass. Rec uses the rec room stuff.</p>';
+      '<p class="note">Eat needs a counter with a guard on Food duty. Work earns you money every hour for each inmate working: $30 on a washer dryer, $45 at a workshop bench, $15 doing chores if no machine is free. 5+ workers get a crew bonus. Yard uses yard stuff and grass. Rec uses the rec room stuff.</p>';
   },
   radio() {
     const list = CRIMES_ACTIVE.slice().sort((a, b) => b.stars - a.stars);
@@ -3507,7 +3507,7 @@ const SHEETS = {
         (have ? (act ? '' : '<button class="btn pri" data-usecar="' + k + '">Use</button>') : lock ? '<span class="tagx">Level ' + s.lvl + '</span>' : '<button class="btn pri" data-buycar="' + k + '">Buy ' + money(s.price) + '</button>') + '</div>';
     }).join('');
     const offs = G.staff.filter(s => s.kind === 'officer').length;
-    return cars + '<h3>Officer patrol cars</h3><div class="row"><div class="grow"><b>Patrol car for an officer</b><small>Each officer you hire needs one. You have ' + G.cars.officerCars + ' (' + offs + ' in use).</small></div><button class="btn pri" data-buyoc="1"' + (level() < 2 ? ' disabled' : '') + '>Buy ' + money(OFFICER_CAR_PRICE) + '</button></div>' +
+    return cars + '<h3>Deputy patrol cars</h3><div class="row"><div class="grow"><b>Patrol car for a deputy</b><small>Each deputy you hire needs one. You have ' + G.cars.officerCars + ' (' + offs + ' in use).</small></div><button class="btn pri" data-buyoc="1"' + (level() < 2 ? ' disabled' : '') + '>Buy ' + money(OFFICER_CAR_PRICE) + '</button></div>' +
       '<p class="note">Your car is in the parking lot on the east side of the jail. A wrecked car gets towed back for $250.</p>';
   },
   gear() {
@@ -3527,7 +3527,7 @@ const SHEETS = {
     return '<h3>Your job</h3><p class="note">You own the jail. Drive the cruiser around the city, arrest criminals and bring them back. The county pays you every day for each inmate. Keep them fed, rested, clean and entertained or they fight, riot and try to escape.</p>' +
       '<h3>Catching criminals</h3><p class="note">Open the Radio and tap GPS. Drive to the beacon. Runners flee when you get close or hear your siren. On foot, get right next to them and press Cuff. Getaway cars: ram them until they wreck, then chase the driver on foot. Drive into the yellow booking box at the gate to book them.</p>' +
       '<h3>Building</h3><p class="note">Tap Build. Pick something, it shows up as a ghost: drag it where you want it, rotate it, then Place. Tap anything you built to move, rotate, sell or fix it. Walls, fences and floors are drawn by dragging.</p>' +
-      '<h3>Staff</h3><p class="note">Guards on Food duty serve meals at the counter. Patrol guards stop fights, catch escapers and search cells. Gate guards walk new prisoners to their cells. Janitors clean and repair. Officers drive out and arrest people for you.</p>' +
+      '<h3>Staff</h3><p class="note">Guards on Food duty serve meals at the counter. Patrol guards stop fights, catch escapers and search cells. Gate guards walk new prisoners to their cells. Janitors clean and repair. Deputies drive out and arrest people for you.</p>' +
       '<h3>Controls</h3><p class="note">' + (MOBILE ? 'Left stick to move or drive. Drag the screen to look around. Buttons on the right do actions.' : 'WASD / arrows to move and drive. Mouse drag to look. E enter/exit car, F cuff, Space handbrake, H siren, T taser, Q spikes, X roadblock, K dog. B build, J jail, R radio, G garage.') + '</p>';
   },
 };
@@ -3557,7 +3557,7 @@ function sheetClick(e) {
   if (d.gps) { if (d.gps.startsWith('esc')) { const m = INMATES.find(x => x.d.uid === +d.gps.slice(3)); UI.target = m ? { escapee: m } : null; } else UI.target = CRIMES_ACTIVE.find(c => c.id === +d.gps) || null; SFX.click(); UI.renderSheet(); setTimeout(closeSheet, 250); tutEvent('gps'); return; }
   if (d.buycar) { const s = CAR_SPECS[d.buycar]; if (spend(s.price, 'Cars & gear')) { G.cars.owned.push(d.buycar); G.cars.active = d.buycar; swapPlayerCar(); SFX.cash(); UI.toast('🚓 New ' + s.n + ' is in the lot.'); } else UI.toast('Not enough money.', 'bad'); UI.refresh(); return; }
   if (d.usecar) { G.cars.active = d.usecar; swapPlayerCar(); UI.refresh(); return; }
-  if (d.buyoc) { if (spend(OFFICER_CAR_PRICE, 'Cars & gear')) { G.cars.officerCars++; SFX.cash(); UI.toast('Patrol car bought. Hire an officer in Jail → Staff.'); } else UI.toast('Not enough money.', 'bad'); UI.refresh(); return; }
+  if (d.buyoc) { if (spend(OFFICER_CAR_PRICE, 'Cars & gear')) { G.cars.officerCars++; SFX.cash(); UI.toast('Patrol car bought. Hire a deputy in Jail → Staff.'); } else UI.toast('Not enough money.', 'bad'); UI.refresh(); return; }
   if (d.gear) { const g = GEAR[d.gear]; if (spend(g.price, 'Cars & gear')) { G.gear[d.gear] = true; SFX.cash(); if (d.gear === 'k9') makePlayerDog(); UI.toast(g.ic + ' ' + g.n + ' unlocked!'); buildActionButtons(); } else UI.toast('Not enough money.', 'bad'); UI.refresh(); return; }
   if (d.m === 'sound') { SFX.setOn(!SFX.on); UI.renderSheet(); return; }
   if (d.m === 'save') { saveGame(); UI.toast('💾 Saved'); return; }
