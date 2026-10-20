@@ -258,6 +258,7 @@ h3{margin:14px 0 8px;font:800 15px var(--disp);letter-spacing:.06em;text-transfo
   #bTool{bottom:calc(150px + var(--sb))}
 }
 
+.trait{display:inline-block;margin-left:4px;padding:1px 8px;border-radius:999px;font:700 11px var(--body);color:#e4e7ee;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);vertical-align:middle}
 .gang{display:inline-block;margin-left:4px;padding:1px 8px;border-radius:999px;font:700 11px var(--body);color:var(--gc);border:1px solid var(--gc);background:rgba(255,255,255,.04);vertical-align:middle}
 
 #signEd{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,7,12,.5)}
@@ -2256,8 +2257,9 @@ function payWorkHour() {
   for (const m of INMATES) {
     if (m.d.escaped || m.d.solo > 0 || m.state === 'escapee') continue;
     const s = m.p.spot || m.p.spotRes;
-    if (s && s.tag === 'work') { pay += WORK_PAY[s.item.data.type] || 30; n++; }
-    else if (m.choring) { pay += WORK_PAY.chores; n++; }
+    const tm = m.d.trait === 'lazy' ? 0.5 : m.d.trait === 'worker' ? 1.5 : 1;
+    if (s && s.tag === 'work') { pay += (WORK_PAY[s.item.data.type] || 30) * tm; n++; }
+    else if (m.choring) { pay += WORK_PAY.chores * tm; n++; }
   }
   if (!n) return;
   const bonus = n >= 10 ? 1.25 : n >= 5 ? 1.1 : 1; // bigger crews earn more per head
@@ -2352,6 +2354,15 @@ const GANGS = {
   green: { n: 'Green Vipers', c: 0x2f9a3a, css: '#4fd25f', rival: ['red', 'blue'] },
 };
 const CONTRA = { phone: { n: 'phone', ic: '📱' }, shank: { n: 'shank', ic: '🔪', metal: 1 }, tool: { n: 'digging tool', ic: '🪛', metal: 1 } };
+/* personalities: each inmate may get one */
+const TRAITS = {
+  hothead: { n: 'Hothead', e: '😡', d: 'Gets angry fast and starts fights more often.' },
+  snitch: { n: 'Snitch', e: '🐀', d: 'Tips you off about escape plans and contraband.' },
+  lazy: { n: 'Lazy', e: '😴', d: 'Earns half pay at work.' },
+  worker: { n: 'Hard Worker', e: '💪', d: 'Earns 50% more at work.' },
+  artist: { n: 'Escape Artist', e: '🗝️', d: 'Wants out more and digs tunnels faster.' },
+};
+function rollTrait() { return Math.random() < 0.25 ? '' : pick(Object.keys(TRAITS)); }
 function rollGang(stars) { return Math.random() < 0.25 + stars * 0.1 ? pick(Object.keys(GANGS)) : null; }
 function makeInmateData(stars, crime, look) {
   const female = look ? look.female : Math.random() < 0.18;
@@ -2360,7 +2371,7 @@ function makeInmateData(stars, crime, look) {
     uid: UID++, name: first + ' ' + pick(LAST), crime: crime || pick(CRIMES[stars]), stars, days: stars * 2 + rint(1, 3), served: 0,
     need: { food: rnd(50, 80), sleep: rnd(55, 85), hyg: rnd(40, 70), fun: rnd(40, 70) }, mood: 60, anger: 0, cell: 0, bed: 0,
     look: look || { female, model: female ? 'w_casual' : (Math.random() < 0.7 ? 'casual_2' : 'casual_hoodie'), tone: pick(SKIN_TONES), hair: pick(HAIR_COLS), height: rnd(1.72, 1.95) * (female ? 0.94 : 1) },
-    dig: 0, solo: 0, plan: null, x: 0, z: 0, gang: rollGang(stars), contra: Math.random() < 0.15 + stars * 0.05 ? [pick(['phone', 'shank', 'tool'])] : [],
+    dig: 0, solo: 0, plan: null, x: 0, z: 0, gang: rollGang(stars), trait: rollTrait(), contra: Math.random() < 0.15 + stars * 0.05 ? [pick(['phone', 'shank', 'tool'])] : [],
   };
 }
 class Inmate {
@@ -2370,6 +2381,7 @@ class Inmate {
     p.owner = this; this.p = p; this.state = 'idle'; this.timer = 0; this.replan = true; this.think = rnd(0.5);
     if (!d.contra) d.contra = [];
     if (d.gang === undefined) d.gang = rollGang(d.stars);
+    if (d.trait === undefined) d.trait = rollTrait();
     if (d.gang) gangBand(p.v, GANGS[d.gang].c);
     INMATES.push(this);
   }
@@ -2418,7 +2430,19 @@ function releaseInmate(m) {
   G.inmates = G.inmates.filter(x => x !== m.d);
 }
 
+function snitchTips() {
+  for (const sn of INMATES) {
+    if (sn.d.trait !== 'snitch' || sn.d.escaped || sn.d.solo > 0 || Math.random() > 0.3) continue;
+    const near = INMATES.filter(o => o !== sn && !o.d.escaped && o.state !== 'escapee' && dist2(o.p.x, o.p.z, sn.p.x, sn.p.z) < 100);
+    const planner = near.find(o => o.d.plan && o.state !== 'climb');
+    if (planner) { const how = planner.d.plan === 'tunnel' ? 'digging a tunnel' : 'planning to climb the fence'; planner.d.plan = null; planner.d.dig = 0; planner.d.anger = clamp(planner.d.anger + 10, 0, 100);
+      UI.event('🐀 Snitch tip from ' + sn.d.name + ': ' + planner.d.name + ' was ' + how + '. Plan stopped.', planner.p, false); return; }
+    const smug = near.find(o => o.d.contra && o.d.contra.length && !o.searching);
+    if (smug) { UI.event('🐀 Snitch tip from ' + sn.d.name + ': ' + smug.d.name + ' is hiding a ' + smug.d.contra[0] + '. Search them (Jail → Inmates).', smug.p, false); return; }
+  }
+}
 function hourlyMoods() {
+  snitchTips();
   for (const m of INMATES) {
     const d = m.d, n = d.need;
     if (d.escaped) continue;
@@ -2436,12 +2460,12 @@ function hourlyMoods() {
     if (d.solo > 0) target -= 12;
     if (SIM.noFood && curAct() === 'eat') target -= 5;
     d.mood = clamp(lerp(d.mood, target, 0.35), 0, 100);
-    if (d.mood < 32) d.anger = clamp(d.anger + (32 - d.mood) * 0.35, 0, 100); else d.anger = clamp(d.anger - 6, 0, 100);
+    if (d.mood < 32) d.anger = clamp(d.anger + (32 - d.mood) * (d.trait === 'hothead' ? 0.6 : 0.35), 0, 100); else d.anger = clamp(d.anger - 6, 0, 100);
     if (d.solo > 0) d.solo = Math.max(0, d.solo - 1);
     // trouble rolls
     if (m.state === 'idle' || m.state === 'act') {
       const shank = d.contra.includes('shank');
-      if (d.anger > 55 && Math.random() < (shank ? 0.18 : 0.12)) startFight(m);
+      if (d.anger > (d.trait === 'hothead' ? 40 : 55) && Math.random() < (shank ? 0.18 : 0.12) * (d.trait === 'hothead' ? 2 : 1)) startFight(m);
       else if (d.gang && !SIM.locked) { // rival gang members nearby start trouble
         const rival = INMATES.find(o => o !== m && o.d.gang && GANGS[d.gang].rival.includes(o.d.gang) && o.state !== 'fight' && o.d.solo <= 0 && dist2(o.p.x, o.p.z, m.p.x, m.p.z) < 36);
         if (rival && Math.random() < (shank ? 0.14 : 0.08) + d.anger * 0.002) startFight(m, rival, true);
@@ -2449,7 +2473,7 @@ function hourlyMoods() {
         if (crew) d.mood = clamp(d.mood + 1.5, 0, 100);
       }
       const sec = securityScore();
-      const want = d.stars * 7 + (55 - d.mood) + (d.days - d.served) * 1.5 - sec * 6 + (d.contra.includes('phone') ? 12 : 0);
+      const want = (d.trait === 'artist' ? 20 : 0) + d.stars * 7 + (55 - d.mood) + (d.days - d.served) * 1.5 - sec * 6 + (d.contra.includes('phone') ? 12 : 0);
       if (!d.plan && want > 35 && Math.random() < 0.04 + (want - 35) * 0.003) d.plan = (d.contra.includes('tool') && d.cell) ? 'tunnel' : (Math.random() < 0.25 && d.cell) ? 'tunnel' : 'climb';
       if (d.contra.includes('phone')) n.fun = clamp(n.fun + 3, 0, 100);
     }
@@ -2562,7 +2586,7 @@ function inmateUpdate(m, dt) {
       else { m.useT = 3; m.waitFood = (m.waitFood || 0) + 1; if (m.waitFood > 4) { SIM.noFood = true; UI.alertOnce('nofood', '🍽 No guard is serving food. Set a guard to Food duty in Staff.'); m.waitFood = 0; m.atCounter = null; wander(m); } }
     }
     if (s.tag === 'seat' && m.eating && m.useT <= 0) { d.need.food = clamp(d.need.food + 65, 0, 100); m.eating = false; m.hasTray = false; p.keepProp = null; holdProp(p.v, null); dirtAt(s.ai, s.aj, 4); m.replan = true; SIM.noFood = false; }
-    if (s.tag === 'bed' && SIM.locked && d.plan === 'tunnel' && m.inCell()) { d.dig += dt / HOUR_SECS * (d.contra.includes('tool') ? 7 : 3) * (1 - Math.min(0.6, detectorCount() * 0.2)); p.poseOverride = (Math.sin(m.p.t * 0.3) > 0.6) ? 'dig' : null; if (d.dig >= 100) tunnelEscape(m); }
+    if (s.tag === 'bed' && SIM.locked && d.plan === 'tunnel' && m.inCell()) { d.dig += dt / HOUR_SECS * (d.contra.includes('tool') ? 7 : 3) * (d.trait === 'artist' ? 1.5 : 1) * (1 - Math.min(0.6, detectorCount() * 0.2)); p.poseOverride = (Math.sin(m.p.t * 0.3) > 0.6) ? 'dig' : null; if (d.dig >= 100) tunnelEscape(m); }
     else if (p.poseOverride === 'dig') p.poseOverride = null;
     if (m.useT <= 0 && !SIM.locked && s.tag !== 'bed' && s.tag !== 'serve') m.replan = true;
     if (s.tag === 'bed' && !SIM.locked && d.solo <= 0) m.replan = true;
@@ -3460,11 +3484,12 @@ const SHEETS = {
     return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><button class="btn danger" data-shake="1">🚨 Shakedown everyone</button><small style="color:var(--mute)">Guards search every inmate for phones, shanks and digging tools. Mood drops a bit.</small></div>' + gangLine +
       '<p class="note">' + list.length + ' inmates, ' + freeBeds() + ' free beds. Search one inmate, move them to another cell, or Find them.</p>' + list.sort((a, b) => a.d.mood - b.d.mood).map(m => {
       const d = m.d, n = d.need, st = m.state === 'fight' ? '👊 fighting' : m.state === 'riot' ? '🔥 rioting' : m.state === 'climb' ? '🧗 escaping!' : d.solo > 0 ? '🔒 solitary ' + Math.ceil(d.solo) + 'h' : m.p.spot ? spotWord(m.p.spot) : 'walking';
+      const trTag = d.trait && TRAITS[d.trait] ? ' <span class="trait" title="' + TRAITS[d.trait].d + '">' + TRAITS[d.trait].e + ' ' + TRAITS[d.trait].n + '</span>' : '';
       const gangTag = d.gang ? ' <span class="gang" style="--gc:' + GANGS[d.gang].css + '">' + GANGS[d.gang].n + '</span>' : '';
-      return '<div class="row" style="flex-wrap:wrap"><div class="grow" style="min-width:180px"><b>' + d.name + ' <span class="stars">' + '★'.repeat(d.stars) + '</span>' + gangTag + '</b><small>' + d.crime + ' · day ' + (d.served + 1) + ' of ' + d.days + ' · ' + st + (d.cell ? '' : ' · <span style="color:#ffb3ba">no bed</span>') + '</small>' +
+      return '<div class="row" style="flex-wrap:wrap"><div class="grow" style="min-width:180px"><b>' + d.name + ' <span class="stars">' + '★'.repeat(d.stars) + '</span>' + gangTag + trTag + '</b><small>' + d.crime + ' · day ' + (d.served + 1) + ' of ' + d.days + ' · ' + st + (d.cell ? '' : ' · <span style="color:#ffb3ba">no bed</span>') + '</small>' +
         '<div class="bars" title="food, sleep, hygiene, fun">' + bar(n.food, '#f2a43a') + bar(n.sleep, '#7a8cff') + bar(n.hyg, '#3ec6ff') + bar(n.fun, '#c77dff') + '</div></div>' +
         '<b style="font:800 20px var(--disp);color:' + (d.mood > 60 ? '#9ff0c8' : d.mood > 35 ? '#f2c230' : '#ff8a95') + '">' + Math.round(d.mood) + '</b><div style="display:flex;gap:6px"><button class="btn" data-search="' + d.uid + '"' + (m.searching ? ' disabled' : '') + '>' + (m.searching ? 'Searching…' : '🔎 Search') + '</button><button class="btn" data-move="' + d.uid + '">Move</button><button class="btn" data-find="' + d.uid + '">Find</button></div></div>';
-    }).join('') + '<p class="note">Bars: 🟧 food · 🟦 sleep · 🩵 hygiene · 🟪 fun. Low mood leads to fights, riots and escapes.</p>';
+    }).join('') + '<p class="note">Bars: 🟧 food · 🟦 sleep · 🩵 hygiene · 🟪 fun. Low mood leads to fights, riots and escapes.</p><p class="note">Personalities: ' + Object.values(TRAITS).map(t => t.e + ' <b>' + t.n + '</b>: ' + t.d).join(' ') + '</p>';
   },
   staff() {
     const hire = Object.entries(STAFF_TYPES).map(([k, t]) => '<div class="row"><div class="grow"><b>' + t.n + '</b><small>' + t.d + ' Wage ' + money(t.wage) + '/day.</small></div><button class="btn pri" data-hire="' + k + '"' + (t.lvl && level() < t.lvl ? ' disabled' : '') + '>Hire ' + money(t.hire) + '</button></div>').join('');
