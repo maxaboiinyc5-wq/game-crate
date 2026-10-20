@@ -2357,12 +2357,13 @@ const CONTRA = { phone: { n: 'phone', ic: '📱' }, shank: { n: 'shank', ic: '�
 /* personalities: each inmate may get one */
 const TRAITS = {
   hothead: { n: 'Hothead', e: '😡', d: 'Gets angry fast and starts fights more often.' },
-  snitch: { n: 'Snitch', e: '🐀', d: 'Tips you off about escape plans and contraband.' },
+  snitch: { n: 'Snitch', e: '🐀', d: 'Snitches to the guards about escape plans and contraband, and they go search.' },
   lazy: { n: 'Lazy', e: '😴', d: 'Earns half pay at work.' },
   worker: { n: 'Hard Worker', e: '💪', d: 'Earns 50% more at work.' },
   artist: { n: 'Escape Artist', e: '🗝️', d: 'Wants out more and digs tunnels faster.' },
+  normal: { n: 'Normal', e: '🙂', d: 'No special habits.' },
 };
-function rollTrait() { return Math.random() < 0.25 ? '' : pick(Object.keys(TRAITS)); }
+function rollTrait() { return Math.random() < 0.25 ? 'normal' : pick(Object.keys(TRAITS).filter(k => k !== 'normal')); }
 function rollGang(stars) { return Math.random() < 0.25 + stars * 0.1 ? pick(Object.keys(GANGS)) : null; }
 function makeInmateData(stars, crime, look) {
   const female = look ? look.female : Math.random() < 0.18;
@@ -2436,9 +2437,11 @@ function snitchTips() {
     const near = INMATES.filter(o => o !== sn && !o.d.escaped && o.state !== 'escapee' && dist2(o.p.x, o.p.z, sn.p.x, sn.p.z) < 100);
     const planner = near.find(o => o.d.plan && o.state !== 'climb');
     if (planner) { const how = planner.d.plan === 'tunnel' ? 'digging a tunnel' : 'planning to climb the fence'; planner.d.plan = null; planner.d.dig = 0; planner.d.anger = clamp(planner.d.anger + 10, 0, 100);
-      UI.event('🐀 Snitch tip from ' + sn.d.name + ': ' + planner.d.name + ' was ' + how + '. Plan stopped.', planner.p, false); return; }
+      const g1 = STAFF.some(s => s.d.kind === 'guard') && orderSearch(planner);
+      UI.event('🐀 ' + sn.d.name + ' snitched: ' + planner.d.name + ' was ' + how + '. Plan stopped' + (g1 ? ', a guard is going to search them.' : '.'), planner.p, false); return; }
     const smug = near.find(o => o.d.contra && o.d.contra.length && !o.searching);
-    if (smug) { UI.event('🐀 Snitch tip from ' + sn.d.name + ': ' + smug.d.name + ' is hiding a ' + smug.d.contra[0] + '. Search them (Jail → Inmates).', smug.p, false); return; }
+    if (smug) { const g2 = STAFF.some(s => s.d.kind === 'guard') && orderSearch(smug);
+      UI.event('🐀 ' + sn.d.name + ' snitched to the guards: ' + smug.d.name + ' is hiding a ' + smug.d.contra[0] + '. ' + (g2 ? 'A guard is going to search them.' : 'Hire a guard, or search them in Jail → Inmates.'), smug.p, false); return; }
   }
 }
 function hourlyMoods() {
@@ -3484,7 +3487,7 @@ const SHEETS = {
     return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><button class="btn danger" data-shake="1">🚨 Shakedown everyone</button><small style="color:var(--mute)">Guards search every inmate for phones, shanks and digging tools. Mood drops a bit.</small></div>' + gangLine +
       '<p class="note">' + list.length + ' inmates, ' + freeBeds() + ' free beds. Search one inmate, move them to another cell, or Find them.</p>' + list.sort((a, b) => a.d.mood - b.d.mood).map(m => {
       const d = m.d, n = d.need, st = m.state === 'fight' ? '👊 fighting' : m.state === 'riot' ? '🔥 rioting' : m.state === 'climb' ? '🧗 escaping!' : d.solo > 0 ? '🔒 solitary ' + Math.ceil(d.solo) + 'h' : m.p.spot ? spotWord(m.p.spot) : 'walking';
-      const trTag = d.trait && TRAITS[d.trait] ? ' <span class="trait" title="' + TRAITS[d.trait].d + '">' + TRAITS[d.trait].e + ' ' + TRAITS[d.trait].n + '</span>' : '';
+      const tr = TRAITS[d.trait] || TRAITS.normal, trTag = ' <span class="trait" title="' + tr.d + '">' + tr.e + ' ' + tr.n + '</span>';
       const gangTag = d.gang ? ' <span class="gang" style="--gc:' + GANGS[d.gang].css + '">' + GANGS[d.gang].n + '</span>' : '';
       return '<div class="row" style="flex-wrap:wrap"><div class="grow" style="min-width:180px"><b>' + d.name + ' <span class="stars">' + '★'.repeat(d.stars) + '</span>' + gangTag + trTag + '</b><small>' + d.crime + ' · day ' + (d.served + 1) + ' of ' + d.days + ' · ' + st + (d.cell ? '' : ' · <span style="color:#ffb3ba">no bed</span>') + '</small>' +
         '<div class="bars" title="food, sleep, hygiene, fun">' + bar(n.food, '#f2a43a') + bar(n.sleep, '#7a8cff') + bar(n.hyg, '#3ec6ff') + bar(n.fun, '#c77dff') + '</div></div>' +
