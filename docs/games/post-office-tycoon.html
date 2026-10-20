@@ -419,25 +419,78 @@ const LMS=[];
  const ball=new THREE.Mesh(new THREE.SphereGeometry(0.12,10,8),mat(0xe0601a));ball.position.set(cx+3,0.12,cz+2);scene.add(ball);
  LMS.push({id:'court',name:'the basketball court',x0:cx-W/2,x1:cx+W/2,z0:cz-D/2,z1:cz+D/2,col:'#d4813f'});
 }
-{ // County Jail: the block behind the post office, across the back street
- const C=0x8f9399,F=0xa4aab0;
- const fz=(z,x0,x1)=>{box(x1-x0,3.6,0.12,F,(x0+x1)/2,1.8,z);box(x1-x0,0.15,0.3,0x333333,(x0+x1)/2,3.65,z);addCol(x0,x1,z-0.15,z+0.15,true);};
- const fx=(x,z0,z1)=>{box(0.12,3.6,z1-z0,F,x,1.8,(z0+z1)/2);box(0.3,0.15,z1-z0,0x333333,x,3.65,(z0+z1)/2);addCol(x-0.15,x+0.15,z0,z1,true);};
- fz(-32,30,42);fz(-32,46,58);fz(-60,30,58);fx(30,-60,-32);fx(58,-60,-32);
- box(0.5,5,0.5,C,42,2.5,-32);box(0.5,5,0.5,C,46,2.5,-32);box(4.5,0.9,0.4,0x2b2f36,44,4.6,-32);addCol(41.7,42.3,-32.3,-31.7,true);addCol(45.7,46.3,-32.3,-31.7,true);
- const s1=signMesh('COUNTY JAIL',4.3,0.8,'#2b2f36','#ffd23f');s1.position.set(44,4.6,-31.78);scene.add(s1);
- box(18,7,13,C,44,3.5,-48.5);box(18.3,0.4,13.3,0x6d7178,44,7.1,-48.5);
- for(let wx=36.5;wx<=51.5;wx+=2.5){if(Math.abs(wx-44)<2)continue;for(const wy of [2.2,5]){box(1,1.3,0.08,0x1d2026,wx,wy,-41.97);for(const bo of [-0.3,0,0.3])box(0.06,1.3,0.1,0xc8ccd0,wx+bo,wy,-41.93);}}
- box(2.4,2.8,0.1,0x3a3f47,44,1.4,-41.96);
- const s2=signMesh('COUNTY JAIL',9,1.3,'#2b2f36','#ffffff');s2.position.set(44,6.2,-41.92);scene.add(s2);
- addCol(35,53,-55,-42,true);
- for(const [tx,tz] of [[31.5,-33.5],[56.5,-33.5],[31.5,-58.5],[56.5,-58.5]]){box(1.4,7,1.4,C,tx,3.5,tz);box(2.8,1.8,2.8,0x6d7178,tx,7.9,tz);box(2.9,0.8,2.9,0x1d2026,tx,8.1,tz);box(3.2,0.25,3.2,0x2b2f36,tx,8.95,tz);box(0.5,0.3,0.5,0xfff1b0,tx,9.2,tz);addCol(tx-0.8,tx+0.8,tz-0.8,tz+0.8,true);}
- // cop car parked in the yard
- box(4.4,0.9,2,0xf2f2f2,38,0.65,-36);box(1.3,0.92,2.02,0x111111,40,0.65,-36);box(1.3,0.92,2.02,0x111111,36,0.65,-36);box(2.2,0.7,1.8,0x223344,37.8,1.45,-36);
- box(0.25,0.18,0.5,0xff2020,37.8,1.9,-36.4);box(0.25,0.18,0.5,0x2050ff,37.8,1.9,-35.6);addCol(35.8,40.2,-37,-35,true);
- // yard picnic tables
- for(const px of [49,53]){box(2,0.1,0.9,0x6d7178,px,0.8,-37);box(2,0.08,0.35,0x6d7178,px,0.45,-37.7);box(2,0.08,0.35,0x6d7178,px,0.45,-36.3);}
- LMS.push({id:'jail',name:'the County Jail',x0:30,x1:58,z0:-60,z1:-32,col:'#8f9399'});
+{ // Country Jail: built like the starter jail in Lockup Tycoon (open-top lot, chain-link fence, cell block, canteen, yard)
+ const TS=1.5,LX0=29,LZ0=-36,NW=20,NH=14,FH=3.8;
+ const X=i=>LX0+i*TS, Z=j=>LZ0-j*TS;
+ const spk=(g,w,h,n,cols,sz)=>{for(let k=0;k<n;k++){g.fillStyle=cols[k%cols.length];g.fillRect(Math.random()*w,Math.random()*h,sz*Math.random()+0.6,sz*Math.random()+0.6);}};
+ const rep=t=>{t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;};
+ const tDirt=rep(canvasTex(128,128,(g,w,h)=>{g.fillStyle='#9a8f78';g.fillRect(0,0,w,h);spk(g,w,h,1500,['#8f846c','#a59a82','#857a62','#aaa08a'],3);}));
+ const tGrass=rep(canvasTex(128,128,(g,w,h)=>{g.fillStyle='#5d8a3c';g.fillRect(0,0,w,h);spk(g,w,h,1800,['#57823a','#679444','#4f7a33','#6f9b4a'],3);}));
+ const tConc=rep(canvasTex(128,128,(g,w,h)=>{g.fillStyle='#a9abac';g.fillRect(0,0,w,h);spk(g,w,h,900,['#a1a3a4','#b1b3b4','#9a9c9d'],2);g.strokeStyle='rgba(70,72,74,.35)';g.lineWidth=2;g.strokeRect(1,1,w-2,h-2);}));
+ const tTile=rep(canvasTex(128,128,(g,w,h)=>{for(let i=0;i<2;i++)for(let j=0;j<2;j++){g.fillStyle=(i+j)%2?'#d9d6cf':'#c9c5bc';g.fillRect(i*64,j*64,64,64);}g.strokeStyle='#a19c92';g.lineWidth=2;for(let i=0;i<=2;i++){g.beginPath();g.moveTo(i*64,0);g.lineTo(i*64,h);g.stroke();g.beginPath();g.moveTo(0,i*64);g.lineTo(w,i*64);g.stroke();}}));
+ const tWall=rep(canvasTex(128,256,(g,w,h)=>{g.fillStyle='#d7d5cf';g.fillRect(0,0,w,h);spk(g,w,h,900,['#cfccc5','#dedbd5'],2);g.fillStyle='#5b6b7e';g.fillRect(0,h-70,w,70);g.fillStyle='#45525f';g.fillRect(0,h-74,w,4);g.strokeStyle='rgba(0,0,0,.12)';for(let y=0;y<h;y+=32){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();}}));
+ const tFence=rep(canvasTex(128,128,(g,w,h)=>{g.clearRect(0,0,w,h);g.strokeStyle='rgba(200,206,212,.95)';g.lineWidth=3;for(let i=-h;i<w+h;i+=16){g.beginPath();g.moveTo(i,0);g.lineTo(i+h,h);g.stroke();g.beginPath();g.moveTo(i+h,0);g.lineTo(i,h);g.stroke();}}));
+ const mFence=new THREE.MeshLambertMaterial({map:tFence,transparent:true,alphaTest:0.4,side:THREE.DoubleSide}),mWall=new THREE.MeshLambertMaterial({map:tWall});
+ const METAL=0x8d949b,DSTEEL=0x4a5058,STEEL=0x9aa2aa,PORC=0xf2f2ef,WALLTOP=0x9a9893;
+ const uvScale=(geo,su,sv)=>{const uv=geo.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,uv.getX(k)*su,uv.getY(k)*sv);return geo;};
+ const floor=(tex,i0,i1,j0,j1,y,per)=>{const w=(i1-i0)*TS,d=(j1-j0)*TS,geo=uvScale(new THREE.PlaneGeometry(w,d),w/per,d/per);geo.rotateX(-Math.PI/2);const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({map:tex}));m.position.set((X(i0)+X(i1))/2,y,(Z(j0)+Z(j1))/2);scene.add(m);};
+ // ground: dirt lot, grass yard, tile canteen, concrete cell hall
+ floor(tDirt,0,NW,0,NH,0.05,3);floor(tGrass,9,NW,1,9,0.06,6);floor(tTile,0,9,1,9,0.06,TS*2);floor(tConc,0,NW,9,NH,0.06,TS*2);
+ // inner walls (2.6 m, open top, like the game)
+ const WH=2.6;
+ const wallSeg=(x0,z0,x1,z1,col)=>{const len=Math.hypot(x1-x0,z1-z0),geo=uvScale(new THREE.BoxGeometry(len+0.2,WH,0.2),len/2,1);const m=new THREE.Mesh(geo,mWall);m.position.set((x0+x1)/2,WH/2,(z0+z1)/2);m.rotation.y=-Math.atan2(z1-z0,x1-x0);scene.add(m);
+  const cap=box(len+0.22,0.06,0.24,WALLTOP,(x0+x1)/2,WH+0.03,(z0+z1)/2);cap.rotation.y=m.rotation.y;
+  if(col!==false)addCol(Math.min(x0,x1)-0.12,Math.max(x0,x1)+0.12,Math.min(z0,z1)-0.12,Math.max(z0,z1)+0.12);};
+ const doorFrame=(x0,z,x1)=>{box(x1-x0+0.1,WH-2.15,0.22,WALLTOP,(x0+x1)/2,(WH+2.15)/2,z);const pan=box(0.07,2.1,TS-0.08,DSTEEL,x1-0.04,1.05,z-(TS-0.08)/2);};
+ wallSeg(X(0),Z(1),X(4),Z(1));wallSeg(X(5),Z(1),X(9),Z(1));doorFrame(X(4),Z(1),X(5));
+ wallSeg(X(0),Z(9),X(4),Z(9));wallSeg(X(5),Z(9),X(9),Z(9));doorFrame(X(4),Z(9),X(5));
+ // inner fence between canteen and yard (door at j=5)
+ const chain=(x0,z0,x1,z1,h,posts)=>{const len=Math.hypot(x1-x0,z1-z0),geo=uvScale(new THREE.PlaneGeometry(len,h),len/1.5,h/1.5);const m=new THREE.Mesh(geo,mFence);m.position.set((x0+x1)/2,h/2+0.1,(z0+z1)/2);m.rotation.y=-Math.atan2(z1-z0,x1-x0);scene.add(m);
+  for(let s2=0;s2<=len+0.01;s2+=posts){const t=s2/len;box(0.12,h+0.5,0.12,METAL,x0+(x1-x0)*t,(h+0.5)/2,z0+(z1-z0)*t);}
+  addCol(Math.min(x0,x1)-0.1,Math.max(x0,x1)+0.1,Math.min(z0,z1)-0.1,Math.max(z0,z1)+0.1,true);};
+ chain(X(9),Z(1),X(9),Z(5),2.4,TS);chain(X(9),Z(6),X(9),Z(9),2.4,TS);
+ // cell block: 4 single cells along the back, barred fronts
+ const barPos=[];
+ const bars=(x0,x1,z)=>{const c=Math.round((x1-x0)/0.14);for(let k=0;k<=c;k++)barPos.push([x0+(x1-x0)*k/c,z]);box(x1-x0,0.08,0.08,0x5d646c,(x0+x1)/2,WH-0.04,z);box(x1-x0,0.06,0.06,0x5d646c,(x0+x1)/2,1.13,z);};
+ const bed=(x,z)=>{box(0.9,0.08,2,STEEL,x,0.4,z);for(const sx of [-0.4,0.4])for(const sz of [-0.95,0.95])box(0.05,0.36,0.05,STEEL,x+sx,0.18,z+sz);box(0.86,0.12,1.96,0xe9e6dc,x,0.5,z);box(0.88,0.04,1.2,0x5a6f8a,x,0.58,z+0.3);box(0.6,0.1,0.32,0xf6f4ee,x,0.6,z-0.75);};
+ for(const ci of [1,3,5,7]){const x0=X(ci),x1=X(ci+2),zf=Z(10),zb=Z(12);
+  wallSeg(x0,zb,x1,zb,false);wallSeg(x0,zf,x0,zb,false);wallSeg(x1,zf,x1,zb,false);bars(x0,x1,zf);
+  bed(x0+0.63,(zf+zb)/2-0.25);box(0.38,0.38,0.5,PORC,x1-0.35,0.19,zb+0.4);box(0.4,0.06,0.52,PORC,x1-0.35,0.41,zb+0.4);box(0.38,0.4,0.16,PORC,x1-0.35,0.5,zb+0.15);
+  addCol(x0-0.12,x1+0.12,zb-0.12,zf+0.12,true);}
+ // showers, TV couch, bookshelf, laundry
+ for(const si of [9,10]){const x0=X(si),x1=X(si+1),zb=Z(12),zf=Z(11);box(TS-0.1,0.05,TS-0.1,0xcfd8dc,(x0+x1)/2,0.08,(zf+zb)/2);for(const sx of [x0+0.05,x1-0.05])box(0.06,2.1,TS-0.1,0xcfd8dc,sx,1.05,(zf+zb)/2);box(TS-0.1,2.1,0.06,0xcfd8dc,(x0+x1)/2,1.05,zb+0.05);box(0.2,0.05,0.2,STEEL,(x0+x1)/2,2.15,zb+0.3);addCol(x0,x1,zb,zf);}
+ {const x0=X(12),x1=X(15),zf=Z(11),zb=Z(13);box(3.8,0.42,0.85,0x6a4a3a,(x0+x1)/2,0.21,zf-0.55);box(3.8,0.5,0.2,0x6a4a3a,(x0+x1)/2,0.67,zf-0.2);box(1.6,0.55,0.45,0x8a5f38,(x0+x1)/2,0.28,zb+0.4);box(1.5,0.85,0.06,0x1c1d20,(x0+x1)/2,1.0,zb+0.4);box(1.4,0.75,0.01,new THREE.MeshBasicMaterial({color:0x5aa0e0}),(x0+x1)/2,1.0,zb+0.44);addCol(x0,x1,zb,zf-0.1);}
+ {const bxx=X(16)+0.75,bz=Z(12)-0.75;box(1.2,2,0.4,0x8a5f38,bxx,1,bz-0.3);for(let r=0;r<4;r++)for(let k=0;k<7;k++)box(0.12,0.3,0.28,[0xb8352a,0x2b5c8a,0x3f7a35,0xf2c230,0xe8e0cc][(r+k)%5],bxx-0.45+k*0.15,0.27+r*0.47,bz-0.25);}
+ for(const li of [18,19]){const lx=X(li)+0.75,lz=Z(12)-0.75;box(0.85,1,0.8,0xf4f4f0,lx,0.5,lz-0.1);box(0.85,0.12,0.8,STEEL,lx,1.06,lz-0.1);const dr=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.04,20),new THREE.MeshLambertMaterial({color:0x9fc6e0,transparent:true,opacity:0.6}));dr.rotation.x=Math.PI/2;dr.position.set(lx,0.55,lz+0.31);scene.add(dr);}
+ addCol(X(16),X(20),Z(13),Z(12)-0.2);
+ // canteen: serving counter + 2 dining tables
+ {const x0=X(1),x1=X(3),zc=Z(3)-0.75;box(2.9,0.9,0.7,STEEL,(x0+x1)/2,0.45,zc);box(2.95,0.05,0.8,DSTEEL,(x0+x1)/2,0.92,zc);for(let k=0;k<4;k++)box(0.42,0.04,0.28,k%2?0xe0661a:0xf2c230,x0+0.45+k*0.7,1.0,zc);addCol(x0,x1,zc-0.4,zc+0.4);}
+ for(const ti of [1,4]){const tx=X(ti)+1.5,tz=Z(5)-1.5;box(2.6,0.06,0.9,STEEL,tx,0.77,tz);for(const sx of [-1.1,1.1])box(0.08,0.74,0.08,DSTEEL,tx+sx,0.37,tz);for(const sz of [-1.08,1.08]){box(2.5,0.06,0.38,STEEL,tx,0.45,tz+sz);}addCol(tx-1.3,tx+1.3,tz-1.3,tz+1.3);}
+ // yard: hoop, bench, weight bench
+ {const hx=X(16)+0.75,hz=Z(1)-0.4;box(0.14,3.2,0.14,DSTEEL,hx,1.6,hz);box(1.2,0.8,0.05,0xf4f4f0,hx,3.1,hz-0.3);const rim=new THREE.Mesh(new THREE.TorusGeometry(0.23,0.02,6,16),mat(0xe0661a));rim.rotation.x=Math.PI/2;rim.position.set(hx,3.05,hz-0.6);scene.add(rim);addCol(hx-0.15,hx+0.15,hz-0.15,hz+0.15);}
+ {const bxx=X(11)+1.5,bz=Z(2)-0.75;box(2.7,0.07,0.45,0x8a5f38,bxx,0.46,bz);box(2.7,0.4,0.06,0x8a5f38,bxx,0.75,bz-0.22);for(const sx of [-1.2,1.2])box(0.07,0.42,0.4,DSTEEL,bxx+sx,0.21,bz);}
+ {const wx=X(13)+0.75,wz=Z(3)-1.5;box(0.35,0.45,1.3,0x1c1d20,wx,0.22,wz);const barM=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1.6,6),mat(STEEL));barM.rotation.z=Math.PI/2;barM.position.set(wx,1.15,wz-0.5);scene.add(barM);for(const sd of [-1,1]){const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.08,14),mat(0x1c1d20));pl.rotation.z=Math.PI/2;pl.position.set(wx+sd*0.68,1.15,wz-0.5);scene.add(pl);for(const up of [0])box(0.06,1.2,0.06,STEEL,wx+sd*0.3,0.6,wz-0.5);}}
+ // all cell bars as one instanced mesh
+ {const im=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.025,0.025,WH,6),mat(0x5d646c),barPos.length);const m4=new THREE.Matrix4();barPos.forEach((b,k)=>{m4.makeTranslation(b[0],WH/2,b[1]);im.setMatrixAt(k,m4);});scene.add(im);}
+ // perimeter: chain-link fence with posts every 3 m and barbed wire on top, gate at the front middle
+ const PX0=X(0),PX1=X(NW),PZ0=Z(0),PZ1=Z(NH),gx0=X(9),gx1=X(11),wire=[];
+ const run=(ax,az,bx2,bz)=>{chain(ax,az,bx2,bz,FH,3);const len=Math.hypot(bx2-ax,bz-az);for(let s2=0;s2<len;s2+=0.5)wire.push([ax+(bx2-ax)*s2/len,az+(bz-az)*s2/len]);};
+ run(PX0,PZ0,gx0,PZ0);run(gx1,PZ0,PX1,PZ0);run(PX1,PZ0,PX1,PZ1);run(PX1,PZ1,PX0,PZ1);run(PX0,PZ1,PX0,PZ0);
+ {const im=new THREE.InstancedMesh(new THREE.BoxGeometry(0.4,0.05,0.4),mat(0x777d83),wire.length);const m4=new THREE.Matrix4();wire.forEach((w,k)=>{m4.makeTranslation(w[0],FH+0.38,w[1]);im.setMatrixAt(k,m4);});scene.add(im);}
+ // gate posts, crossbar and the sign on both sides (navy + gold, like the game)
+ const gcx=(gx0+gx1)/2;for(const sd of [-1,1]){box(0.35,FH+1.2,0.35,DSTEEL,gcx+sd*(TS+0.25),(FH+1.2)/2,PZ0);addCol(gcx+sd*(TS+0.25)-0.2,gcx+sd*(TS+0.25)+0.2,PZ0-0.2,PZ0+0.2,true);}
+ box(4.8,0.15,0.2,DSTEEL,gcx,FH+0.52,PZ0);
+ const signT=canvasTex(512,128,(g,w,h)=>{g.fillStyle='#1b2333';g.fillRect(0,0,w,h);g.fillStyle='#e8c66a';g.font='900 64px "Barlow Condensed", Impact, "Arial Narrow", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('COUNTRY JAIL',w/2,h/2+4);g.strokeStyle='rgba(255,255,255,.25)';g.lineWidth=6;g.strokeRect(3,3,w-6,h-6);});
+ for(const sd of [1,-1]){const sm=new THREE.Mesh(new THREE.PlaneGeometry(4.6,0.9),new THREE.MeshLambertMaterial({map:signT}));sm.position.set(gcx,FH+1.0,PZ0+sd*0.12);sm.rotation.y=sd>0?0:Math.PI;scene.add(sm);}
+ // the sliding gate, rolled open beside the opening (chain-link panel, steel rails, yellow stripe)
+ {const gw=gx1-gx0,gxm=gx1+gw/2+0.1,gz=PZ0+0.3;const pg=uvScale(new THREE.PlaneGeometry(gw,FH-0.3),gw/1.5,(FH-0.3)/1.5);const pm=new THREE.Mesh(pg,mFence);pm.position.set(gxm,(FH-0.3)/2+0.1,gz);scene.add(pm);
+  box(gw,0.1,0.1,DSTEEL,gxm,0.15,gz);box(gw,0.1,0.1,DSTEEL,gxm,FH-0.2,gz);box(gw,0.08,0.12,0xf2c230,gxm,1.24,gz);}
+ // outside: walk apron + yellow booking bay in front of the gate, and a cruiser parked by the fence
+ box(12,0.03,PZ0-(-30.5)+0.4,0xb9b4aa,gcx,0.04,(PZ0+(-30.5))/2+0.2);
+ const bayZ=PZ0+2.6;box(8.4,0.02,0.2,0xf2c230,gcx,0.07,bayZ-2.1);box(8.4,0.02,0.2,0xf2c230,gcx,0.07,bayZ+2.1);box(0.2,0.02,4.4,0xf2c230,gcx-4.1,0.07,bayZ);box(0.2,0.02,4.4,0xf2c230,gcx+4.1,0.07,bayZ);
+ {const cx2=X(17),cz2=PZ0+2.6;box(4.4,0.9,2,0xf2f2f2,cx2,0.65,cz2);box(1.3,0.92,2.02,0x111111,cx2+2,0.65,cz2);box(1.3,0.92,2.02,0x111111,cx2-2,0.65,cz2);box(2.2,0.7,1.8,0x223344,cx2-0.2,1.45,cz2);
+  box(0.25,0.18,0.5,0xff2020,cx2-0.2,1.9,cz2-0.4);box(0.25,0.18,0.5,0x2050ff,cx2-0.2,1.9,cz2+0.4);addCol(cx2-2.2,cx2+2.2,cz2-1,cz2+1,true);}
+ LMS.push({id:'jail',name:'the Country Jail',x0:PX0,x1:PX1,z0:PZ1,z1:PZ0,col:'#9a8f78'});
 }
 function checkFound(x,z){if(!S.found)S.found={};for(const l of LMS){if(S.found[l.id])continue;const m=8;
  if(x>l.x0-m&&x<l.x1+m&&z>l.z0-m&&z<l.z1+m){S.found[l.id]=true;toast(`📍 You found ${l.name}!`);beep(880,0.1,'triangle',0.05);setTimeout(()=>beep(1320,0.14,'triangle',0.05),110);save();}}}
