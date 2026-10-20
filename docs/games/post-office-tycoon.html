@@ -253,7 +253,7 @@ const ITEMS=[
 const BOARD_CAP=8;
 
 // ================= STATE =================
-const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
+const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,found:{},desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
 ITEMS.forEach(i=>{DEF.stock[i.id]=0;DEF.board[i.id]=0;});
 const fresh=()=>JSON.parse(JSON.stringify(DEF));
 function readSlot(n){try{const j=localStorage.getItem(slotKey(n));return j?JSON.parse(j):null;}catch(e){return null;}}
@@ -360,9 +360,12 @@ const houses=[];
 const treePos=[];
 for(let i=0;i<4;i++)for(let j=0;j<4;j++){
  const x0=VX[i],x1=VX[i+1],z0=HZ[j],z1=HZ[j+1];
+ const LM=(i===1&&j===1)?'market':(i===3&&j===0)?'jail':(i===1&&j===2)?'court':null;
+ if(LM==='market'||LM==='jail')continue;
  if(i===2&&j===1){ // store block: trees behind
    for(let k=0;k<6;k++)treePos.push({x:rnd(-12,19),z:rnd(-21,-12),s:rnd(.8,1.2),col:true});continue;}
  for(const hx of [x0+10.5,x1-10.5])for(const top of [true,false]){
+   if(LM==='court'&&top)continue;
    const hz=top?z0+10.5:z1-10.5, rz=top?z0:z1, sz=top?z0+2.2:z1-2.2, face=top?-1:1;
    const m=new THREE.Mesh(houseGeo,pick(houseMats));m.position.set(hx,2,hz);scene.add(m);
    const r=new THREE.Mesh(roofGeo,mat(pick(roofCols)));r.position.set(hx,5.3,hz);scene.add(r);
@@ -371,8 +374,8 @@ for(let i=0;i<4;i++)for(let j=0;j<4;j++){
    addCol(hx-3.6,hx+3.6,hz-3.6,hz+3.6,true);
    houses.push({x:hx,z:hz,sx:hx,sz,rz,face});
  }
- treePos.push({x:(x0+x1)/2+rnd(-2,2),z:(z0+z1)/2+rnd(-2,2),s:rnd(.9,1.3),col:true});
- treePos.push({x:(x0+x1)/2+rnd(-3,3),z:(z0+z1)/2+rnd(-3,3),s:rnd(.7,1.1),col:true});
+ if(!LM)treePos.push({x:(x0+x1)/2+rnd(-2,2),z:(z0+z1)/2+rnd(-2,2),s:rnd(.9,1.3),col:true});
+ if(!LM)treePos.push({x:(x0+x1)/2+rnd(-3,3),z:(z0+z1)/2+rnd(-3,3),s:rnd(.7,1.1),col:true});
 }
 for(let k=0;k<170;k++){let x,z;do{x=rnd(-170,140);z=rnd(-140,170);}while(x>-104&&x<72&&z>-74&&z<102);treePos.push({x,z,s:rnd(.8,1.5)});}
 {const trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25,0.35,2,6),mat(0x6b4a2b),treePos.length);
@@ -382,6 +385,62 @@ for(let k=0;k<170;k++){let x,z;do{x=rnd(-170,140);z=rnd(-140,170);}while(x>-104&
  scene.add(trunks);scene.add(leaves);}
 // street lamps (decor)
 for(const z of HZ)for(let x=VX[0];x<=VX[4];x+=20){if(VX.some(v=>Math.abs(v-x)<6))continue;box(0.15,4,0.15,0x333333,x,2,z+5.2);box(0.6,0.2,0.4,0xfff1b0,x,4,z+5);}
+
+// ================= LANDMARKS =================
+function signMesh(text,w,h,bg,fg){const cw=1024,ch=Math.max(64,Math.round(1024*h/w));const ft=fs=>`900 ${fs}px "Arial Black", Arial, sans-serif`;
+ const t=canvasTex(cw,ch,g=>{g.fillStyle=bg;g.fillRect(0,0,cw,ch);g.fillStyle=fg;let fs=Math.floor(ch*0.62);g.font=ft(fs);while(g.measureText(text).width>cw*0.9&&fs>10){fs-=4;g.font=ft(fs);}g.textAlign='center';g.textBaseline='middle';g.fillText(text,cw/2,ch/2+fs*0.04);});
+ return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t}));}
+const LMS=[];
+{ // Aisle Nine Market: the block west of the post office, facing the main street
+ box(28,6,20,0xfff8e8,-36,3,-8);box(28.3,0.7,20.3,0xe63946,-36,5.3,-8);box(28.6,0.3,20.6,0xd8d0c0,-36,6.15,-8);
+ const sg=signMesh('AISLE NINE MARKET',16,2.2,'#e63946','#ffffff');sg.position.set(-36,4.1,2.07);scene.add(sg);
+ box(5,3,0.12,0x2a4a66,-36,1.5,2.05);box(0.15,3,0.16,0xe63946,-36,1.5,2.07);
+ for(const wx of [-46,-42.5,-29.5,-26])box(2.6,2.2,0.1,0x3a5f80,wx,1.7,2.05);
+ box(26,0.04,7,0x55575c,-36,0.03,5.8);
+ for(let k=0;k<9;k++)box(0.15,0.05,4.5,0xffffff,-48+k*3,0.06,6.2);
+ [[-43.5,0xc43b3b],[-37.5,0x3b82c4],[-28.5,0xdddddd]].forEach(([cx,col])=>{box(1.9,0.8,4,col,cx,0.6,6.2);box(1.7,0.6,2.2,0x223344,cx,1.3,6);addCol(cx-1,cx+1,4.2,8.2,true);});
+ addCol(-50,-22,-18,2,true);
+ LMS.push({id:'market',name:'Aisle Nine Market',x0:-50,x1:-22,z0:-18,z1:9,col:'#e63946'});
+}
+{ // basketball court: across the street from Aisle Nine Market
+ const cx=-36,cz=27,W=28,D=15;
+ const tex=canvasTex(1024,548,(g,w,h)=>{g.fillStyle='#2f6db5';g.fillRect(0,0,w,h);const m=24;g.fillStyle='#d4813f';g.fillRect(m,m,w-2*m,h-2*m);
+  g.strokeStyle='#fff';g.lineWidth=6;g.strokeRect(m,m,w-2*m,h-2*m);g.beginPath();g.moveTo(w/2,m);g.lineTo(w/2,h-m);g.stroke();g.beginPath();g.arc(w/2,h/2,64,0,Math.PI*2);g.stroke();
+  for(const side of [0,1]){const x=side?w-m:m,dir=side?-1:1;g.fillStyle='#2f6db5';g.fillRect(side?x-190:x,h/2-70,190,140);g.strokeRect(side?x-190:x,h/2-70,190,140);
+   g.beginPath();g.arc(x+dir*190,h/2,70,side?Math.PI/2:-Math.PI/2,side?Math.PI*1.5:Math.PI/2);g.stroke();
+   g.beginPath();g.arc(x+dir*20,h/2,250,side?Math.PI/2:-Math.PI/2,side?Math.PI*1.5:Math.PI/2);g.stroke();}});
+ const court=new THREE.Mesh(new THREE.PlaneGeometry(W,D),new THREE.MeshLambertMaterial({map:tex}));court.rotation.x=-Math.PI/2;court.position.set(cx,0.04,cz);scene.add(court);
+ for(const sd of [-1,1]){const px=cx+sd*(W/2+0.4);
+  box(0.25,3.6,0.25,0x444444,px,1.8,cz);box(0.9,0.15,0.15,0x444444,px-sd*0.45,3.5,cz);box(0.08,1.1,1.8,0xffffff,px-sd*0.9,3.4,cz);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(0.23,0.025,6,16),mat(0xff6a1a));rim.rotation.x=Math.PI/2;rim.position.set(px-sd*1.2,3.05,cz);scene.add(rim);
+  const net=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.15,0.4,10,1,true),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.6,side:THREE.DoubleSide}));net.position.set(px-sd*1.2,2.83,cz);scene.add(net);
+  addCol(px-0.2,px+0.2,cz-0.2,cz+0.2,true);}
+ for(const bx of [cx-6,cx+6]){box(3,0.12,0.6,0xb07a45,bx,0.5,cz+D/2+1.3);box(0.15,0.45,0.5,0x444444,bx-1.3,0.22,cz+D/2+1.3);box(0.15,0.45,0.5,0x444444,bx+1.3,0.22,cz+D/2+1.3);}
+ const ball=new THREE.Mesh(new THREE.SphereGeometry(0.12,10,8),mat(0xe0601a));ball.position.set(cx+3,0.12,cz+2);scene.add(ball);
+ LMS.push({id:'court',name:'the basketball court',x0:cx-W/2,x1:cx+W/2,z0:cz-D/2,z1:cz+D/2,col:'#d4813f'});
+}
+{ // County Jail: the block behind the post office, across the back street
+ const C=0x8f9399,F=0xa4aab0;
+ const fz=(z,x0,x1)=>{box(x1-x0,3.6,0.12,F,(x0+x1)/2,1.8,z);box(x1-x0,0.15,0.3,0x333333,(x0+x1)/2,3.65,z);addCol(x0,x1,z-0.15,z+0.15,true);};
+ const fx=(x,z0,z1)=>{box(0.12,3.6,z1-z0,F,x,1.8,(z0+z1)/2);box(0.3,0.15,z1-z0,0x333333,x,3.65,(z0+z1)/2);addCol(x-0.15,x+0.15,z0,z1,true);};
+ fz(-32,30,42);fz(-32,46,58);fz(-60,30,58);fx(30,-60,-32);fx(58,-60,-32);
+ box(0.5,5,0.5,C,42,2.5,-32);box(0.5,5,0.5,C,46,2.5,-32);box(4.5,0.9,0.4,0x2b2f36,44,4.6,-32);addCol(41.7,42.3,-32.3,-31.7,true);addCol(45.7,46.3,-32.3,-31.7,true);
+ const s1=signMesh('COUNTY JAIL',4.3,0.8,'#2b2f36','#ffd23f');s1.position.set(44,4.6,-31.78);scene.add(s1);
+ box(18,7,13,C,44,3.5,-48.5);box(18.3,0.4,13.3,0x6d7178,44,7.1,-48.5);
+ for(let wx=36.5;wx<=51.5;wx+=2.5){if(Math.abs(wx-44)<2)continue;for(const wy of [2.2,5]){box(1,1.3,0.08,0x1d2026,wx,wy,-41.97);for(const bo of [-0.3,0,0.3])box(0.06,1.3,0.1,0xc8ccd0,wx+bo,wy,-41.93);}}
+ box(2.4,2.8,0.1,0x3a3f47,44,1.4,-41.96);
+ const s2=signMesh('COUNTY JAIL',9,1.3,'#2b2f36','#ffffff');s2.position.set(44,6.2,-41.92);scene.add(s2);
+ addCol(35,53,-55,-42,true);
+ for(const [tx,tz] of [[31.5,-33.5],[56.5,-33.5],[31.5,-58.5],[56.5,-58.5]]){box(1.4,7,1.4,C,tx,3.5,tz);box(2.8,1.8,2.8,0x6d7178,tx,7.9,tz);box(2.9,0.8,2.9,0x1d2026,tx,8.1,tz);box(3.2,0.25,3.2,0x2b2f36,tx,8.95,tz);box(0.5,0.3,0.5,0xfff1b0,tx,9.2,tz);addCol(tx-0.8,tx+0.8,tz-0.8,tz+0.8,true);}
+ // cop car parked in the yard
+ box(4.4,0.9,2,0xf2f2f2,38,0.65,-36);box(1.3,0.92,2.02,0x111111,40,0.65,-36);box(1.3,0.92,2.02,0x111111,36,0.65,-36);box(2.2,0.7,1.8,0x223344,37.8,1.45,-36);
+ box(0.25,0.18,0.5,0xff2020,37.8,1.9,-36.4);box(0.25,0.18,0.5,0x2050ff,37.8,1.9,-35.6);addCol(35.8,40.2,-37,-35,true);
+ // yard picnic tables
+ for(const px of [49,53]){box(2,0.1,0.9,0x6d7178,px,0.8,-37);box(2,0.08,0.35,0x6d7178,px,0.45,-37.7);box(2,0.08,0.35,0x6d7178,px,0.45,-36.3);}
+ LMS.push({id:'jail',name:'the County Jail',x0:30,x1:58,z0:-60,z1:-32,col:'#8f9399'});
+}
+function checkFound(x,z){if(!S.found)S.found={};for(const l of LMS){if(S.found[l.id])continue;const m=8;
+ if(x>l.x0-m&&x<l.x1+m&&z>l.z0-m&&z<l.z1+m){S.found[l.id]=true;toast(`📍 You found ${l.name}!`);beep(880,0.1,'triangle',0.05);setTimeout(()=>beep(1320,0.14,'triangle',0.05),110);save();}}}
 
 // ================= PEOPLE =================
 const G={leg:new THREE.BoxGeometry(0.2,0.8,0.22),body:new THREE.BoxGeometry(0.58,0.75,0.34),arm:new THREE.BoxGeometry(0.16,0.66,0.18),head:new THREE.SphereGeometry(0.22,10,8),hat:new THREE.CylinderGeometry(0.24,0.24,0.14,10),brim:new THREE.BoxGeometry(0.32,0.04,0.2),pkg:new THREE.BoxGeometry(0.42,0.32,0.42),stick:new THREE.BoxGeometry(0.2,0.02,0.2),tape:new THREE.BoxGeometry(0.44,0.33,0.08)};
@@ -651,7 +710,7 @@ function updDrive(dt){
  if(truckHit(nx,nz,T.h)){if(Math.abs(T.v)>6&&drive.crashCd<=0){drive.crashes++;drive.crashCd=1;popup(drive.r.fragile?'💥 CRASH! Fragile packages!':'💥 CRASH!','bad');beep(90,0.3,'sawtooth',0.08);}T.v=-T.v*0.3;}
  else{T.x=clamp(nx,VX[0]-12,VX[4]+12);T.z=clamp(nz,HZ[0]-12,HZ[4]+12);}
  dTruck.position.set(T.x,0,T.z);dTruck.rotation.y=T.h;dTruck.userData.wheels.forEach(w=>w.rotation.x+=T.v*dt/0.45);
- drive.since+=dt;
+ drive.since+=dt;checkFound(T.x,T.z);
  const s=drive.r.stops[drive.idx];if(s&&Math.hypot(T.x-s.x,T.z-s.z)<4.4)deliverStop();
  const fx=Math.sin(T.h),fz=Math.cos(T.h);
  const cx=T.x-fx*9.5,cz=T.z-fz*9.5;const k=1-Math.pow(0.002,dt);
@@ -673,6 +732,7 @@ function drawMini(){const W=mini.width,R=W/2;mc.setTransform(1,0,0,1,0,0);mc.cle
  for(const z of HZ){mc.beginPath();mc.moveTo(VX[0]-4.5,z);mc.lineTo(VX[4]+4.5,z);mc.stroke();}
  mc.fillStyle='#4a2c17';mc.fillRect(-10,-8,29,16);mc.fillStyle='#ffb500';mc.fillRect(-10,6.5,29,1.5);
  mc.fillStyle='#e6d8bd';for(const h of houses)mc.fillRect(h.x-3.5,h.z-3.5,7,7);
+ for(const l of LMS){mc.fillStyle=l.col;mc.fillRect(l.x0,l.z0,l.x1-l.x0,l.z1-l.z0);}
  const st=drive.r.stops[drive.idx];
  if(st){const p=routePath(T.x,T.z,st);mc.strokeStyle='#ffb500';mc.lineWidth=2.4;mc.lineJoin='round';mc.beginPath();mc.moveTo(p[0].x,p[0].z);for(let i=1;i<p.length;i++)mc.lineTo(p[i].x,p[i].z);mc.stroke();}
  for(let i=drive.idx+1;i<drive.r.stops.length;i++){const s=drive.r.stops[i];mc.fillStyle='#fff4dc';mc.beginPath();mc.arc(s.x,s.z,2.2,0,Math.PI*2);mc.fill();}
@@ -889,7 +949,7 @@ function updWalk(dt){let mx=joy.x,my=joy.y;if(K.w||K.arrowup)my=-1;if(K.s||K.arr
  if(S.tut===0)tutMoved+=Math.hypot(dx,dz);
  P.x=clamp(P.x,-110,80);P.z=clamp(P.z,-80,108);
  const moving=Math.abs(dx)+Math.abs(dz)>0.001;if(moving)P.bob+=dt*10;
- camera.position.set(P.x,1.65+(moving?Math.sin(P.bob)*0.04:0),P.z);camera.rotation.set(P.pitch,P.yaw,0);}
+ checkFound(P.x,P.z);camera.position.set(P.x,1.65+(moving?Math.sin(P.bob)*0.04:0),P.z);camera.rotation.set(P.pitch,P.yaw,0);}
 let last=performance.now();
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
  const paused=!started||(modalKind&&modalKind!=='computer');
