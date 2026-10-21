@@ -88,7 +88,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #hud{position:fixed;inset:0;z-index:2;pointer-events:none}
 #hud button,#hud .panel,#hud canvas{pointer-events:auto}
 .panel{background:var(--panel);border:2px solid var(--gold);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
-#topL{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 12px;width:180px;max-width:46vw}
+#topL{position:absolute;left:calc(10px + env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));padding:8px 12px;width:160px;max-width:42vw}
 #storeName{font-weight:900;color:var(--gold);font-size:13px;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
 #money{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
@@ -98,7 +98,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #popTxt{font-size:11px;margin-top:3px;opacity:.92}
 #routeBadge{font-size:11px;color:var(--gold);margin-top:2px}
 #topR{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:8px}
-.ib{background:var(--gold);color:var(--ink);border:3px solid var(--brown);border-radius:14px;font-size:20px;font-weight:900;padding:6px 10px;display:flex;flex-direction:column;align-items:center;line-height:1;min-width:48px;cursor:pointer}
+.ib{background:var(--gold);color:var(--ink);border:3px solid var(--brown);border-radius:14px;font-size:18px;font-weight:900;padding:6px 7px;display:flex;flex-direction:column;align-items:center;line-height:1;min-width:44px;cursor:pointer}
 .ib small{font-size:10px;margin-top:3px}
 #act{position:absolute;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));width:116px;height:116px;border-radius:50%;background:var(--gold);color:var(--ink);border:5px solid var(--brown);font-weight:900;font-size:14px;line-height:1.15;padding:8px;box-shadow:0 6px 0 #8a5a00,0 10px 20px rgba(0,0,0,.4);cursor:pointer}
 #act small{font-weight:700;font-size:11px}
@@ -186,6 +186,21 @@ input.nm{width:100%;font-size:18px;padding:12px;border-radius:10px;border:2px so
 .slotDel{flex:none;width:56px;border-radius:12px;border:2px solid var(--brown2);background:#2a1408;font-size:18px;cursor:pointer;color:var(--cream)}
 .slotDel.sure{background:var(--red);font-size:13px;font-weight:800}
 @media (max-height:520px){.logo{font-size:38px}.stamp{margin:6px 0 10px}.how{display:none}}
+#buildUI{position:fixed;inset:0;z-index:3;pointer-events:none}
+#buildUI button,#bTop,#bBar{pointer-events:auto}
+#bTop{position:absolute;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--gold);border-radius:14px;padding:6px 6px 6px 14px;white-space:nowrap}
+#bTop b{color:var(--gold);letter-spacing:1px;font-size:14px}
+#bMoney{font-weight:900;font-variant-numeric:tabular-nums}
+#bDone{background:var(--green);color:#06210e;border:0;border-radius:10px;padding:8px 14px;font-weight:900;font-size:14px;cursor:pointer}
+#bHint{position:absolute;left:50%;transform:translateX(-50%);top:calc(62px + env(safe-area-inset-top,0px));width:min(520px,92vw);text-align:center;font-size:13px;font-weight:700;color:var(--gold2);background:rgba(29,15,5,.78);padding:6px 10px;border-radius:10px}
+#bTool{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(112px + env(safe-area-inset-bottom,0px));display:flex;gap:8px}
+#bTool button{border:3px solid var(--brown);border-radius:12px;padding:10px 14px;font-weight:900;font-size:15px;background:var(--gold);color:var(--ink);cursor:pointer}
+#tOk{background:var(--green)!important;color:#06210e!important}
+#tCancel{background:#8a7658!important}
+#bBar{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;overflow-x:auto;padding:10px max(10px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));background:rgba(29,15,5,.9);border-top:2px solid var(--gold)}
+.bItem{flex:none;width:96px;display:flex;flex-direction:column;align-items:center;gap:2px;background:#3a2010;color:var(--cream);border:2px solid var(--brown2);border-radius:12px;padding:6px 4px;cursor:pointer}
+.bItem .bi{font-size:22px}.bItem b{font-size:11px;line-height:1.1;text-align:center}.bItem small{font-size:11px;color:var(--gold);font-weight:800}
+.bItem:disabled{opacity:.45;cursor:default}
 [hidden]{display:none!important}
 button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 </style>
@@ -199,7 +214,7 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
     <div id="popTxt"></div>
     <div id="routeBadge"></div>
   </div>
-  <div id="topR"><button id="bClose" class="ib">🔒<small>CLOSE</small></button><button id="bShop" class="ib">🛒<small>SHOP</small></button><button id="bSet" class="ib">⚙️<small>MENU</small></button></div>
+  <div id="topR"><button id="bBuild" class="ib">🔨<small>BUILD</small></button><button id="bClose" class="ib">🔒<small>CLOSE</small></button><button id="bShop" class="ib">🛒<small>SHOP</small></button><button id="bSet" class="ib">⚙️<small>MENU</small></button></div>
   <div id="toast"></div>
   <div id="pops"></div>
   <div id="hint"></div>
@@ -212,6 +227,12 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
     <div id="speed">0<small>MPH</small></div>
   </div>
   <div id="joyBase"><div id="joyKnob"></div></div>
+</div>
+<div id="buildUI" hidden>
+  <div id="bTop"><b>BUILD MODE</b><span id="bMoney"></span><button id="bDone">✓ Done</button></div>
+  <div id="bHint"></div>
+  <div id="bTool" hidden><button id="tRot">⟳ Rotate</button><button id="tMove">✥ Move</button><button id="tOk">✓ Place</button><button id="tCancel" aria-label="Cancel">✕</button></div>
+  <div id="bBar"></div>
 </div>
 <div id="modal" hidden><div class="sheet"><div class="mh"><b id="mTitle"></b><button id="mClose" aria-label="Close">✕</button></div><div id="mBody"></div></div></div>
 <div id="start">
@@ -253,7 +274,7 @@ const ITEMS=[
 const BOARD_CAP=8;
 
 // ================= STATE =================
-const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,found:{},desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
+const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,found:{},layout:null,desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
 ITEMS.forEach(i=>{DEF.stock[i.id]=0;DEF.board[i.id]=0;});
 const fresh=()=>JSON.parse(JSON.stringify(DEF));
 function readSlot(n){try{const j=localStorage.getItem(slotKey(n));return j?JSON.parse(j):null;}catch(e){return null;}}
@@ -328,11 +349,11 @@ box(0.2,3.2,0.4,GOLD,-1.4,1.6,8);box(0.2,3.2,0.4,GOLD,1.4,1.6,8);box(3,0.2,0.4,G
 for(const wx of [5.5,14.5]){box(4,1.9,0.36,0x2a4a66,wx,2.2,8);box(4.3,0.15,0.42,GOLD,wx,3.2,8);box(4.3,0.15,0.42,GOLD,wx,1.2,8);}
 // awning + roof + sign
 box(4,0.15,1.6,GOLD,0,3.45,8.85);
-box(29.6,0.35,16.6,DARKB,4.5,4.68,0);
-const ceil=new THREE.Mesh(new THREE.PlaneGeometry(29,16),mat(0xb08a5e));ceil.rotation.x=Math.PI/2;ceil.position.set(4.5,4.49,0);scene.add(ceil);
-for(const lx of [-6,0,6,14])for(const lz of [-4,3])box(2.4,0.06,0.5,new THREE.MeshBasicMaterial({color:0xfff6d8}),lx,4.45,lz);
-box(12.4,2.3,0.4,DARKB,0,5.95,8.05);
-const sign=new THREE.Mesh(new THREE.PlaneGeometry(11.6,2.17),nameMat);sign.position.set(0,5.95,8.27);scene.add(sign);
+const roofParts=[];roofParts.push(box(29.6,0.35,16.6,DARKB,4.5,4.68,0));
+const ceil=new THREE.Mesh(new THREE.PlaneGeometry(29,16),mat(0xb08a5e));ceil.rotation.x=Math.PI/2;ceil.position.set(4.5,4.49,0);scene.add(ceil);roofParts.push(ceil);
+for(const lx of [-6,0,6,14])for(const lz of [-4,3])roofParts.push(box(2.4,0.06,0.5,new THREE.MeshBasicMaterial({color:0xfff6d8}),lx,4.45,lz));
+roofParts.push(box(12.4,2.3,0.4,DARKB,0,5.95,8.05));
+const sign=new THREE.Mesh(new THREE.PlaneGeometry(11.6,2.17),nameMat);sign.position.set(0,5.95,8.27);scene.add(sign);roofParts.push(sign);
 const sign2=new THREE.Mesh(new THREE.PlaneGeometry(7,1.31),nameMat);sign2.position.set(-3,3.25,-7.83);scene.add(sign2);
 // floor
 const floorTex=canvasTex(128,128,g=>{g.fillStyle='#d9c29a';g.fillRect(0,0,128,128);g.fillStyle='#c4a679';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);});
@@ -345,11 +366,6 @@ const divider=new THREE.Group();scene.add(divider);
 box(0.3,4.5,16,mat(WALL_IN),10,2.25,0,divider);box(0.38,0.28,16,GOLD,10,1.15,0,divider);
 const divSign=textSprite('EXPANSION · SHOP',3.2);divSign.position.set(9.7,2.6,0);divider.add(divSign);
 const divCol=addCol(9.8,10.2,-8,8);
-// decor plants
-function plant(x,z){box(0.6,0.6,0.6,BROWN2,x,0.3,z);const l=new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6),mat(0x3f8f3a));l.position.set(x,1.05,z);scene.add(l);addCol(x-0.35,x+0.35,z-0.35,z+0.35);}
-plant(9.3,-7.3);plant(-9.3,7.3);plant(18.3,7.3);plant(18.3,-7.3);
-// expansion benches
-for(const bz of [2,5]){box(3,0.12,0.8,GOLD,15.5,0.55,bz);box(0.15,0.5,0.7,DARKB,14.2,0.25,bz);box(0.15,0.5,0.7,DARKB,16.8,0.25,bz);}
 
 // ================= HOUSES / TOWN =================
 const HOUSE_COLS=['#e8d3a8','#c9dbe8','#e6c3c3','#cfe3c1','#efe2b5','#d8cbe6'];
@@ -525,75 +541,87 @@ function itemMesh(id){const g=new THREE.Group();
  else {g.add(new THREE.Mesh(new THREE.BoxGeometry(0.02,0.16,0.16),mat(0xd23b3b)));}
  return g;}
 
-// ================= DYNAMIC STORE OBJECTS =================
-const deskObjs=[];
-function buildDesk(i){const x=DESK_SLOTS[i];const g=new THREE.Group();
- box(3,1.05,1,BROWN2,0,0.525,0,g);box(3.1,0.08,1.1,GOLD,0,1.09,0,g);box(3.02,0.25,1.02,DARKB,0,0.15,0,g);
- box(0.5,0.32,0.4,0x222222,0.7,1.3,-0.05,g);const scr=box(0.42,0.26,0.04,new THREE.MeshBasicMaterial({color:0x7fe0a0}),0.7,1.32,0.17,g);
- box(0.6,0.04,0.4,0xeeeeee,-0.6,1.15,0,g); // scale
- const num=textSprite('DESK '+(i+1),1.4);num.position.set(0,2.1,0);g.add(num);
- g.position.set(x,0,DESK_Z);scene.add(g);addCol(x-1.5,x+1.5,DESK_Z-0.5,DESK_Z+0.5);
- deskObjs.push({x,g,queue:[],clerk:null,t:0});}
-function ensureDesks(){while(deskObjs.length<S.desks)buildDesk(deskObjs.length);}
-function ensureClerks(){deskObjs.forEach((d,i)=>{const want=i<S.clerks;if(want&&!d.clerk){d.clerk=worker();d.clerk.position.set(d.x-0.3,0,DESK_Z-1.0);scene.add(d.clerk);}});}
-
-// bins
-const binGroups=[];
-BIN_X.forEach((x,b)=>{const g=new THREE.Group();box(1.6,0.8,1.1,BIN_COLORS[b],0,0.4,0,g);box(1.4,0.05,0.9,0x1d0f05,0,0.81,0,g);
- const lab=textSprite(BIN_NAMES[b]+' BIN',1.3,'#'+BIN_COLORS[b].toString(16).padStart(6,'0'),'#ffffff');lab.position.set(0,1.9,0);g.add(lab);
- const stack=new THREE.Group();g.add(stack);g.position.set(x,0,BIN_Z);scene.add(g);addCol(x-0.8,x+0.8,BIN_Z-0.55,BIN_Z+0.55);binGroups.push(stack);});
-function updBins(){binGroups.forEach((st,b)=>{while(st.children.length)st.remove(st.children[0]);for(let k=0;k<S.bins[b];k++){const p=pkgMesh(b);p.position.set(-0.45+(k%3)*0.45,0.98+Math.floor(k/3)*0.33,k%2?0.15:-0.15);st.add(p);}});}
-// outgoing table
-box(2.2,0.85,1.1,BROWN2,PILE.x,0.425,PILE.z);box(2.3,0.06,1.2,GOLD,PILE.x,0.88,PILE.z);
-addCol(PILE.x-1.1,PILE.x+1.1,PILE.z-0.55,PILE.z+0.55);
-{const l=textSprite('OUTGOING',1.5);l.position.set(PILE.x,2.2,PILE.z);scene.add(l);}
-const pileG=new THREE.Group();pileG.position.set(PILE.x,0,PILE.z);scene.add(pileG);
-function updPile(){while(pileG.children.length)pileG.remove(pileG.children[0]);S.pile.forEach((c,k)=>{const p=pkgMesh(c);const l=k%8;p.position.set(-0.75+(l%4)*0.5,1.07+Math.floor(k/8)*0.33,l<4?-0.24:0.24);p.rotation.y=(k*0.37)%0.4;pileG.add(p);});}
-
-// computer
-let compG=null;
-function ensureComputer(){if(!S.computer||compG)return;compG=new THREE.Group();
- box(2,0.8,1,BROWN2,0,0.4,0,compG);box(2.1,0.06,1.1,GOLD,0,0.83,0,compG);
- box(1.1,0.7,0.08,0x111111,0,1.28,-0.2,compG);box(1,0.6,0.02,new THREE.MeshBasicMaterial({color:0x45c46a}),0,1.28,-0.15,compG);
- box(0.12,0.3,0.12,0x111111,0,0.98,-0.2,compG);box(0.8,0.03,0.3,0x222222,0,0.88,0.2,compG);
- const l=textSprite('DELIVERIES',1.6);l.position.set(0,2.2,0);compG.add(l);
- compG.position.set(COMP.x,0,COMP.z);scene.add(compG);addCol(COMP.x-1,COMP.x+1,COMP.z-0.5,COMP.z+0.5);}
-
-// rack
-let rackG=null;const hookGroups={};
-function ensureRack(){if(!S.rack||rackG)return;rackG=new THREE.Group();
- box(0.12,2.4,4.4,GOLD,0,1.7,0,rackG);box(0.14,2.2,4.2,0xc8a46e,0.02,1.7,0,rackG);
- const hole=new THREE.MeshLambertMaterial({color:0x8a6a40});
- ITEMS.forEach((it,k)=>{const zz=[-1.35,0,1.35][k%3],yy=k<3?2.35:1.35;
-  const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.45,6),mat(0x999999));rod.rotation.z=Math.PI/2;rod.position.set(0.3,yy,zz);rackG.add(rod);
-  const hg=new THREE.Group();hg.position.set(0.1,yy-0.15,zz);rackG.add(hg);hookGroups[it.id]=hg;
-  const tag=textSprite(`${it.name.split(' ').pop()} $${it.price}`,0.9,'#fff4dc','#3d2210');tag.position.set(0.25,yy-0.48,zz);rackG.add(tag);});
- const l=textSprite('PIN BOARD',1.6);l.position.set(0.3,3.3,0);rackG.add(l);
- rackG.position.set(RACK.x,0,RACK.z);scene.add(rackG);addCol(-10,-9.4,RACK.z-2.2,RACK.z+2.2);updRack();}
-function updRack(){if(!rackG)return;ITEMS.forEach(it=>{const hg=hookGroups[it.id];while(hg.children.length)hg.remove(hg.children[0]);const n=Math.ceil(S.board[it.id]/2);for(let k=0;k<n;k++){const m=itemMesh(it.id);m.position.set(0.06+k*0.09,0,0);hg.add(m);}});}
-
-// lockers
-let lockG=null;
-function ensureLockers(){if(!S.lockers||lockG)return;lockG=new THREE.Group();box(4,2.5,0.6,BROWN2,0,1.25,0,lockG);
- for(let r=0;r<4;r++)for(let c=0;c<5;c++)box(0.66,0.5,0.04,GOLD,-1.6+c*0.8,0.45+r*0.6,-0.31,lockG);
- const l=textSprite('MAIL LOCKERS',1.8);l.position.set(0,3.1,0);lockG.add(l);
- lockG.position.set(LOCK.x,0,LOCK.z);scene.add(lockG);addCol(LOCK.x-2,LOCK.x+2,LOCK.z-0.35,LOCK.z+0.35);}
-
-// coffee
-let coffeeG=null;
-function ensureCoffee(){if(!S.coffee||coffeeG)return;coffeeG=new THREE.Group();box(1.4,0.9,0.8,BROWN2,0,0.45,0,coffeeG);box(1.5,0.05,0.9,GOLD,0,0.92,0,coffeeG);
- box(0.5,0.7,0.45,0x222222,-0.25,1.3,0,coffeeG);box(0.3,0.15,0.05,0xff3b3b,-0.25,1.45,-0.24,coffeeG);
- for(let k=0;k<3;k++){const c=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.14,8),mat(0xffffff));c.position.set(0.3+k*0.14,1.02,0);coffeeG.add(c);}
- const l=textSprite('FREE COFFEE',1.6);l.position.set(0,2.2,0);coffeeG.add(l);
- coffeeG.position.set(COFFEE.x,0,COFFEE.z);scene.add(coffeeG);addCol(COFFEE.x-0.7,COFFEE.x+0.7,COFFEE.z-0.4,COFFEE.z+0.4);}
-
+// ================= FURNITURE (free building, like Lockup Tycoon) =================
+// every piece is built facing local +z (its front); r = quarter turns
+const ROT=r=>r*Math.PI/2;
+const FT={
+ desk:{w:3,d:1,name:'Front Desk',icon:'🧾'},bin:{w:1.6,d:1.1,name:'Sorting Bin',icon:'🗑️'},pile:{w:2.2,d:1.1,name:'Outgoing Table',icon:'📦'},
+ comp:{w:2,d:1,name:'Delivery Computer',icon:'🖥️'},rack:{w:4.4,d:0.7,name:'Pin Board Rack',icon:'📌'},lock:{w:4,d:0.6,name:'Mail Lockers',icon:'🔐'},
+ coffee:{w:1.4,d:0.8,name:'Coffee Machine',icon:'☕'},plant:{w:0.7,d:0.7,name:'Plant',icon:'🪴'},bench:{w:3,d:0.8,name:'Bench',icon:'🪑'}};
+const FURN=[],deskObjs=[];
+function l2w(x,z,r,lx,lz){const a=ROT(r),c=Math.cos(a),s=Math.sin(a);return {x:x+lx*c+lz*s,z:z-lx*s+lz*c};}
+const fw=(f,lx,lz)=>l2w(f.x,f.z,f.r,lx,lz);
+function footAABB(t,x,z,r){const o=FT[t],w=r%2?o.d:o.w,d=r%2?o.w:o.d;return {x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2};}
+const furnOf=t=>FURN.find(f=>f.t===t);
+const binOf=c=>FURN.find(f=>f.t==='bin'&&f.c===c);
+function buildFurnMesh(f){const g=new THREE.Group();
+ if(f.t==='desk'){box(3,1.05,1,BROWN2,0,0.525,0,g);box(3.1,0.08,1.1,GOLD,0,1.09,0,g);box(3.02,0.25,1.02,DARKB,0,0.15,0,g);
+  box(0.5,0.32,0.4,0x222222,0.7,1.3,-0.05,g);box(0.42,0.26,0.04,new THREE.MeshBasicMaterial({color:0x7fe0a0}),0.7,1.32,0.17,g);box(0.6,0.04,0.4,0xeeeeee,-0.6,1.15,0,g);
+  const num=textSprite('DESK '+(deskObjs.length+1),1.4);num.position.set(0,2.1,0);g.add(num);}
+ else if(f.t==='bin'){const c=f.c||0;box(1.6,0.8,1.1,BIN_COLORS[c],0,0.4,0,g);box(1.4,0.05,0.9,0x1d0f05,0,0.81,0,g);
+  const lab=textSprite(BIN_NAMES[c]+' BIN',1.3,'#'+BIN_COLORS[c].toString(16).padStart(6,'0'),'#ffffff');lab.position.set(0,1.9,0);g.add(lab);f.stack=new THREE.Group();g.add(f.stack);}
+ else if(f.t==='pile'){box(2.2,0.85,1.1,BROWN2,0,0.425,0,g);box(2.3,0.06,1.2,GOLD,0,0.88,0,g);const l=textSprite('OUTGOING',1.5);l.position.set(0,2.2,0);g.add(l);f.pileG=new THREE.Group();g.add(f.pileG);}
+ else if(f.t==='comp'){box(2,0.8,1,BROWN2,0,0.4,0,g);box(2.1,0.06,1.1,GOLD,0,0.83,0,g);box(1.1,0.7,0.08,0x111111,0,1.28,-0.2,g);box(1,0.6,0.02,new THREE.MeshBasicMaterial({color:0x45c46a}),0,1.28,-0.15,g);
+  box(0.12,0.3,0.12,0x111111,0,0.98,-0.2,g);box(0.8,0.03,0.3,0x222222,0,0.88,0.2,g);const l=textSprite('DELIVERIES',1.6);l.position.set(0,2.2,0);g.add(l);}
+ else if(f.t==='rack'){const inner=new THREE.Group();inner.rotation.y=-Math.PI/2;inner.position.z=-0.25;g.add(inner);f.hooks={};
+  box(0.12,2.4,4.4,GOLD,0,1.7,0,inner);box(0.14,2.2,4.2,0xc8a46e,0.02,1.7,0,inner);
+  ITEMS.forEach((it,k)=>{const zz=[-1.35,0,1.35][k%3],yy=k<3?2.35:1.35;
+   const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.45,6),mat(0x999999));rod.rotation.z=Math.PI/2;rod.position.set(0.3,yy,zz);inner.add(rod);
+   const hg=new THREE.Group();hg.position.set(0.1,yy-0.15,zz);inner.add(hg);f.hooks[it.id]=hg;
+   const tag=textSprite(`${it.name.split(' ').pop()} $${it.price}`,0.9,'#fff4dc','#3d2210');tag.position.set(0.25,yy-0.48,zz);inner.add(tag);});
+  const l=textSprite('PIN BOARD',1.6);l.position.set(0.3,3.3,0);inner.add(l);}
+ else if(f.t==='lock'){box(4,2.5,0.6,BROWN2,0,1.25,0,g);for(let r=0;r<4;r++)for(let c=0;c<5;c++)box(0.66,0.5,0.04,GOLD,-1.6+c*0.8,0.45+r*0.6,0.31,g);
+  const l=textSprite('MAIL LOCKERS',1.8);l.position.set(0,3.1,0);g.add(l);}
+ else if(f.t==='coffee'){box(1.4,0.9,0.8,BROWN2,0,0.45,0,g);box(1.5,0.05,0.9,GOLD,0,0.92,0,g);box(0.5,0.7,0.45,0x222222,-0.25,1.3,0,g);box(0.3,0.15,0.05,0xff3b3b,-0.25,1.45,0.24,g);
+  for(let k=0;k<3;k++){const c=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.14,8),mat(0xffffff));c.position.set(0.3+k*0.14,1.02,0);g.add(c);}
+  const l=textSprite('FREE COFFEE',1.6);l.position.set(0,2.2,0);g.add(l);}
+ else if(f.t==='plant'){box(0.6,0.6,0.6,BROWN2,0,0.3,0,g);const l=new THREE.Mesh(new THREE.SphereGeometry(0.55,8,6),mat(0x3f8f3a));l.position.y=1.05;g.add(l);}
+ else if(f.t==='bench'){box(3,0.12,0.7,GOLD,0,0.5,0.05,g);box(3,0.55,0.1,GOLD,0,0.85,-0.33,g);box(0.15,0.45,0.7,DARKB,-1.3,0.22,0,g);box(0.15,0.45,0.7,DARKB,1.3,0.22,0,g);}
+ return g;}
+function makeFurn(o){const f={id:o.id,t:o.t,x:o.x,z:o.z,r:o.r||0,c:o.c};
+ if(f.t==='desk'){f.queue=[];f.clerk=null;f.tm=0;}
+ f.g=buildFurnMesh(f);scene.add(f.g);f.col=addCol(0,0,0,0);FURN.push(f);if(f.t==='desk')deskObjs.push(f);posFurn(f);
+ if(f.t==='bin')updBins();if(f.t==='pile')updPile();if(f.t==='rack')updRack();return f;}
+function posFurn(f){f.g.position.set(f.x,0,f.z);f.g.rotation.y=ROT(f.r);Object.assign(f.col,footAABB(f.t,f.x,f.z,f.r));
+ if(f.clerk){const p=fw(f,-0.3,-1.0);f.clerk.position.set(p.x,0,p.z);f.clerk.rotation.y=ROT(f.r);}
+ placeHelpers();}
+function saveLayout(){S.layout=FURN.map(f=>{const o={id:f.id,t:f.t,x:+f.x.toFixed(2),z:+f.z.toFixed(2),r:f.r};if(f.c!=null)o.c=f.c;return o;});}
+function defaultLayout(){const L=[];let n=0;const add=(t,x,z,r,c)=>{const o={id:t+(n++),t,x,z,r};if(c!=null)o.c=c;L.push(o);};
+ for(let i=0;i<S.desks;i++)add('desk',DESK_SLOTS[i],DESK_Z,0);
+ BIN_X.forEach((x,b)=>add('bin',x,BIN_Z,0,b));add('pile',-1.3,-7.2,0);
+ if(S.computer)add('comp',4.2,-7.2,0);if(S.rack)add('rack',-9.4,3,1);if(S.lockers)add('lock',-6.5,7.45,2);if(S.coffee)add('coffee',8.3,6.9,2);
+ add('plant',9.3,-7.3,0);add('plant',-9.3,7.3,0);add('plant',18.3,7.3,0);add('plant',18.3,-7.3,0);add('bench',15.5,2,2);add('bench',15.5,5,2);
+ return L;}
+function ensureClerks(){deskObjs.forEach((d,i)=>{if(i<S.clerks&&!d.clerk){d.clerk=worker();scene.add(d.clerk);posFurn(d);}});}
+function updBins(){FURN.forEach(f=>{if(f.t!=='bin')return;const st=f.stack;while(st.children.length)st.remove(st.children[0]);for(let k=0;k<S.bins[f.c];k++){const p=pkgMesh(f.c);p.position.set(-0.45+(k%3)*0.45,0.98+Math.floor(k/3)*0.33,k%2?0.15:-0.15);st.add(p);}});}
+function updPile(){const f=furnOf('pile');if(!f)return;const pg=f.pileG;while(pg.children.length)pg.remove(pg.children[0]);S.pile.forEach((c,k)=>{const p=pkgMesh(c);const l=k%8;p.position.set(-0.75+(l%4)*0.5,1.07+Math.floor(k/8)*0.33,l<4?-0.24:0.24);p.rotation.y=(k*0.37)%0.4;pg.add(p);});}
+function updRack(){const f=furnOf('rack');if(!f)return;ITEMS.forEach(it=>{const hg=f.hooks[it.id];while(hg.children.length)hg.remove(hg.children[0]);const n=Math.ceil(S.board[it.id]/2);for(let k=0;k<n;k++){const m=itemMesh(it.id);m.position.set(0.06+k*0.09,0,0);hg.add(m);}});}
 function applyExpand(){if(S.expand){divider.visible=false;divCol.off=true;}}
-
-// sorters & drivers
+// sorters & drivers stand next to the things they use
 const sorterMeshes=[];
-function ensureSorters(){while(sorterMeshes.length<S.sorters){const w=worker();const i=sorterMeshes.length;w.position.set(-5.2-i*1.2,0,-5.6);w.rotation.y=Math.PI;scene.add(w);sorterMeshes.push(w);}}
+function ensureSorters(){while(sorterMeshes.length<S.sorters){const w=worker();scene.add(w);sorterMeshes.push(w);}placeHelpers();}
 const drivers=[];   // {busy,t,total,r,mesh}
-function ensureDrivers(){while(drivers.length<S.drivers){const w=worker();const i=drivers.length;w.position.set(6.6+i*0.8,0,-6.2);scene.add(w);drivers.push({busy:false,t:0,total:0,r:null,mesh:w});}}
+function ensureDrivers(){while(drivers.length<S.drivers){const w=worker();scene.add(w);drivers.push({busy:false,t:0,total:0,r:null,mesh:w});}placeHelpers();}
+function placeHelpers(){const pl=furnOf('pile');if(pl&&typeof sorterMeshes!=='undefined')sorterMeshes.forEach((m,i)=>{const p=fw(pl,-0.6+i*1.2,1.3);m.position.set(p.x,0,p.z);m.rotation.y=ROT(pl.r)+Math.PI;});
+ const cp=furnOf('comp')||pl;if(cp&&typeof drivers!=='undefined')drivers.forEach((d,i)=>{const p=fw(cp,1.7+i*0.8,0.9);d.mesh.position.set(p.x,0,p.z);d.mesh.rotation.y=ROT(cp.r);});}
+// what each buildable costs and what placing it unlocks
+const PLACE={
+ desk:{price:()=>DESK_PRICES[S.desks]||0,can:()=>S.desks<5,why:()=>'Max 5',desc:'Another line for customers',onPlace:()=>{S.desks++;}},
+ coffee:{price:()=>1200,can:()=>!S.coffee&&!furnOf('coffee'),why:()=>'Owned',desc:'Customers wait longer',onPlace:()=>{S.coffee=true;}},
+ rack:{price:()=>5000,can:()=>!S.rack&&!furnOf('rack'),why:()=>'Owned',desc:'Sell supplies',onPlace:()=>{S.rack=true;}},
+ lock:{price:()=>6000,can:()=>!S.lockers&&!furnOf('lock'),why:()=>'Owned',desc:'Self-serve pickups',onPlace:()=>{S.lockers=true;}},
+ comp:{price:()=>8000,can:()=>!S.computer&&!furnOf('comp'),why:()=>'Owned',desc:'Unlocks delivery routes',onPlace:()=>{S.computer=true;S.trucks=Math.max(1,S.trucks);if(S.tut2===0)S.tut2=1;refreshParked();toast('🖥️ Delivery Computer installed. Turn deliveries ON!');}},
+ plant:{price:()=>60,can:()=>true,why:()=>'',desc:'Decoration',onPlace:()=>{}},
+ bench:{price:()=>150,can:()=>true,why:()=>'',desc:'Decoration',onPlace:()=>{}}};
+const PLACE_ORDER=['desk','coffee','rack','lock','comp','plant','bench'];
+const roomMaxX=()=>S.expand?18.75:9.75;
+function inRoom(x,z){return x>-9.6&&x<roomMaxX()-0.15&&z>-7.6&&z<7.6;}
+function canPlace(t,x,z,r,ignore){const a=footAABB(t,x,z,r);
+ if(a.x0<-9.8||a.x1>roomMaxX()+0.05||a.z0<-7.8||a.z1>7.8)return false;
+ if(a.x1>-1.8&&a.x0<1.8&&a.z1>5.0)return false; // keep the front door clear
+ for(const f of FURN){if(f===ignore)continue;const b=f.col;if(a.x0<b.x1-0.02&&a.x1>b.x0+0.02&&a.z0<b.z1-0.02&&a.z1>b.z0+0.02)return false;}
+ if(t==='desk'||t==='rack'||t==='lock'){const p=l2w(x,z,r,0,t==='desk'?1.4:1.1);if(!inRoom(p.x,p.z))return false;for(const f of FURN){if(f===ignore)continue;const b=f.col;if(p.x>b.x0&&p.x<b.x1&&p.z>b.z0&&p.z<b.z1)return false;}}
+ return true;}
 
 // ================= TRUCKS =================
 const wheelGeo=new THREE.CylinderGeometry(0.45,0.45,0.35,12);wheelGeo.rotateZ(Math.PI/2);
@@ -641,11 +669,11 @@ function fmtTime(m){let h=Math.floor(m/60),mm=Math.floor(m%60);const ap=h>=12?'P
 const customers=[];
 const angryTex=canvasTex(64,64,g=>{g.font='48px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('😠',32,36);});
 const happyTex=canvasTex(64,64,g=>{g.font='48px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('😊',32,36);});
-const qSpot=(d,k)=>({x:d.x,z:DESK_Z+1.15+1.05*k});
+const qSpot=(d,k)=>fw(d,0,1.15+1.05*k);
 function spawnCustomer(){const side=Math.random()<.5?-1:1;
  const g=person(pick(SHIRTS),pick(PANTS),pick(SKINS),Math.random()<.25?pick(SHIRTS):null);g.position.set(side*15,0,9.2);scene.add(g);
  let kind='drop';const r=Math.random();if(S.lockers&&r<0.2)kind='locker';else if(S.rack&&r<0.52)kind='buy';
- const hasPkg=kind==='drop'||(kind==='buy'&&Math.random()<0.4);
+ const hasPkg=kind!=='locker'&&kind!=='buy'||(kind==='buy'&&Math.random()<0.4);
  const c={g,kind,state:'enter',path:[{x:0,z:9.2},{x:0,z:6.6}],speed:rnd(1.9,2.5),maxP:rnd(45,65),pat:0,exitX:(Math.random()<.5?-1:1)*15,color:ri(0,2),hasPkg,bill:hasPkg?ri(4,9):0,item:null,wait:0,desk:null,ready:false,held:null};
  c.pat=c.maxP;
  if(hasPkg){c.held=pkgMesh(c.color);c.held.position.set(0,1.2,0.42);g.add(c.held);g.userData.carry=true;}
@@ -675,7 +703,7 @@ function updCustomers(dt,t){const drain=S.tut<5?0:(S.coffee?0.6:1);
   if(tx!==undefined){const dx=tx-c.g.position.x,dz=tz-c.g.position.z,d=Math.hypot(dx,dz);
    if(d>0.06){const st=Math.min(d,c.speed*dt);c.g.position.x+=dx/d*st;c.g.position.z+=dz/d*st;c.g.rotation.y=Math.atan2(dx,dz);moving=true;}
    else if(c.state!=='queue'){c.path.shift();if(!c.path.length)arrive(c);}
-   if(c.state==='queue'){c.ready=(k===0&&d<0.2);if(d<=0.06)c.g.rotation.y=Math.PI;}
+   if(c.state==='queue'){c.ready=(k===0&&d<0.2);if(d<=0.06)c.g.rotation.y=ROT(c.desk.r)+Math.PI;}
   }
   if(c.state==='browse'||c.state==='atLocker'){c.wait-=dt;if(c.wait<=0)doneWaiting(c);}
   if(c.state==='queue'||c.state==='browse'){c.pat-=dt*drain;c.bg.visible=c.fill.visible=true;const p=clamp(c.pat/c.maxP,0,1);c.fill.scale.x=0.82*p;c.fill.material.color.setHex(p>0.5?0x44dd44:p>0.25?0xffc23a:0xff4a3a);if(c.pat<=0)angry(c);}
@@ -683,10 +711,11 @@ function updCustomers(dt,t){const drain=S.tut<5?0:(S.coffee?0.6:1);
   animPerson(c.g,t+i,moving);
  }}
 function arrive(c){
- if(c.state==='enter'){if(c.kind==='locker'){c.state='toLocker';c.path=[{x:LOCK.x+rnd(-1.4,1.4),z:6.4}];}
-  else if(c.kind==='buy'){c.state='toRack';c.path=[{x:-8.3,z:RACK.z+rnd(-1.3,1.3)}];}else joinQueue(c);}
- else if(c.state==='toLocker'){c.state='atLocker';c.wait=2.5;c.g.rotation.y=0;}
- else if(c.state==='toRack'){c.state='browse';c.wait=2.2;c.g.rotation.y=-Math.PI/2;}
+ if(c.state==='enter'){const lk=furnOf('lock'),rk=furnOf('rack');if(c.kind==='locker'&&!lk)c.kind='drop';if(c.kind==='buy'&&!rk)c.kind='drop';
+  if(c.kind==='locker'){c.state='toLocker';c.path=[fw(lk,rnd(-1.4,1.4),1.2)];}
+  else if(c.kind==='buy'){c.state='toRack';c.path=[fw(rk,rnd(-1.3,1.3),1.4)];}else joinQueue(c);}
+ else if(c.state==='toLocker'){c.state='atLocker';c.wait=2.5;const lk=furnOf('lock');if(lk)c.g.rotation.y=ROT(lk.r)+Math.PI;}
+ else if(c.state==='toRack'){c.state='browse';c.wait=2.2;const rk=furnOf('rack');if(rk)c.g.rotation.y=ROT(rk.r)+Math.PI;}
  else if(c.state==='leave'){c.state='gone';}}
 function doneWaiting(c){
  if(c.state==='atLocker'){addMoney(4);addPop(0.3);c.state='leave';c.path=leavePath(c);emote(c,happyTex);return;}
@@ -797,30 +826,35 @@ function drawMini(){const W=mini.width,R=W/2;mc.setTransform(1,0,0,1,0,0);mc.cle
 
 // ================= INPUT =================
 const K={};
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();K[k]=true;if(k==='e'&&started&&!modalKind&&mode==='walk')doAct();if(k==='escape'&&modalKind&&modalKind!=='summaryDay'&&modalKind!=='summaryRoute')closeModal();});
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+ if(BLD.on){if(k==='r')rotateBuild();else if(k==='enter')placeGhost();else if(k==='escape'){if(BLD.ghost)cancelGhost();else if(BLD.sel)clearSel();else exitBuild();}else if(k==='b'&&!BLD.ghost)exitBuild();return;}
+ if(k==='b'&&started&&!modalKind&&mode==='walk'){enterBuild();return;}
+ K[k]=true;if(k==='e'&&started&&!modalKind&&mode==='walk')doAct();if(k==='escape'&&modalKind&&modalKind!=='summaryDay'&&modalKind!=='summaryRoute')closeModal();});
 addEventListener('keyup',e=>{K[e.key.toLowerCase()]=false;});
 addEventListener('blur',()=>{for(const k in K)K[k]=false;});
 const joy={x:0,y:0,id:null,ox:0,oy:0},look={id:null,lx:0,ly:0};
 const touchEl=$('touch'),jb=$('joyBase'),jk=$('joyKnob');
 touchEl.addEventListener('pointerdown',e=>{if(!started||modalKind)return;
+ if(BLD.on){bDown(e);try{touchEl.setPointerCapture(e.pointerId);}catch(_){}return;}
  const left=e.clientX<innerWidth*0.5;
  if(e.pointerType!=='mouse'&&left&&joy.id===null){joy.id=e.pointerId;joy.ox=e.clientX;joy.oy=e.clientY;jb.style.left=e.clientX+'px';jb.style.top=e.clientY+'px';jb.style.display='block';jk.style.transform='translate(-50%,-50%)';}
  else if(look.id===null){look.id=e.pointerId;look.lx=e.clientX;look.ly=e.clientY;}
  try{touchEl.setPointerCapture(e.pointerId);}catch(_){}});
 touchEl.addEventListener('pointermove',e=>{
+ if(BLD.on){bMove(e);return;}
  if(e.pointerId===joy.id){let dx=e.clientX-joy.ox,dy=e.clientY-joy.oy;const d=Math.hypot(dx,dy),m=55;if(d>m){dx*=m/d;dy*=m/d;}joy.x=dx/m;joy.y=dy/m;jk.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;}
  else if(e.pointerId===look.id){const s=e.pointerType==='mouse'?0.0045:0.006;P.yaw-=(e.clientX-look.lx)*s;P.pitch=clamp(P.pitch-(e.clientY-look.ly)*s,-1.2,1.2);look.lx=e.clientX;look.ly=e.clientY;}});
-function endPtr(e){if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;jb.style.display='none';}if(e.pointerId===look.id)look.id=null;}
+function endPtr(e){if(BLD.on){bUp(e);return;}if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;jb.style.display='none';}if(e.pointerId===look.id)look.id=null;}
 touchEl.addEventListener('pointerup',endPtr);touchEl.addEventListener('pointercancel',endPtr);
 
 // ================= INTERACTION =================
 function getInter(){const L=[];
- deskObjs.forEach(d=>L.push({x:d.x,z:DESK_Z,r:2.7,lab:()=>{const c=d.queue[0];return c&&c.ready?`SERVE<br><small>$${c.bill}${c.item?' + item':''}</small>`:(d.clerk?'Clerk is<br>working':'No one<br>waiting');},ok:()=>{const c=d.queue[0];return !!(c&&c.ready);},act:()=>serve(d,false)}));
- L.push({x:PILE.x,z:PILE.z,r:2.3,lab:()=>P.carry>=0?'Hands<br>full':S.pile.length?`PICK UP<br><small>${S.pile.length} package${S.pile.length>1?'s':''}</small>`:'No<br>packages',ok:()=>P.carry<0&&S.pile.length>0,act:()=>{P.carry=S.pile.shift();updPile();updCarry();beep(600,0.05,'triangle',0.04);}});
- BIN_X.forEach((x,b)=>L.push({x,z:BIN_Z,r:1.8,lab:()=>P.carry<0?`${BIN_NAMES[b]} BIN<br><small>${S.bins[b]}/6</small>`:`SORT<br><small>into ${BIN_NAMES[b]}</small>`,ok:()=>P.carry>=0,act:()=>{if(P.carry===b){P.carry=-1;updCarry();sortPkg(b);}else{toast(`❌ Wrong bin! That's a ${BIN_NAMES[P.carry]} package.`);beep(200,0.15,'square',0.04);}}}));
- if(S.computer)L.push({x:COMP.x,z:COMP.z,r:2.4,lab:()=>'DELIVERY<br>COMPUTER',ok:()=>true,act:openComputer});
- if(S.rack)L.push({x:RACK.x+0.6,z:RACK.z,r:2.8,lab:()=>canRestock()?'RESTOCK<br><small>pin board</small>':'PIN BOARD<br><small>buy supplies</small>',ok:()=>true,act:restock});
- if(S.coffee)L.push({x:COFFEE.x,z:COFFEE.z,r:2.2,lab:()=>P.boost>0?`☕ BOOST<br><small>${Math.ceil(P.boost)}s</small>`:'GRAB<br>COFFEE',ok:()=>P.boost<=0,act:()=>{P.boost=20;toast('☕ Speed boost for 20 seconds!');beep(700,0.1,'triangle',0.05);}});
+ deskObjs.forEach(d=>L.push({x:d.x,z:d.z,r:2.7,lab:()=>{const c=d.queue[0];return c&&c.ready?`SERVE<br><small>$${c.bill}${c.item?' + item':''}</small>`:(d.clerk?'Clerk is<br>working':'No one<br>waiting');},ok:()=>{const c=d.queue[0];return !!(c&&c.ready);},act:()=>serve(d,false)}));
+ const pl=furnOf('pile');if(pl)L.push({x:pl.x,z:pl.z,r:2.3,lab:()=>P.carry>=0?'Hands<br>full':S.pile.length?`PICK UP<br><small>${S.pile.length} package${S.pile.length>1?'s':''}</small>`:'No<br>packages',ok:()=>P.carry<0&&S.pile.length>0,act:()=>{P.carry=S.pile.shift();updPile();updCarry();beep(600,0.05,'triangle',0.04);}});
+ FURN.filter(f=>f.t==='bin').forEach(bf=>{const b=bf.c;L.push({x:bf.x,z:bf.z,r:1.8,lab:()=>P.carry<0?`${BIN_NAMES[b]} BIN<br><small>${S.bins[b]}/6</small>`:`SORT<br><small>into ${BIN_NAMES[b]}</small>`,ok:()=>P.carry>=0,act:()=>{if(P.carry===b){P.carry=-1;updCarry();sortPkg(b);}else{toast(`❌ Wrong bin! That's a ${BIN_NAMES[P.carry]} package.`);beep(200,0.15,'square',0.04);}}});});
+ const cpf=furnOf('comp');if(cpf)L.push({x:cpf.x,z:cpf.z,r:2.4,lab:()=>'DELIVERY<br>COMPUTER',ok:()=>true,act:openComputer});
+ const rkf=furnOf('rack');if(rkf){const rp=fw(rkf,0,0.8);L.push({x:rp.x,z:rp.z,r:2.8,lab:()=>canRestock()?'RESTOCK<br><small>pin board</small>':'PIN BOARD<br><small>buy supplies</small>',ok:()=>true,act:restock});}
+ const cff=furnOf('coffee');if(cff)L.push({x:cff.x,z:cff.z,r:2.2,lab:()=>P.boost>0?`☕ BOOST<br><small>${Math.ceil(P.boost)}s</small>`:'GRAB<br>COFFEE',ok:()=>P.boost<=0,act:()=>{P.boost=20;toast('☕ Speed boost for 20 seconds!');beep(700,0.1,'triangle',0.05);}});
  return L;}
 let curInter=null;
 function pickInter(){const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw);let best=null,bs=1e9;
@@ -834,17 +868,18 @@ function restock(){if(!canRestock()){toast(ITEMS.some(it=>S.stock[it.id]>0)?'Pin
 
 // ================= SHOP =================
 const DESK_PRICES=[0,600,1000,1600,2400];
-const maxDesks=()=>S.expand?5:3;
 const SHOP=[
- {tab:'Store',icon:'🧾',name:'Front Desk',desc:()=>`You have ${S.desks}. More desks = shorter lines.`,price:()=>DESK_PRICES[S.desks]||0,can:()=>S.desks<maxDesks(),why:()=>S.desks>=5?'Max':'Expand first',buy:()=>{S.desks++;ensureDesks();}},
+ {tab:'Store',icon:'🧾',name:'Front Desk',desc:()=>`You have ${S.desks}. You place it yourself, anywhere in the store.`,price:()=>PLACE.desk.price(),can:()=>PLACE.desk.can(),why:()=>'Max 5',place:'desk'},
  {tab:'Store',icon:'🏗️',name:'Store Expansion',desc:()=>'Opens the side room: room for 2 more desks.',price:()=>4000,can:()=>!S.expand,why:()=>'Owned',buy:()=>{S.expand=true;applyExpand();}},
- {tab:'Store',icon:'☕',name:'Coffee Machine',desc:()=>'Customers wait 40% longer before getting mad. You can grab a coffee for a speed boost.',price:()=>1200,can:()=>!S.coffee,why:()=>'Owned',buy:()=>{S.coffee=true;ensureCoffee();}},
- {tab:'Store',icon:'📌',name:'Pin Board Rack',desc:()=>'Sell tape, sharpies, bubble wrap and more. Stock it from Supplies.',price:()=>5000,can:()=>!S.rack,why:()=>'Owned',buy:()=>{S.rack=true;ensureRack();}},
- {tab:'Store',icon:'🔐',name:'Mail Lockers',desc:()=>'Some customers pick up from lockers on their own: +$4 each, no line.',price:()=>6000,can:()=>!S.lockers,why:()=>'Owned',buy:()=>{S.lockers=true;ensureLockers();}},
+ {tab:'Store',icon:'☕',name:'Coffee Machine',desc:()=>'Customers wait 40% longer before getting mad. You can grab a coffee for a speed boost.',price:()=>PLACE.coffee.price(),can:()=>PLACE.coffee.can(),why:()=>'Owned',place:'coffee'},
+ {tab:'Store',icon:'📌',name:'Pin Board Rack',desc:()=>'Sell tape, sharpies, bubble wrap and more. Stock it from Supplies.',price:()=>PLACE.rack.price(),can:()=>PLACE.rack.can(),why:()=>'Owned',place:'rack'},
+ {tab:'Store',icon:'🔐',name:'Mail Lockers',desc:()=>'Some customers pick up from lockers on their own: +$4 each, no line.',price:()=>PLACE.lock.price(),can:()=>PLACE.lock.can(),why:()=>'Owned',place:'lock'},
+ {tab:'Store',icon:'🪴',name:'Plant',desc:()=>'Decoration. Place it anywhere.',price:()=>PLACE.plant.price(),can:()=>true,why:()=>'',place:'plant'},
+ {tab:'Store',icon:'🪑',name:'Bench',desc:()=>'Decoration. Place it anywhere.',price:()=>PLACE.bench.price(),can:()=>true,why:()=>'',place:'bench'},
  {tab:'Staff',icon:'🧑‍💼',name:'Front Desk Clerk',desc:()=>`Serves a desk for you. Clerks: ${S.clerks}/${S.desks}. Wage $60/day.`,price:()=>900,can:()=>S.clerks<S.desks,why:()=>'Buy a desk',buy:()=>{S.clerks++;ensureClerks();}},
  {tab:'Staff',icon:'🗂️',name:'Package Sorter',desc:()=>`Sorts the OUTGOING pile into bins. Sorters: ${S.sorters}/2. Wage $50/day.`,price:()=>700,can:()=>S.sorters<2,why:()=>'Max',buy:()=>{S.sorters++;ensureSorters();}},
  {tab:'Staff',icon:'🚚',name:'Delivery Driver',desc:()=>`Runs routes when deliveries are ON. 10s per stop. Drivers: ${S.drivers}/${S.trucks} trucks. Wage $80/day.`,price:()=>1200,can:()=>S.computer&&S.drivers<S.trucks,why:()=>!S.computer?'Need computer':'Need truck',buy:()=>{S.drivers++;ensureDrivers();}},
- {tab:'Delivery',icon:'🖥️',name:'Delivery Computer',desc:()=>'Unlocks delivery routes. Comes with 1 delivery truck.',price:()=>8000,can:()=>!S.computer,why:()=>'Owned',buy:()=>{S.computer=true;S.trucks=Math.max(1,S.trucks);if(S.tut2===0)S.tut2=1;ensureComputer();refreshParked();toast('🖥️ Delivery Computer installed in the back. Turn deliveries ON!');}},
+ {tab:'Delivery',icon:'🖥️',name:'Delivery Computer',desc:()=>'Unlocks delivery routes. Comes with 1 delivery truck. You place it yourself.',price:()=>PLACE.comp.price(),can:()=>PLACE.comp.can(),why:()=>'Owned',place:'comp'},
  {tab:'Delivery',icon:'🚛',name:'Delivery Truck',desc:()=>`Trucks: ${S.trucks}/4. Each driver needs their own truck.`,price:()=>3500,can:()=>S.computer&&S.trucks<4,why:()=>!S.computer?'Need computer':'Max',buy:()=>{S.trucks++;refreshParked();}},
  {tab:'Delivery',icon:'⚡',name:'Turbo Engines',desc:()=>'All trucks get a higher top speed.',price:()=>2500,can:()=>S.computer&&!S.fast,why:()=>!S.computer?'Need computer':'Owned',buy:()=>{S.fast=true;}},
  ...ITEMS.map(it=>({tab:'Supplies',icon:it.icon,name:`${it.name} ×${it.pack}`,desc:()=>`Sells for $${it.price} each · In back: ${S.stock[it.id]} · On board: ${S.board[it.id]}/${BOARD_CAP}`,price:()=>it.cost,can:()=>S.rack,why:()=>'Need rack',buy:()=>{S.stock[it.id]+=it.pack;toast(`${it.icon} Bought ${it.pack} ${it.name}. Restock the pin board!`);}})),
@@ -882,7 +917,7 @@ function closeModal(){modalKind=null;$('modal').hidden=true;}
 $('mClose').addEventListener('click',closeModal);
 $('modal').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
  if(t.dataset.tab){shopTab=t.dataset.tab;renderShop();return;}
- if(t.dataset.buy){const s=SHOP[+t.dataset.buy];const p=s.price();if(!s.can()||S.money<p)return;S.money-=p;s.buy();ching();save();renderShop();return;}
+ if(t.dataset.buy){const s=SHOP[+t.dataset.buy];const p=s.price();if(!s.can()||S.money<p)return;if(s.place){closeModal();enterBuild();startGhost(s.place);return;}S.money-=p;s.buy();ching();save();renderShop();return;}
  if(t.dataset.a==='tog'){S.deliveriesOn=!S.deliveriesOn;if(!S.deliveriesOn)requests=[];else{reqTimer=0.5;rollTarget();}save();renderComputer();return;}
  if(t.dataset.do){startRoute(+t.dataset.do);return;}
  if(t.dataset.a==='back'){closeModal();endDrive();return;}
@@ -898,7 +933,7 @@ $('bClose').addEventListener('click',()=>{if(!started||mode!=='walk'||modalKind)
  toast(S.closed?(customers.length?'🔒 Store closed. The day ends once the last customer leaves.':'🔒 Store closed.'):'🔓 Store is open again!');beep(S.closed?500:900,0.1,'triangle',0.05);});
 $('bSet').addEventListener('click',()=>{if(!started)return;openModal('settings','Menu',`<label for="nameIn" style="display:block;font-weight:800;margin-bottom:6px;color:#ffd766">Post office name</label><input id="nameIn" class="nm" maxlength="28" value="${S.name.replace(/"/g,'&quot;')}"><button class="buy wide" data-a="rename">Save name</button>
  <div class="sec" style="margin-top:18px">Stats</div><div class="sum">Day <b>${S.day}</b><br>Customers served <b>${S.served}</b><br>Routes delivered <b>${S.routes}</b></div>
- <div class="sec" style="margin-top:18px">How to play</div><div class="cinfo">Serve customers at a front desk. Their packages land on OUTGOING: carry each one to the bin that matches its sticker color. Grow popularity to get more customers. Buy the Delivery Computer to run delivery routes in a truck, then hire drivers to run them for you.</div>
+ <div class="sec" style="margin-top:18px">How to play</div><div class="cinfo">Serve customers at a front desk. Their packages land on OUTGOING: carry each one to the bin that matches its sticker color. Grow popularity to get more customers. Buy the Delivery Computer to run delivery routes in a truck, then hire drivers to run them for you. Tap BUILD to move, rotate and place anything in your post office.</div>
  <button class="buy wide" data-a="save">💾 Save game</button><button class="buy wide" data-a="tut" style="margin-top:8px">Replay tutorial</button><button class="buy wide" data-a="quit" style="margin-top:8px">Save &amp; quit to title</button>
  <button class="buy wide danger" data-a="reset">Delete this save</button>`);});
 $('bEnd').addEventListener('click',()=>{if(mode!=='drive')return;marker.visible=false;recipient.visible=false;const d=drive;save();
@@ -937,17 +972,17 @@ function hintText(){
 // ================= TUTORIAL =================
 let tutMoved=0,tutServedBase=0,tutSorted=false,tutShop=false,tutArrowY=3;
 const tutArrow=new THREE.Mesh(new THREE.ConeGeometry(0.32,0.7,10),new THREE.MeshBasicMaterial({color:GOLD}));tutArrow.rotation.x=Math.PI;tutArrow.visible=false;scene.add(tutArrow);
-const deskTarget=()=>({x:deskObjs[0].x,z:DESK_Z,y:2.9});
+const deskTarget=()=>({x:deskObjs[0].x,z:deskObjs[0].z,y:2.9});
 const TUT=[
  {t:'Welcome to your post office! Drag the left side of the screen to walk (WASD on computer). Drag the right side to look around.',done:()=>tutMoved>3},
- {t:'Walk up to DESK 1. Follow the gold arrow.',target:deskTarget,done:()=>Math.hypot(P.x-deskObjs[0].x,P.z-DESK_Z)<2.7},
+ {t:'Walk up to DESK 1. Follow the gold arrow.',target:deskTarget,done:()=>Math.hypot(P.x-deskObjs[0].x,P.z-deskObjs[0].z)<2.7},
  {t:'A customer is coming in! When they reach the desk, tap the gold SERVE button.',target:deskTarget,done:()=>S.served>tutServedBase},
- {t:'You got paid! Their package went to the OUTGOING table in the back. Walk over and tap PICK UP.',target:()=>({x:PILE.x,z:PILE.z,y:2.9}),done:()=>P.carry>=0},
- {t:()=>{const c=BIN_NAMES[Math.max(0,P.carry)];return `Check the sticker on top of the package. It's ${c}, so SORT it into the ${c} bin.`;},target:()=>P.carry>=0?{x:BIN_X[P.carry],z:BIN_Z,y:2.6}:null,done:()=>tutSorted},
+ {t:'You got paid! Their package went to the OUTGOING table in the back. Walk over and tap PICK UP.',target:()=>{const f=furnOf('pile');return f?{x:f.x,z:f.z,y:2.9}:null;},done:()=>P.carry>=0},
+ {t:()=>{const c=BIN_NAMES[Math.max(0,P.carry)];return `Check the sticker on top of the package. It's ${c}, so SORT it into the ${c} bin.`;},target:()=>{const f=P.carry>=0?binOf(P.carry):null;return f?{x:f.x,z:f.z,y:2.6}:null;},done:()=>tutSorted},
  {t:'Nice sorting! Now tap SHOP in the top right. That is where you buy desks, workers and upgrades.',done:()=>tutShop},
  {t:'Happy customers raise your popularity, which brings in more customers. Angry ones lower it. Every day ends with rent and bills, so watch your cash. Save up $8,000 for the Delivery Computer to unlock delivery routes. The game autosaves, and you can save any time from MENU.',btn:'Got it, let\'s go!'},
 ];
-const compTarget=()=>({x:COMP.x,z:COMP.z,y:2.9});
+const compTarget=()=>{const f=furnOf('comp');return f?{x:f.x,z:f.z,y:2.9}:null;};
 const TUT2=[null,
  {t:'Your Delivery Computer is in the back of the store. Walk over and open it.',target:compTarget,done:()=>modalKind==='computer'},
  {t:'At the Delivery Computer, turn Deliveries ON, then press DO IT on a route.',target:compTarget,done:()=>mode==='drive'},
@@ -962,7 +997,7 @@ function tutAdvance(){const c=curTut();if(!c)return;
 function updTut(){const c=curTut(),el=$('tut');
  if(!c||!started){el.hidden=true;tutArrow.visible=false;return;}
  const step=c.list[c.i];if(step.done&&step.done()){tutAdvance();return;}
- if(modalKind){el.hidden=true;tutArrow.visible=false;return;}
+ if(modalKind||BLD.on){el.hidden=true;tutArrow.visible=false;return;}
  el.hidden=false;
  $('tutStep').textContent=c.part===1?`TUTORIAL ${c.i+1}/${TUT.length}`:`DELIVERIES ${c.i}/${TUT2.length-1}`;
  const txt=typeof step.t==='function'?step.t():step.t;if($('tutTxt').textContent!==txt)$('tutTxt').textContent=txt;
@@ -971,6 +1006,75 @@ function updTut(){const c=curTut(),el=$('tut');
  if(tg&&mode==='walk'){tutArrow.visible=true;tutArrow.position.x=tg.x;tutArrow.position.z=tg.z;tutArrowY=tg.y||3;}else tutArrow.visible=false;}
 $('tutBtn').addEventListener('click',tutAdvance);
 $('tutSkip').addEventListener('click',()=>{S.tut=99;S.tut2=99;save();updTut();toast('Tutorial skipped. Replay it any time from MENU.');});
+
+// ================= BUILD MODE =================
+const BLD={on:false,ghost:null,sel:null,cam:{x:4.5,z:0,dist:24},ptrs:new Map(),mode:null,g0:null,off:null,moved:0,sx:0,sy:0,pinch:0};
+const RC=new THREE.Raycaster(),GPL=new THREE.Plane(new THREE.Vector3(0,1,0),0),V2=new THREE.Vector2(),V3=new THREE.Vector3();
+function groundAt(cx,cy){camera.updateMatrixWorld();V2.set(cx/innerWidth*2-1,-(cy/innerHeight)*2+1);RC.setFromCamera(V2,camera);return RC.ray.intersectPlane(GPL,V3)?{x:V3.x,z:V3.z}:null;}
+function bCam(){const c=BLD.cam;c.x=clamp(c.x,-12,S.expand?22:12);c.z=clamp(c.z,-10,12);c.dist=clamp(c.dist,10,36);camera.position.set(c.x,c.dist,c.z+c.dist*0.6);camera.lookAt(c.x,0,c.z);}
+const padMat=new THREE.MeshBasicMaterial({color:0x3ee6a8,transparent:true,opacity:0.45,depthWrite:false});
+const padBad=new THREE.MeshBasicMaterial({color:0xff4d5e,transparent:true,opacity:0.5,depthWrite:false});
+const selMat=new THREE.MeshBasicMaterial({color:0xffd24a,transparent:true,opacity:0.4,depthWrite:false});
+const pad=new THREE.Mesh(new THREE.PlaneGeometry(1,1),padMat);pad.rotation.x=-Math.PI/2;pad.position.y=0.05;pad.visible=false;scene.add(pad);
+const padFront=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:0xffb500,transparent:true,opacity:0.85,depthWrite:false}));padFront.rotation.x=-Math.PI/2;padFront.position.y=0.06;padFront.visible=false;scene.add(padFront);
+function showPad(t,x,z,r,m){const a=footAABB(t,x,z,r);pad.material=m;pad.scale.set(a.x1-a.x0+0.1,a.z1-a.z0+0.1,1);pad.position.x=(a.x0+a.x1)/2;pad.position.z=(a.z0+a.z1)/2;pad.visible=true;
+ const o=FT[t],p=l2w(x,z,r,0,o.d/2+0.2);padFront.scale.set(r%2?0.18:o.w*0.6,r%2?o.w*0.6:0.18,1);padFront.position.x=p.x;padFront.position.z=p.z;padFront.visible=true;}
+function hidePad(){pad.visible=padFront.visible=false;}
+const snap=v=>Math.round(v*2)/2;
+function enterBuild(){if(!started||mode!=='walk'||BLD.on)return;closeModal();BLD.on=true;BLD.cam.x=clamp(P.x,-4,S.expand?13:4);BLD.cam.z=1;BLD.cam.dist=innerWidth>innerHeight?15:26;bCam();
+ roofParts.forEach(m=>m.visible=false);if(P.carry>=0){S.pile.unshift(P.carry);P.carry=-1;updCarry();updPile();}
+ $('buildUI').hidden=false;$('topR').hidden=true;$('topL').hidden=true;$('act').hidden=true;$('hint').hidden=true;$('tut').hidden=true;tutArrow.visible=false;joy.id=null;joy.x=joy.y=0;jb.style.display='none';
+ renderBuildBar();bTools();}
+function exitBuild(){if(!BLD.on)return;cancelGhost();clearSel();BLD.on=false;roofParts.forEach(m=>m.visible=true);
+ $('buildUI').hidden=true;$('topR').hidden=false;$('topL').hidden=false;$('act').hidden=false;$('hint').hidden=false;
+ if(hitBox(colliders,P.x,P.z,0.35)){P.x=0;P.z=6;P.yaw=0;}
+ saveLayout();save();hudT=0;}
+function renderBuildBar(){let h='';for(const t of PLACE_ORDER){const pl=PLACE[t],p=pl.price(),can=pl.can(),ok=can&&S.money>=p;
+  h+=`<button class="bItem" data-bt="${t}" ${ok?'':'disabled'}><span class="bi">${FT[t].icon}</span><b>${FT[t].name}</b><small>${can?'$'+p.toLocaleString():pl.why()}</small></button>`;}
+ $('bBar').innerHTML=h;$('bMoney').textContent='$'+Math.floor(S.money).toLocaleString();}
+function bTools(){const g=BLD.ghost,s=BLD.sel;$('bTool').hidden=!g&&!s;$('tOk').hidden=!g;$('tMove').hidden=!s||!!g;
+ $('bHint').textContent=g?(g.isNew?`Drag the ${FT[g.t].name.toLowerCase()} where you want it. The gold edge is the front. Then tap Place ($${PLACE[g.t].price().toLocaleString()}).`:'Drag it to a new spot, then tap Place.')
+  :s?`${FT[s.t].name}: rotate it or move it.`:'Tap anything in your post office to move or rotate it. Pick something below to buy and place it. Drag to look around.';}
+function freeSpotNear(t,x,z,r,ignore){for(let rad=0;rad<14;rad+=0.5)for(let k=0;k<Math.max(1,rad*8);k++){const a=k/Math.max(1,rad*8)*Math.PI*2,px=snap(x+Math.cos(a)*rad),pz=snap(z+Math.sin(a)*rad);if(canPlace(t,px,pz,r,ignore))return {x:px,z:pz};}return {x:snap(x),z:snap(z)};}
+function startGhost(t){cancelGhost();clearSel();const pl=PLACE[t];if(!pl||!pl.can())return;
+ if(S.money<pl.price()){toast(`Not enough money for the ${FT[t].name.toLowerCase()}.`);return;}
+ const f={t,x:0,z:0,r:0};f.g=buildFurnMesh(f);scene.add(f.g);const p=freeSpotNear(t,BLD.cam.x,BLD.cam.z,0,null);f.x=p.x;f.z=p.z;
+ BLD.ghost={t,f,isNew:true,x:p.x,z:p.z,r:0};updGhost();bTools();}
+function startMove(f){cancelGhost();BLD.sel=null;BLD.ghost={t:f.t,f,isNew:false,x:f.x,z:f.z,r:f.r,ox:f.x,oz:f.z,or:f.r};updGhost();bTools();}
+function updGhost(){const g=BLD.ghost;if(!g)return;const f=g.f;f.g.position.set(g.x,0,g.z);f.g.rotation.y=ROT(g.r);g.ok=canPlace(g.t,g.x,g.z,g.r,g.isNew?null:f);showPad(g.t,g.x,g.z,g.r,g.ok?padMat:padBad);}
+function cancelGhost(){const g=BLD.ghost;if(!g)return;if(g.isNew)scene.remove(g.f.g);else{g.f.x=g.ox;g.f.z=g.oz;g.f.r=g.or;posFurn(g.f);}BLD.ghost=null;hidePad();bTools();}
+function placeGhost(){const g=BLD.ghost;if(!g)return;if(!g.ok){toast("It doesn't fit there. Red means blocked.");beep(200,0.15,'square',0.04);return;}
+ if(g.isNew){const pl=PLACE[g.t],p=pl.price();if(S.money<p){toast('Not enough money.');return;}S.money-=p;scene.remove(g.f.g);
+  const f=makeFurn({id:g.t+Date.now().toString(36),t:g.t,x:g.x,z:g.z,r:g.r});pl.onPlace(f);ensureClerks();popup('-$'+p.toLocaleString(),'bad');}
+ else{const f=g.f;f.x=g.x;f.z=g.z;f.r=g.r;posFurn(f);}
+ BLD.ghost=null;hidePad();ching();saveLayout();save();renderBuildBar();bTools();}
+function rotateBuild(){const g=BLD.ghost;if(g){g.r=(g.r+1)&3;updGhost();beep(700,0.04,'triangle',0.04);return;}
+ const s=BLD.sel;if(s){const nr=(s.r+1)&3;if(!canPlace(s.t,s.x,s.z,nr,s)){toast('No room to turn it here. Use Move.');return;}s.r=nr;posFurn(s);selectFurn(s);saveLayout();beep(700,0.04,'triangle',0.04);}}
+function selectFurn(f){BLD.sel=f;if(f)showPad(f.t,f.x,f.z,f.r,selMat);else hidePad();bTools();}
+function clearSel(){if(BLD.sel){BLD.sel=null;hidePad();}bTools();}
+function furnAt(x,z){for(const f of FURN){const b=f.col;if(x>b.x0-0.15&&x<b.x1+0.15&&z>b.z0-0.15&&z<b.z1+0.15)return f;}return null;}
+function bDown(e){BLD.ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(BLD.ptrs.size===2){const a=[...BLD.ptrs.values()];BLD.pinch=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);BLD.mode='pinch';return;}
+ BLD.sx=e.clientX;BLD.sy=e.clientY;BLD.moved=0;const g=groundAt(e.clientX,e.clientY);if(!g)return;const gh=BLD.ghost;
+ if(gh){const a=footAABB(gh.t,gh.x,gh.z,gh.r);if(g.x>a.x0-0.8&&g.x<a.x1+0.8&&g.z>a.z0-0.8&&g.z<a.z1+0.8){BLD.mode='ghost';BLD.off={x:g.x-gh.x,z:g.z-gh.z};return;}}
+ BLD.mode='pan';BLD.g0=g;}
+function bMove(e){if(!BLD.ptrs.has(e.pointerId))return;const pp=BLD.ptrs.get(e.pointerId);pp.x=e.clientX;pp.y=e.clientY;
+ if(BLD.mode==='pinch'&&BLD.ptrs.size===2){const a=[...BLD.ptrs.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(BLD.pinch>0){BLD.cam.dist*=BLD.pinch/d;bCam();}BLD.pinch=d;return;}
+ BLD.moved=Math.max(BLD.moved,Math.hypot(e.clientX-BLD.sx,e.clientY-BLD.sy));
+ if(BLD.mode==='ghost'&&BLD.ghost){const g=groundAt(e.clientX,e.clientY);if(!g)return;const gh=BLD.ghost,nx=snap(g.x-BLD.off.x),nz=snap(g.z-BLD.off.z);if(nx!==gh.x||nz!==gh.z){gh.x=nx;gh.z=nz;updGhost();}}
+ else if(BLD.mode==='pan'&&BLD.moved>6){const g=groundAt(e.clientX,e.clientY);if(!g)return;BLD.cam.x+=BLD.g0.x-g.x;BLD.cam.z+=BLD.g0.z-g.z;bCam();}}
+function bUp(e){BLD.ptrs.delete(e.pointerId);if(BLD.mode==='pinch'){if(BLD.ptrs.size===0)BLD.mode=null;return;}
+ if(BLD.moved<8&&BLD.mode){const g=groundAt(e.clientX,e.clientY);
+  if(g){if(BLD.ghost&&BLD.mode!=='ghost'){BLD.ghost.x=snap(g.x);BLD.ghost.z=snap(g.z);updGhost();}
+   else if(!BLD.ghost){const f=furnAt(g.x,g.z);if(f){selectFurn(f);beep(900,0.04,'triangle',0.03);}else clearSel();}}}
+ BLD.mode=null;}
+addEventListener('wheel',e=>{if(!BLD.on)return;BLD.cam.dist*=e.deltaY>0?1.1:0.9;bCam();},{passive:true});
+$('bDone').addEventListener('click',exitBuild);
+$('tRot').addEventListener('click',rotateBuild);$('tOk').addEventListener('click',placeGhost);
+$('tMove').addEventListener('click',()=>{if(BLD.sel)startMove(BLD.sel);});
+$('tCancel').addEventListener('click',()=>{if(BLD.ghost)cancelGhost();else clearSel();});
+$('bBar').addEventListener('click',e=>{const b=e.target.closest('[data-bt]');if(b&&!b.disabled)startGhost(b.dataset.bt);});
+$('bBuild').addEventListener('click',enterBuild);
 
 // ================= MAIN LOOP =================
 let spawnT=2,saveT=0,clockAcc=0;
@@ -986,7 +1090,7 @@ function update(dt,t){
  updCustomers(dt,t);
  if(S.closed&&mode==='walk'&&!modalKind&&!customers.length){endDay();return;}
  // clerks
- deskObjs.forEach(d=>{if(!d.clerk)return;const c=d.queue[0];if(c&&c.ready){d.t+=dt;if(d.t>3)d.t=0,serve(d,true);}else d.t=0;animPerson(d.clerk,t,false);});
+ deskObjs.forEach(d=>{if(!d.clerk)return;const c=d.queue[0];if(c&&c.ready){d.tm+=dt;if(d.tm>3){d.tm=0;serve(d,true);}}else d.tm=0;animPerson(d.clerk,t,false);});
  // sorters
  if(S.sorters>0&&S.pile.length){sortAcc+=dt;if(sortAcc>2.4/S.sorters){sortAcc=0;sortPkg(S.pile.shift(),true);updPile();}}
  updDeliveries(dt);
@@ -1005,19 +1109,21 @@ function updWalk(dt){let mx=joy.x,my=joy.y;if(K.w||K.arrowup)my=-1;if(K.s||K.arr
  checkFound(P.x,P.z);camera.position.set(P.x,1.65+(moving?Math.sin(P.bob)*0.04:0),P.z);camera.rotation.set(P.pitch,P.yaw,0);}
 let last=performance.now();
 function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
- const paused=!started||(modalKind&&modalKind!=='computer');
+ const paused=!started||BLD.on||(modalKind&&modalKind!=='computer');
  if(!paused)update(dt,now/1000);
  if(started){updHud();if(mode==='drive'&&drive)drawMini();if(tutArrow.visible)tutArrow.position.y=tutArrowY+Math.sin(now/200)*0.18;}
  renderer.render(scene,camera);}
 
 // ================= START =================
-function buildFromState(){drawName();ensureDesks();ensureClerks();ensureSorters();ensureDrivers();ensureComputer();ensureRack();ensureLockers();ensureCoffee();applyExpand();updBins();updPile();refreshParked();}
+function buildFromState(){drawName();if(!Array.isArray(S.layout)||!S.layout.length)S.layout=defaultLayout();S.layout.forEach(o=>{if(FT[o.t])makeFurn(o);});
+ S.desks=deskObjs.length;if(!binOf(0)||!binOf(1)||!binOf(2)||!furnOf('pile')){[0,1,2].forEach(c=>{if(!binOf(c))makeFurn({id:'bin'+c+'x',t:'bin',x:BIN_X[c],z:BIN_Z,r:0,c});});if(!furnOf('pile'))makeFurn({id:'pilex',t:'pile',x:-1.3,z:-7.2,r:0});}
+ ensureClerks();ensureSorters();ensureDrivers();applyExpand();updBins();updPile();refreshParked();}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function ago(t){const m=Math.floor((Date.now()-t)/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 let pendingSlot=1;
 function clearWorld(){customers.forEach(c=>scene.remove(c.g));customers.length=0;
- deskObjs.forEach(d=>{scene.remove(d.g);if(d.clerk)scene.remove(d.clerk);});deskObjs.length=0;
- [compG,rackG,lockG,coffeeG].forEach(g=>{if(g)scene.remove(g);});compG=rackG=lockG=coffeeG=null;
+ if(BLD.on){cancelGhost();clearSel();BLD.on=false;roofParts.forEach(m=>m.visible=true);$('buildUI').hidden=true;$('hint').hidden=false;$('topL').hidden=false;$('topR').hidden=false;}
+ FURN.forEach(f=>{scene.remove(f.g);if(f.clerk)scene.remove(f.clerk);});FURN.length=0;deskObjs.length=0;
  sorterMeshes.forEach(m=>scene.remove(m));sorterMeshes.length=0;drivers.forEach(d=>scene.remove(d.mesh));drivers.length=0;
  dynCols.forEach(c=>{const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1);});dynCols.length=0;
  divider.visible=true;divCol.off=false;requests=[];P.carry=-1;updCarry();mode='walk';drive=null;dTruck.visible=false;marker.visible=false;recipient.visible=false;
