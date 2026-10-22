@@ -260,6 +260,7 @@ button{font:inherit;color:inherit}
 .th b{font-weight:700}
 .th small{display:block;color:var(--mute);font-size:.78rem;margin-top:1px}
 .th.lock .tpv{filter:grayscale(.85) brightness(.6)}
+.tile.soon{cursor:default}.tile.soon:hover .tim{transform:none}
 .empty{margin:0;padding:18px;border-radius:14px;border:1px dashed rgba(255,255,255,.14);color:var(--mute);font-size:.92rem}
 
 /* ---- title screen: a wall of every game drifting behind the logo ---- */
@@ -487,7 +488,12 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   </section>
   <section class="sec" id="secSoon" aria-labelledby="hSoon">
     <div class="sech pad"><h2 id="hSoon">Coming soon</h2><p>Games on the way to the shelf.</p></div>
-    <div class="pad"><p class="empty">New games are on the way. Check back soon.</p></div>
+    <div class="row" id="rowSoon">
+      <div class="tile soon" role="group" aria-label="Crosswalk Captain, coming soon. Be the crossing guard: raise the STOP sign at the right moment and get every kid to school." style="--bgs:#3a3d44;--ac:#d6322b;--ci:#ffffff;--font:'Lilita One','Arial Rounded MT Bold',sans-serif;--lfg:#fffaf0;--sz:1.12">
+        <span class="tim"><img src="art/crosswalk-captain.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · arcade</span><span class="sdate">SOON</span><span class="tnm">Crosswalk Captain</span></span>
+        <span class="tmeta">Be the crossing guard. Raise the <b>STOP</b> sign at the right moment and get every kid to school.</span>
+      </div>
+    </div>
   </section>
  </div>
 </div>
@@ -1410,7 +1416,7 @@ function renderJump(){
   const nNew=GAMES.filter(g=>tagsOf(g).isNew).length,nUpd=GAMES.filter(g=>tagsOf(g).isUpd).length,nFav=favs().length;
   const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+achAll()+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
     ['secNew','New games',nNew?'<b class="hot">'+nNew+'</b>':''],['secUpd','Recently updated',nUpd?'<b>'+nUpd+'</b>':''],['secFav','Favorites',nFav?'<b>'+nFav+'</b>':''],
-    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','']];
+    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','<b>1</b>']];
   const box=$('jump');box.textContent='';
   for(const [id,label,extra] of J){const b=document.createElement('button');b.type='button';b.className='jb';b.innerHTML='<span></span>'+extra;b.firstChild.textContent=label;
     b.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}));box.append(b)}
@@ -1547,7 +1553,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-21-crate25';
+  var V='2026-10-22-crate26';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
