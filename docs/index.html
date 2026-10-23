@@ -493,6 +493,10 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
         <span class="tim"><img src="art/crosswalk-captain.jpg?2" alt="" loading="lazy" decoding="async"><span class="tkd">3D · arcade</span><span class="sdate">OCT 24</span><span class="tnm">Crosswalk Captain</span></span>
         <span class="tmeta">Comes out <b>Sat, Oct 24</b> · Be the crossing guard and get every kid to school.</span>
       </div>
+      <div class="tile soon" role="group" aria-label="Repair Shop Simulator, comes out Sunday, October 25. Hear each customer's story, figure out what's really wrong with their phone and fix it on the bench." style="--bgs:#1b1f24;--ac:#ffb12e;--ci:#1a1200;--font:'Russo One',Impact,sans-serif;--lfg:#fffaf0;--sz:1">
+        <span class="tim"><img src="art/repair-shop-simulator.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · shop sim</span><span class="sdate">OCT 25</span><span class="tnm">Repair Shop Simulator</span></span>
+        <span class="tmeta">Comes out <b>Sun, Oct 25</b> · Hear their story, then fix the phone.</span>
+      </div>
     </div>
   </section>
  </div>
@@ -1416,7 +1420,7 @@ function renderJump(){
   const nNew=GAMES.filter(g=>tagsOf(g).isNew).length,nUpd=GAMES.filter(g=>tagsOf(g).isUpd).length,nFav=favs().length;
   const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+achAll()+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
     ['secNew','New games',nNew?'<b class="hot">'+nNew+'</b>':''],['secUpd','Recently updated',nUpd?'<b>'+nUpd+'</b>':''],['secFav','Favorites',nFav?'<b>'+nFav+'</b>':''],
-    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','<b>1</b>']];
+    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','<b>2</b>']];
   const box=$('jump');box.textContent='';
   for(const [id,label,extra] of J){const b=document.createElement('button');b.type='button';b.className='jb';b.innerHTML='<span></span>'+extra;b.firstChild.textContent=label;
     b.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}));box.append(b)}
@@ -1553,7 +1557,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-22-crate27';
+  var V='2026-10-22-crate27-rss';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
