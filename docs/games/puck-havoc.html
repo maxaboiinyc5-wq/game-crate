@@ -3,7 +3,7 @@
 /* Maxcade: "back to console" tab on the side of the screen. Lives in a shadow root so the game's CSS and selectors never touch it. */
 (function(){
   if(window.__mxHomeOn)return;window.__mxHomeOn=1;
-  var KEY='maxcade.homepos2',BW=42,BH=58,pos=[1,.5],host=document.createElement('div');
+  var KEY='maxcade.homepos2',PC=!!(window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches),BW=PC?72:42,BH=PC?84:58,pos=[1,.5],host=document.createElement('div');
   host.id='mx-home';
   host.style.cssText='position:fixed;z-index:2147483647;left:0;top:0;margin:0;padding:0;border:0;width:0;height:0;touch-action:none;-webkit-user-select:none;user-select:none';
   var root=host.attachShadow?host.attachShadow({mode:'open'}):host;
@@ -14,6 +14,7 @@
     +'@keyframes mxglow{50%{box-shadow:0 0 0 2px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.5),0 0 18px 5px rgba(255,176,32,.8)}}'
     +'@media (prefers-reduced-motion:reduce){.h{animation:none}}'
     +'.h svg{display:block;width:24px;height:24px;margin:0 auto;fill:#1a1205}'
+    +(PC?'.h svg{width:34px;height:34px}.ht{display:block;margin-top:3px;font:900 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;color:#1a1205}.h{border-width:3px;border-radius:14px}.h:hover{background:#ffc94d}':'')
     +'.h:focus-visible,.q button:focus-visible{outline:3px solid #ffb020;outline-offset:2px;opacity:1}'
     +'.open .h{opacity:1;background:#ffc94d;animation:none}'
     +'.q{display:none;position:absolute;width:200px;box-sizing:border-box;padding:12px;border-radius:8px;background:#191629;border:2px solid #373055;color:#f3efe6;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.5)}'
@@ -26,7 +27,7 @@
     +'.s{background:#2d2748;color:#f3efe6;margin-top:8px!important}'
     +'</style>'
     +'<div class="w"><button class="h" type="button" aria-label="Console menu" title="Console menu">'
-    +'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11.2h2.7V21h5.3v-6h3v6h5.3v-9.8h2.7z"/></svg></button>'
+    +'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11.2h2.7V21h5.3v-6h3v6h5.3v-9.8h2.7z"/></svg>'+(PC?'<span class="ht">HOME</span>':'')+'</button>'
     +'<div class="q"><p>Leave this game?</p><button class="x" type="button">Back to console</button><button class="s" type="button">Keep playing</button></div></div>';
   var w=root.querySelector('.w'),h=root.querySelector('.h');
   function place(x,y){
