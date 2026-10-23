@@ -854,16 +854,17 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     var rows=c.list.map(function(r){return '<tr><th></th><td></td></tr>'}).join('');
     root.innerHTML='<style>:host{all:initial}'
       +'.w{position:absolute;left:0;top:0;font:500 13px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;color:#f3efe6}'
-      +'.t{display:block;position:absolute;left:0;top:-23px;width:30px;height:46px;box-sizing:border-box;padding:0;border:2px solid rgba(255,255,255,.75);border-left:0;border-radius:0 5px 5px 0;background:rgba(18,16,34,.6);cursor:pointer;opacity:.65}'
-      +'.t svg{display:block;width:20px;height:20px;margin:0 auto;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}'
-      +'.t:hover,.open .t{opacity:1;background:#191629}.t:focus-visible{outline:3px solid #ffb020;outline-offset:2px;opacity:1}'
-      +'.p{display:none;position:absolute;left:38px;top:0;transform:translateY(-50%);width:max-content;max-width:min(330px,calc(100vw - 60px));max-height:80vh;overflow:auto;box-sizing:border-box;padding:12px 14px;border-radius:8px;background:#191629;border:2px solid #373055;box-shadow:0 8px 24px rgba(0,0,0,.5)}'
+      +'.t{display:block;position:absolute;left:0;top:5px;width:60px;height:60px;box-sizing:border-box;padding:0;border:3px solid #fff;border-left:0;border-radius:0 14px 14px 0;background:#191629;cursor:pointer;opacity:1;box-shadow:0 0 0 2px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.5)}'
+      +'.k{display:block;margin-top:3px;font:900 10px/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.12em;color:#ffb020}'
+      +'.t svg{display:block;width:28px;height:28px;margin:0 auto;fill:none;stroke:#ffb020;stroke-width:1.8;stroke-linecap:round}'
+      +'.t:hover,.open .t{opacity:1;background:#2a2445}.t:focus-visible{outline:3px solid #ffb020;outline-offset:2px;opacity:1}'
+      +'.p{display:none;position:absolute;left:70px;top:0;transform:translateY(-50%);width:max-content;max-width:min(330px,calc(100vw - 60px));max-height:80vh;overflow:auto;box-sizing:border-box;padding:12px 14px;border-radius:8px;background:#191629;border:2px solid #373055;box-shadow:0 8px 24px rgba(0,0,0,.5)}'
       +'.open .p{display:block}'
       +'h2{margin:0 0 8px;font:700 12px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffb020}'
       +'table{border-collapse:collapse}th,td{padding:3px 0;vertical-align:top;text-align:left;font-weight:500}'
       +'th{padding-right:14px;color:#ffb020;font-weight:700;white-space:nowrap}'
       +'</style><div class="w"><button class="t" type="button" aria-label="Controls" title="Controls">'
-      +'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.500" y="6" width="19" height="12" rx="2"/><path d="M6.500 10h.01M10 10h.01M13.500 10h.01M17 10h.01M7.500 14.200h9"/></svg></button>'
+      +'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.500" y="6" width="19" height="12" rx="2"/><path d="M6.500 10h.01M10 10h.01M13.500 10h.01M17 10h.01M7.500 14.200h9"/></svg><span class="k">KEYS</span></button>'
       +'<div class="p" role="region" aria-label="Controls"><h2>Controls</h2><table>'+rows+'</table></div></div>';
     var w=root.querySelector('.w'),trs=root.querySelectorAll('tr');
     for(var i=0;i<trs.length;i++){trs[i].children[0].textContent=c.list[i][0];trs[i].children[1].textContent=c.list[i][1]}
@@ -1557,7 +1558,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-22-crate27-rss';
+  var V='2026-10-23-crate24';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
