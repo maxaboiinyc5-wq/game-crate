@@ -1307,7 +1307,10 @@ function updateCars(dt){
       if(!inLaneBand(k.z,c))continue;
       const a=(k.x-front)*c.dir;
       if(a<-c.len-.3)continue;
-      if(a<1.8&&c.v>1.0&&c.emT<=0){
+      /* a car that already had a close call with this kid waits for them instead of creeping into them again */
+      if(c.nm&&c.nm.has(k)){if(a>-.5)limit=Math.min(limit,a-2.5);continue}
+      if(a<1.8&&c.v>2.5&&c.emT<=0){
+        (c.nm||(c.nm=new Set())).add(k);
         const chance=(k.risky||k.jay)?.22:.06;
         if(!c.amb&&c.v>3.5&&Math.random()<chance){hitKid(k,c);return}
         c.v=0;c.emT=1.6;
@@ -1351,7 +1354,8 @@ function updateCars(dt){
     $('bannerText').textContent='Siren! Ambulance coming. Keep the kids on the curb.';$('banner').hidden=false;sfx.siren(5);
   }
   if(G.warn){G.warn.t-=dt;if(G.warn.t<=0){if(laneClear(G.warn.lane)){spawnCar(G.warn.lane,'amb');G.warn=null;setTimeout(()=>{$('banner').hidden=true},2500)}else G.warn.t=.3}}
-  const waiting=G.cars.filter(c=>c.v<.4&&!c.amb&&(c.x*c.dir)<3).length;
+  /* drivers get impatient per lane that's held up, not per car, so a long line on a 4-lane road isn't instant doom */
+  const waiting=new Set(G.cars.filter(c=>c.v<.4&&!c.amb&&(c.x*c.dir)<3).map(c=>c.lane)).size*(LANES>1?1.5:1);
   const amb=G.cars.find(c=>c.amb&&c.stuck>1);
   if(waiting>0)G.patience-=dt*waiting*.55*cfg.impatience/(LANES>1?1.5:1);else G.patience+=dt*5;
   if(amb){G.patience-=dt*6;if(G.ambStuckMsg<=0){toast('Let the ambulance through! Lower the sign.',true);G.ambStuckMsg=4}}
