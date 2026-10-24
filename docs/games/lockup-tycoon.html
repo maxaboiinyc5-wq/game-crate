@@ -746,7 +746,7 @@ const NIGHT = { mats: [], lamps: null, t: 0 };
 function initRenderer() {
   renderer = new T.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOBILE ? 2 : 2));
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth, innerHeight, false);
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
@@ -769,7 +769,16 @@ function initRenderer() {
   skyMesh.renderOrder = -10; scene.add(skyMesh);
   window.addEventListener('resize', onResize);
 }
-function onResize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); }
+/* size the 3D view to the box it actually fills on screen (phones change this without always sending a resize event) */
+let viewW = 0, viewH = 0;
+function viewSize() { const el = document.getElementById('game'); const w = (el && el.clientWidth) || innerWidth, h = (el && el.clientHeight) || innerHeight; return [w, h]; }
+function onResize(force) {
+  const [w, h] = viewSize(); if (!w || !h) return;
+  if (force !== true && w === viewW && h === viewH) return;
+  viewW = w; viewH = h; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+}
+if (window.visualViewport) visualViewport.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', () => setTimeout(() => onResize(true), 300));
 
 function setSky(top, bottom) {
   const g = skyMesh.geometry, p = g.attributes.position, c = g.attributes.color;
@@ -4267,7 +4276,7 @@ function applyGfx() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q === 'low' ? 1 : q === 'medium' ? 1.5 : 2));
   renderer.shadowMap.enabled = q !== 'low'; sun.castShadow = q !== 'low';
   scene.traverse(o => { if (o.material) { const m = Array.isArray(o.material) ? o.material : [o.material]; m.forEach(x => x.needsUpdate = true); } });
-  renderer.setSize(innerWidth, innerHeight);
+  onResize(true);
 }
 
 /* ---------- start / load ---------- */
@@ -4325,7 +4334,7 @@ function frame(now) {
   updateGps();
   renderer.render(scene, camera);
   hudT -= dt;
-  if (hudT <= 0) { hudT = 0.25; eggCheck(); UI.clock(); buildActionButtons(); if (MODE.cur !== 'build') drawMinimap(); tutTick(); hudCarInfo(); promptText(); if (Math.random() < 0.1) UI.refresh(); if (Math.random() < 0.08) setTimeOfDay(G.hour); }
+  if (hudT <= 0) { hudT = 0.25; onResize(); eggCheck(); UI.clock(); buildActionButtons(); if (MODE.cur !== 'build') drawMinimap(); tutTick(); hudCarInfo(); promptText(); if (Math.random() < 0.1) UI.refresh(); if (Math.random() < 0.08) setTimeOfDay(G.hour); }
 }
 function hudCarInfo() {
   const c = PLAYER.car, box = $('carhp');
