@@ -489,10 +489,6 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   <section class="sec" id="secSoon" aria-labelledby="hSoon">
     <div class="sech pad"><h2 id="hSoon">Coming soon</h2><p>Games on the way to the shelf.</p></div>
     <div class="row" id="rowSoon">
-      <div class="tile soon" role="group" aria-label="Crosswalk Captain, comes out Saturday, October 24. Be the crossing guard: raise the STOP sign at the right moment and get every kid to school." style="--bgs:#3a3d44;--ac:#d6322b;--ci:#ffffff;--font:'Lilita One','Arial Rounded MT Bold',sans-serif;--lfg:#fffaf0;--sz:1.12">
-        <span class="tim"><img src="art/crosswalk-captain.jpg?2" alt="" loading="lazy" decoding="async"><span class="tkd">3D · arcade</span><span class="sdate">OCT 24</span><span class="tnm">Crosswalk Captain</span></span>
-        <span class="tmeta">Comes out <b>Sat, Oct 24</b> · Be the crossing guard and get every kid to school.</span>
-      </div>
       <div class="tile soon" role="group" aria-label="Repair Shop Simulator, comes out Sunday, October 25. Hear each customer's story, figure out what's really wrong with their phone and fix it on the bench." style="--bgs:#1b1f24;--ac:#ffb12e;--ci:#1a1200;--font:'Russo One',Impact,sans-serif;--lfg:#fffaf0;--sz:1">
         <span class="tim"><img src="art/repair-shop-simulator.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · shop sim</span><span class="sdate">OCT 25</span><span class="tnm">Repair Shop Simulator</span></span>
         <span class="tmeta">Comes out <b>Sun, Oct 25</b> · Hear their story, then fix the phone.</span>
@@ -659,6 +655,11 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     ['lt1','Book Em','Book your first prisoner',function(){var s=J('lockup.save.v1');return s&&s.stats&&s.stats.arrests>=1}],
     ['lt25','Full House','Make 25 arrests',function(){var s=J('lockup.save.v1');return s&&s.stats&&s.stats.arrests>=25}],
     ['ltw','Week Behind Bars','Run your jail for 7 days',function(){var s=J('lockup.save.v1');return s&&s.day>=7}]],
+   'crosswalk-captain':[
+    ['cc1','First Bell','Finish Monday',function(){var s=J('ccap_best');return s&&s.day>=1}],
+    ['cc3','Midweek','Make it to Wednesday night',function(){var s=J('ccap_best');return s&&s.day>=3}],
+    ['cc5','Perfect Week','Get every kid home on Friday',function(){var s=J('ccap_best');return s&&s.day>=5}],
+    ['cc10','Safety First','Go 10 days without an incident',function(){return N('ccap_safe')>=10}]],
    'brokebox':[
     ['b1','Trophy Hunter','Earn a Brokebox trophy',function(){return bbTro()>=1}],
     ['b10','Trophy Case','Earn 10 Brokebox trophies',function(){return bbTro()>=10}],
@@ -752,6 +753,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     'bad-goat-day':{hide:['#btns','#stick'],
       list:[['W A S D','Move'],['Hold mouse + drag','Look around'],['Space','Jump'],['J or Shift','Headbutt'],['K or E','Lick'],['L or R','Flop']]},
     'brokebox':{list:[['Arrows or W A S D','Move / pick'],['Enter','Select'],['Esc','Back / pause'],['Q  E','Switch tabs'],['How to play','Each game lists its own keys'],['Controller','Plug one in, it just works']]},
+    'crosswalk-captain':{list:[['Space','Raise / lower the STOP sign'],['Enter or G','Send the kids across'],['P or Esc','Pause'],['Mouse','Click the big buttons']]},
     'curb-cut':{list:[['Space or Up','Ollie (hold = higher)'],['X or Right','Flip trick in the air']]},
     'five-star-getaway':{hide:['.pad'],
       list:[['A D or Left Right','Steer'],['S or Down','Brake'],['Space, W or Up','Nitro']]},
@@ -882,6 +884,8 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
 <script>
 (()=>{
 const GAMES=[
+ {id:'crosswalk-captain',name:'Crosswalk Captain',kind:'3D · arcade',audio:1,blurb:'Be the crossing guard. Raise the STOP sign at the right moment and get every kid across.',
+  font:"'Lilita One','Arial Rounded MT Bold',sans-serif",bg:'#2b2e34',fg:'#f5b70a',tx:'#f3f1ea',ac:'#d6322b',ci:'#ffffff',sz:1.12},
  {id:'lockup-tycoon',name:'Lockup Tycoon',kind:'3D · tycoon',blurb:'Run the jail, patrol the city, lock them up.',
   font:"'Barlow Condensed','Arial Narrow',sans-serif",fw:800,tt:'uppercase',bg:'#141925',fg:'#f2c230',tx:'#f3f1ea',ac:'#f2c230',ci:'#141925',sz:1.3},
  {id:'post-office-tycoon',name:'Post Office Tycoon',kind:'3D · tycoon',blurb:'Serve the line, sort the mail, drive the delivery routes.',
@@ -924,6 +928,7 @@ const GAMES=[
 
 /* [first made, last updated]. Badges work themselves out from these and drop off after 7 days. */
 const DATES={
+ 'crosswalk-captain':['2026-10-24','2026-10-24'],
  'lockup-tycoon':['2026-10-19','2026-10-19'],
  'post-office-tycoon':['2026-10-15','2026-10-21'],
  'pocket-maker':['2026-10-12','2026-10-12'],
@@ -1028,7 +1033,7 @@ for(const g of GAMES){
   b.addEventListener('click',()=>{if(cur===g)launch(g,b);else select(g,true)});
   rack.appendChild(b);carts[g.id]=b;
 }
-const CATS={'lockup-tycoon':'Sim','post-office-tycoon':'Sim','pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
+const CATS={'crosswalk-captain':'Arcade','lockup-tycoon':'Sim','post-office-tycoon':'Sim','pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
  'brokebox':'Arcade','jetway-tycoon':'Sim','five-star-getaway':'Driving','lawn-guard':'Arcade','two-minute-drill':'Sports',
  'kickflip-island':'Sports','curb-cut':'Sports','puck-havoc':'Arcade','midnight-motorway':'Driving','zip-riot':'Arcade','wisp-hollow':'Action'};
 const FILTERS=['All','3D','2D','Arcade','Action','Sim','Sports','Driving'];
@@ -1421,7 +1426,7 @@ function renderJump(){
   const nNew=GAMES.filter(g=>tagsOf(g).isNew).length,nUpd=GAMES.filter(g=>tagsOf(g).isUpd).length,nFav=favs().length;
   const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+achAll()+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
     ['secNew','New games',nNew?'<b class="hot">'+nNew+'</b>':''],['secUpd','Recently updated',nUpd?'<b>'+nUpd+'</b>':''],['secFav','Favorites',nFav?'<b>'+nFav+'</b>':''],
-    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','<b>2</b>']];
+    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','<b>1</b>']];
   const box=$('jump');box.textContent='';
   for(const [id,label,extra] of J){const b=document.createElement('button');b.type='button';b.className='jb';b.innerHTML='<span></span>'+extra;b.firstChild.textContent=label;
     b.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}));box.append(b)}
@@ -1520,6 +1525,8 @@ $('bootback').addEventListener('click',()=>{
 
 function launch(g,cart){
   if(busy)return;busy=true;countPlay(g.id);musicStop();
+  /* games with their own music get a sound context unlocked by this tap, so their music starts the moment they open */
+  if(g.audio){try{const C=window.AudioContext||window.webkitAudioContext;window.__mxAudio=new C();window.__mxAudio.resume()}catch(e){}}
   const newAch=checkConsoleAch().map(a=>[a.id,a.n,a.d]);
   if(cart)cart.classList.add('in');
   skin(boot,g);$('bootimg').src=art(g.id);$('bootname').textContent=g.name;
@@ -1558,7 +1565,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-23-crate25';
+  var V='2026-10-24-crate26';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
