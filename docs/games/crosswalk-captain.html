@@ -330,7 +330,7 @@ const DAYS=[
   {name:'Tuesday',short:'TUE',goal:14,carGap:[3.0,5.0],speed:[8,11],distracted:0.12,amb:[],bus:0.08,impatience:0.9,kidGap:[2.2,3.6],tip:'Cars with a phone over them notice your sign late. Give them extra room.'},
   {name:'Wednesday',short:'WED',goal:16,carGap:[2.6,4.4],speed:[8,12],distracted:0.16,amb:[0.45],bus:0.08,impatience:1.0,kidGap:[2.0,3.3],tip:'Ambulances never stop for the sign. Keep kids on the curb and let it through.'},
   {name:'Thursday',short:'THU',goal:20,carGap:[2.2,3.8],speed:[9,13],distracted:0.2,amb:[0.3,0.7],bus:0.1,impatience:1.1,kidGap:[1.8,3.0],tip:'Kids who wait too long will try to cross on their own. Don\'t keep them waiting.'},
-  {name:'Friday',short:'FRI',goal:24,carGap:[1.9,3.3],speed:[9,14],distracted:0.25,amb:[0.25,0.55,0.8],bus:0.1,impatience:0.7,kidGap:[1.6,2.7],tip:'Last day of the week. Busiest morning yet.'}
+  {name:'Friday',short:'FRI',goal:24,carGap:[1.9,3.3],speed:[9,14],distracted:0.25,amb:[0.25,0.55,0.8],bus:0.1,impatience:0.8,kidGap:[1.6,2.7],tip:'Last day of the week. Busiest morning yet.'}
 ];
 function dayCfg(n){
   if(n<=5) return DAYS[n-1];
@@ -1355,7 +1355,7 @@ function updateCars(dt){
   }
   if(G.warn){G.warn.t-=dt;if(G.warn.t<=0){if(laneClear(G.warn.lane)){spawnCar(G.warn.lane,'amb');G.warn=null;setTimeout(()=>{$('banner').hidden=true},2500)}else G.warn.t=.3}}
   /* drivers get impatient per lane that's held up, not per car, so a long line on a 4-lane road isn't instant doom */
-  const waiting=new Set(G.cars.filter(c=>c.v<.4&&!c.amb&&(c.x*c.dir)<3).map(c=>c.lane)).size*(LANES>1?1.5:1);
+  const held=G.cars.filter(c=>c.v<.4&&!c.amb&&(c.x*c.dir)<3),hl=new Set(held.map(c=>c.lane)).size,waiting=(hl+.3*(held.length-hl))*(LANES>1?1.5:1);
   const amb=G.cars.find(c=>c.amb&&c.stuck>1);
   if(waiting>0)G.patience-=dt*waiting*.55*cfg.impatience/(LANES>1?1.5:1);else G.patience+=dt*5;
   if(amb){G.patience-=dt*6;if(G.ambStuckMsg<=0){toast('Let the ambulance through! Lower the sign.',true);G.ambStuckMsg=4}}
