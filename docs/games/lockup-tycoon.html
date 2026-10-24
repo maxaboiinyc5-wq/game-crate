@@ -2305,8 +2305,8 @@ function endOfDay() {
   if (wages) { G.money -= wages; G.ledger.exp += wages; G.ledger.items['Staff wages'] = -wages; UI.money(-wages); }
   addXp(15);
   // contraband gets smuggled in overnight
-  const det = detectorCount(), gs = STAFF.filter(x => x.d.kind === 'guard').length;
-  for (const m of INMATES) { if (m.d.escaped) continue; const ch = 0.05 + m.d.stars * 0.025 + (m.d.gang ? 0.04 : 0) - det * 0.03 - gs * 0.008; if (Math.random() < ch && m.d.contra.length < 2) m.d.contra.push(pick(['phone', 'shank', 'tool', 'phone'])); }
+  const det = detectorCount(), gs = STAFF.filter(x => x.d.kind === 'guard').length, gate = STAFF.filter(x => x.d.kind === 'guard' && x.d.duty === 'intake').length;
+  for (const m of INMATES) { if (m.d.escaped) continue; const ch = 0.05 + m.d.stars * 0.025 + (m.d.gang ? 0.04 : 0) - det * 0.03 - gs * 0.008 - gate * 0.04; if (Math.random() < ch && m.d.contra.length < 2) m.d.contra.push(pick(['phone', 'shank', 'tool', 'phone'])); }
   // sentences
   for (const m of [...INMATES]) {
     if (m.d.escaped || m.state === 'release') continue;
@@ -2828,6 +2828,11 @@ function detectorCheck(m) {
   }
 }
 function finishEscort(s, m) {
+  // gate & intake guards frisk every new arrival before they get to their cell
+  if (s.d.duty === 'intake' && m.d.contra && m.d.contra.length) {
+    const found = m.d.contra.splice(0); addXp(6 * found.length); G.stats.contra = (G.stats.contra || 0) + found.length;
+    UI.toast('🔎 ' + s.d.name + ' frisked ' + m.d.name + ' at intake and took ' + found.map(k => CONTRA[k].ic + ' ' + CONTRA[k].n).join(' + ') + '.');
+  }
   s.job = null; m.escortBy = null; m.p.poseOverride = null; m.state = 'idle'; m.replan = true;
   if (m.d.solo > 0 && solitaryFor(m)) { const rt = solitaryFor(m); const sp = rt.spots[0]; m.toSolitary = true; m.p.x = tileX(sp.ai); m.p.z = tileZ(sp.aj); m.p.goSpot(sp, () => { m.inSolo = true; m.toSolitary = false; }); }
   else { const bed = bedSpot(m); if (bed) m.p.goSpot(bed); }
@@ -3569,7 +3574,7 @@ const SHEETS = {
     return '<h3>Your job</h3><p class="note">You own the jail. Drive the cruiser around the city, arrest criminals and bring them back. The county pays you every day for each inmate. Keep them fed, rested, clean and entertained or they fight, riot and try to escape.</p>' +
       '<h3>Catching criminals</h3><p class="note">Open the Radio and tap GPS. Drive to the beacon. Runners flee when you get close or hear your siren. On foot, get right next to them and press Cuff. Getaway cars: ram them until they wreck, then chase the driver on foot. Drive into the yellow booking box at the gate to book them.</p>' +
       '<h3>Building</h3><p class="note">Tap Build. Pick something, it shows up as a ghost: drag it where you want it, rotate it, then Place. Tap anything you built to move, rotate, sell or fix it. Walls, fences and floors are drawn by dragging.</p>' +
-      '<h3>Staff</h3><p class="note">Guards on Food duty serve meals at the counter. Patrol guards stop fights, catch escapers and search cells. Gate guards walk new prisoners to their cells. Janitors clean and repair. Deputies drive out and arrest people for you.</p>' +
+      '<h3>Staff</h3><p class="note">Guards on Food duty serve meals at the counter. Patrol guards stop fights, catch escapers and search cells. Gate & intake guards walk new prisoners to their cells, frisk them for contraband on the way in, and cut down how much gets smuggled in overnight. Janitors clean and repair. Deputies drive out and arrest people for you.</p>' +
       '<h3>Controls</h3><p class="note">' + (MOBILE ? 'Left stick to move or drive. Drag the screen to look around. Buttons on the right do actions.' : 'WASD / arrows to move and drive. Mouse drag to look. E enter/exit car, F cuff, Space handbrake, H siren, T taser, Q spikes, X roadblock, K dog. B build, J jail, R radio, G garage.') + '</p>';
   },
 };
