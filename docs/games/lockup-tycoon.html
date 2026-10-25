@@ -1463,7 +1463,24 @@ function buildItemMesh(type, data) {
     }
     case 'pool': bx(g, PM.wood, W - 0.4, 0.75, 1.15, 0, 0, 0); bx(g, PM.felt, W - 0.6, 0.04, 0.95, 0, 0.75, 0); for (let k = 0; k < 6; k++) { const b = new T.Mesh(new T.SphereGeometry(0.04, 8, 6), pick([PM.red, PM.yellow, PM.blue, PM.white, PM.black])); b.position.set(rnd(-0.9, 0.9), 0.82, rnd(-0.35, 0.35)); g.add(b); } break;
     case 'arcade': bx(g, PM.black, 0.75, 1.8, 0.75, 0, 0, 0.05); bx(g, PM.screen, 0.55, 0.45, 0.02, 0, 1.15, -0.34, 0, false).rotation.x = -0.2; bx(g, PM.red, 0.7, 0.08, 0.35, 0, 0.95, -0.4); bx(g, PM.yellow, 0.75, 0.2, 0.76, 0, 1.6, 0.05, 0, false); break;
-    case 'books': bx(g, PM.wood, 1.2, 2.0, 0.4, 0, 0, 0.3); for (let r = 0; r < 4; r++) for (let k = 0; k < 7; k++) bx(g, pick([PM.red, PM.blue, PM.green, PM.yellow, PM.cream]), 0.12, rnd(0.25, 0.36), 0.28, -0.45 + k * 0.15, 0.1 + r * 0.47, 0.25, 0, false); break;
+    case 'books': { // open-front shelf: back, sides, top, shelves, rows of books facing the reader (-z)
+      const W = 1.2, H = 2.0, zb = 0.46, zf = 0.06, D = zb - zf, zc = (zb + zf) / 2;
+      bx(g, PM.wood, W, H, 0.04, 0, 0, zb);                                   // back
+      for (const sx of [-W / 2 + 0.03, W / 2 - 0.03]) bx(g, PM.wood, 0.06, H, D, sx, 0, zc); // sides
+      bx(g, PM.wood, W, 0.06, D + 0.02, 0, H - 0.06, zc);                      // top
+      const rows = 4, gap = (H - 0.12) / rows;
+      for (let r = 0; r < rows; r++) {
+        const y0 = 0.06 + r * gap; bx(g, PM.wood, W - 0.1, 0.04, D, 0, y0, zc); // shelf board
+        let x = -W / 2 + 0.08; const colors = [PM.red, PM.blue, PM.green, PM.yellow, PM.cream, PM.dsteel];
+        while (x < W / 2 - 0.12) {
+          const bw = rnd(0.05, 0.09), bh = Math.min(gap - 0.1, rnd(0.26, 0.38)), bd = rnd(0.22, 0.3);
+          if (Math.random() < 0.08) { x += 0.08; continue; }                      // a gap here and there
+          const b = bx(g, pick(colors), bw, bh, bd, x + bw / 2, y0 + 0.04, zb - 0.02 - bd / 2, 0, false);
+          if (x > W / 2 - 0.3 && Math.random() < 0.5) { b.rotation.z = -0.25; b.position.x += 0.04; x = W; } // one leaning at the end
+          x += bw + 0.005;
+        }
+      }
+      break; }
     case 'hoop': { cy(g, PM.dsteel, 0.07, 3.2, 0, 0, 0.2); bx(g, PM.white, 1.2, 0.8, 0.05, 0, 2.7, -0.1); const rim = new T.Mesh(new T.TorusGeometry(0.23, 0.02, 6, 16), PM.orange); rim.rotation.x = Math.PI / 2; rim.position.set(0, 3.05, -0.4); g.add(rim); bx(g, PM.white, 0.5, 0.02, 0.02, 0, 3.0, -0.13, 0, false); break; }
     case 'weights': bx(g, PM.black, 0.35, 0.45, 1.3, 0, 0, 0.1); for (const s of [-1, 1]) cy(g, PM.steel, 0.03, 1.2, s * 0.3, 0, hd - 0.5, 6); const bar = new T.Mesh(new T.CylinderGeometry(0.02, 0.02, 1.6, 6), PM.steel); bar.rotation.z = Math.PI / 2; bar.position.set(0, 1.15, hd - 0.5); g.add(bar);
       for (const s of [-1, 1]) { const p = new T.Mesh(new T.CylinderGeometry(0.2, 0.2, 0.08, 14), PM.black); p.rotation.z = Math.PI / 2; p.position.set(s * 0.68, 1.15, hd - 0.5); g.add(p); } break;
