@@ -279,7 +279,7 @@ const ITEMS=[
 const BOARD_CAP=8;
 
 // ================= STATE =================
-const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,found:{},layout:null,desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
+const DEF={name:"",money:100,pop:10,day:1,time:420,tut:0,tut2:0,savedAt:0,closed:false,compBroken:false,found:{},layout:null,desks:1,clerks:0,sorters:0,rack:false,stock:{},board:{},computer:false,trucks:0,drivers:0,coffee:false,lockers:false,expand:false,fast:false,deliveriesOn:false,pile:[],bins:[0,0,0],served:0,routes:0,stats:{earn:0,served:0,angry:0,routes:0}};
 ITEMS.forEach(i=>{DEF.stock[i.id]=0;DEF.board[i.id]=0;});
 const fresh=()=>JSON.parse(JSON.stringify(DEF));
 function readSlot(n){try{const j=localStorage.getItem(slotKey(n));return j?JSON.parse(j):null;}catch(e){return null;}}
@@ -387,6 +387,7 @@ for(let i=0;i<4;i++)for(let j=0;j<4;j++){
    for(let k=0;k<6;k++)treePos.push({x:rnd(-12,19),z:rnd(-21,-12),s:rnd(.8,1.2),col:true});continue;}
  for(const hx of [x0+10.5,x1-10.5])for(const top of [true,false]){
    if(LM==='court'&&top)continue;
+   if(i===2&&j===2&&top&&hx<0)continue; // Tech Repair goes here
    const hz=top?z0+10.5:z1-10.5, rz=top?z0:z1, sz=top?z0+2.2:z1-2.2, face=top?-1:1;
    const m=new THREE.Mesh(houseGeo,pick(houseMats));m.position.set(hx,2,hz);scene.add(m);
    const r=new THREE.Mesh(roofGeo,mat(pick(roofCols)));r.position.set(hx,5.3,hz);scene.add(r);
@@ -411,7 +412,7 @@ for(const z of HZ)for(let x=VX[0];x<=VX[4];x+=20){if(VX.some(v=>Math.abs(v-x)<6)
 function signMesh(text,w,h,bg,fg){const cw=1024,ch=Math.max(64,Math.round(1024*h/w));const ft=fs=>`900 ${fs}px "Arial Black", Arial, sans-serif`;
  const t=canvasTex(cw,ch,g=>{g.fillStyle=bg;g.fillRect(0,0,cw,ch);g.fillStyle=fg;let fs=Math.floor(ch*0.62);g.font=ft(fs);while(g.measureText(text).width>cw*0.9&&fs>10){fs-=4;g.font=ft(fs);}g.textAlign='center';g.textBaseline='middle';g.fillText(text,cw/2,ch/2+fs*0.04);});
  return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t}));}
-const LMS=[];
+const LMS=[];let REPAIR=null,mkTech=null;
 { // Aisle Nine Market: the block west of the post office, facing the main street
  box(28,6,20,0xfff8e8,-36,3,-8);box(28.3,0.7,20.3,0xe63946,-36,5.3,-8);box(28.6,0.3,20.6,0xd8d0c0,-36,6.15,-8);
  const sg=signMesh('AISLE NINE MARKET',16,2.2,'#e63946','#ffffff');sg.position.set(-36,4.1,2.07);scene.add(sg);
@@ -513,6 +514,46 @@ const LMS=[];
   box(0.25,0.18,0.5,0xff2020,cx2-0.2,1.9,cz2-0.4);box(0.25,0.18,0.5,0x2050ff,cx2-0.2,1.9,cz2+0.4);addCol(cx2-2.2,cx2+2.2,cz2-1,cz2+1,true);}
  LMS.push({id:'jail',name:'the Country Jail',x0:PX0,x1:PX1,z0:PZ1,z1:PZ0,col:'#9a8f78'});
 }
+{ // Tech Repair: across the street from the post office, on the right as you walk out. Same look as Tech Repair Simulator
+ const X0=-10.5,X1=-0.5,Z0=19.5,Z1=30.5,H=3.4,CX=(X0+X1)/2,SAGE=0x8fa19c,FRAME=0x2a2d31,LAM=0x22262b;
+ const tf=canvasTex(256,256,(g,w,h)=>{const n=4,sz=w/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++){const v=128+((i*7+j*3)%5)*4;g.fillStyle=`rgb(${v},${v-3},${v-8})`;g.fillRect(i*sz,j*sz,sz,sz);}g.strokeStyle='rgba(90,86,80,.7)';g.lineWidth=3;for(let i=0;i<=n;i++){g.beginPath();g.moveTo(i*sz,0);g.lineTo(i*sz,h);g.stroke();g.beginPath();g.moveTo(0,i*sz);g.lineTo(w,i*sz);g.stroke();}});
+ tf.wrapS=tf.wrapT=THREE.RepeatWrapping;tf.repeat.set(5,5.5);
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(X1-X0,Z1-Z0),new THREE.MeshLambertMaterial({map:tf}));fl.rotation.x=-Math.PI/2;fl.position.set(CX,0.03,(Z0+Z1)/2);scene.add(fl);
+ box(X1-X0,0.08,1.4,0xbdb6a8,CX,0.04,Z0-0.7); // sidewalk pad
+ // walls (sage green), back and sides
+ box(X1-X0+0.2,H,0.2,SAGE,CX,H/2,Z1);addCol(X0,X1,Z1-0.15,Z1+0.15,true);
+ for(const x of [X0,X1]){box(0.2,H,Z1-Z0,SAGE,x,H/2,(Z0+Z1)/2);addCol(x-0.15,x+0.15,Z0,Z1,true);}
+ // storefront: low wall, big glass windows in dark frames, glass door in the middle
+ const D0=CX-0.8,D1=CX+0.8;
+ for(const [a,b] of [[X0,D0],[D1,X1]]){const w=b-a,m=(a+b)/2;box(w,0.8,0.2,SAGE,m,0.4,Z0);box(w,0.55,0.2,SAGE,m,H-0.27,Z0);
+  const gl=new THREE.Mesh(new THREE.PlaneGeometry(w-0.1,H-1.35),new THREE.MeshLambertMaterial({color:0x9fb7c4,transparent:true,opacity:0.3,side:THREE.DoubleSide}));gl.position.set(m,0.8+(H-1.35)/2,Z0);scene.add(gl);
+  box(w,0.06,0.1,FRAME,m,0.8,Z0-0.06);box(w,0.06,0.1,FRAME,m,H-0.55,Z0-0.06);for(let k=0;k<=2;k++)box(0.08,H-1.35,0.1,FRAME,a+(w)*k/2,0.8+(H-1.35)/2,Z0-0.06);
+  addCol(a,b,Z0-0.15,Z0+0.15,true);}
+ box(1.6,H-2.6,0.2,SAGE,CX,H-(H-2.6)/2,Z0);for(const x of [D0,D1])box(0.1,2.6,0.14,FRAME,x,1.3,Z0-0.05);box(1.7,0.1,0.14,FRAME,CX,2.6,Z0-0.05);
+ // roof + ceiling lights
+ box(X1-X0+0.4,0.25,Z1-Z0+0.4,0x2a2c2f,CX,H+0.12,(Z0+Z1)/2);
+ for(const z of [22.5,25.5,28.5])box(1.6,0.04,0.35,new THREE.MeshBasicMaterial({color:0xfff8e8}),CX,H-0.03,z);
+ // sign: TECH REPAIR, white and amber on dark, like the game's logo
+ box(8.2,1.3,0.25,LAM,CX,H+0.9,Z0-0.05);
+ const st=canvasTex(1024,160,(g,w,h)=>{g.fillStyle='#22262b';g.fillRect(0,0,w,h);g.font='700 104px "Chakra Petch","Arial Narrow",Arial,sans-serif';g.textBaseline='middle';
+  const a='TECH ',b='REPAIR',wa=g.measureText(a).width,wb=g.measureText(b).width,x=(w-wa-wb)/2;g.fillStyle='#f4f1ea';g.fillText(a,x,h/2+4);g.fillStyle='#ffb12e';g.fillText(b,x+wa,h/2+4);g.fillStyle='#ffb12e';g.fillRect(40,h-14,w-80,5);});
+ const sm=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:st}));sm.position.set(CX,H+0.9,Z0-0.19);sm.rotation.y=Math.PI;scene.add(sm);
+ // counter (dark laminate, wood top, amber strip), green repair mat, a phone on it, and the tech behind it
+ const cz=26;box(3.4,0.96,0.78,LAM,CX,0.48,cz);box(3.5,0.05,0.9,0x8a5b36,CX,0.98,cz);box(3.3,0.03,0.02,new THREE.MeshBasicMaterial({color:0xffb12e}),CX,0.86,cz-0.4);
+ box(0.6,0.01,0.45,0x2b6a4e,CX,1.01,cz);box(0.16,0.012,0.32,0x14181c,CX+0.05,1.02,cz);addCol(CX-1.75,CX+1.75,cz-0.45,cz+0.45,true);
+ // back shelves with devices
+ box(6,2,0.4,LAM,CX,1,Z1-0.35);for(let r=0;r<3;r++)for(let k=0;k<7;k++)box(0.3,0.45,0.08,[0x14181c,0x3a3f47,0xdfe3ea,0x1d7fe0][(r+k)%4],CX-2.4+k*0.8,0.35+r*0.62,Z1-0.6);
+ addCol(CX-3,CX+3,Z1-0.6,Z1,true);
+ mkTech=()=>{const tech=person(0x2b6a4e,0x2b2b3a,0xd9a47a,null);tech.position.set(CX,0,cz+1.1);tech.rotation.y=Math.PI;scene.add(tech);};
+ const lab=textSprite('TECH REPAIR',1.6,'#22262b','#ffb12e');lab.position.set(CX,2.4,cz+0.2);scene.add(lab);
+ REPAIR={x:CX,z:cz-1.2};
+ LMS.push({id:'repair',name:'Tech Repair',x0:X0,x1:X1,z0:Z0,z1:Z1,col:'#8fa19c'});
+}
+function updCompLook(){const f=furnOf('comp');if(!f||!f.screen)return;f.screen.material.color.setHex(S.compBroken?0xd23b2c:0x45c46a);f.brokeLab.visible=!!S.compBroken;}
+function breakComputer(){S.compBroken=true;requests=[];updCompLook();toast('💥 The delivery computer broke! Fix it at Tech Repair across the street ($50).');beep(120,0.4,'sawtooth',0.07);save();}
+function fixComputer(){if(!S.compBroken){toast('🔧 Nothing to fix right now. Come back if the delivery computer breaks.');return;}
+ if(S.money<50){toast('You need $50 to fix the delivery computer.');beep(200,0.15,'square',0.04);return;}
+ S.money-=50;S.compBroken=false;updCompLook();popup('-$50 · Computer fixed!');ching();save();}
 function checkFound(x,z){if(!S.found)S.found={};for(const l of LMS){if(S.found[l.id])continue;const m=8;
  if(x>l.x0-m&&x<l.x1+m&&z>l.z0-m&&z<l.z1+m){S.found[l.id]=true;toast(`📍 You found ${l.name}!`);beep(880,0.1,'triangle',0.05);setTimeout(()=>beep(1320,0.14,'triangle',0.05),110);save();}}}
 
@@ -566,7 +607,7 @@ function buildFurnMesh(f){const g=new THREE.Group();
  else if(f.t==='bin'){const c=f.c||0;box(1.6,0.8,1.1,BIN_COLORS[c],0,0.4,0,g);box(1.4,0.05,0.9,0x1d0f05,0,0.81,0,g);
   const lab=textSprite(BIN_NAMES[c]+' BIN',1.3,'#'+BIN_COLORS[c].toString(16).padStart(6,'0'),'#ffffff');lab.position.set(0,1.9,0);g.add(lab);f.stack=new THREE.Group();g.add(f.stack);}
  else if(f.t==='pile'){box(2.2,0.85,1.1,BROWN2,0,0.425,0,g);box(2.3,0.06,1.2,GOLD,0,0.88,0,g);const l=textSprite('OUTGOING',1.5);l.position.set(0,2.2,0);g.add(l);f.pileG=new THREE.Group();g.add(f.pileG);}
- else if(f.t==='comp'){box(2,0.8,1,BROWN2,0,0.4,0,g);box(2.1,0.06,1.1,GOLD,0,0.83,0,g);box(1.1,0.7,0.08,0x111111,0,1.28,-0.2,g);box(1,0.6,0.02,new THREE.MeshBasicMaterial({color:0x45c46a}),0,1.28,-0.15,g);
+ else if(f.t==='comp'){box(2,0.8,1,BROWN2,0,0.4,0,g);box(2.1,0.06,1.1,GOLD,0,0.83,0,g);box(1.1,0.7,0.08,0x111111,0,1.28,-0.2,g);f.screen=box(1,0.6,0.02,new THREE.MeshBasicMaterial({color:S.compBroken?0xd23b2c:0x45c46a}),0,1.28,-0.15,g);f.brokeLab=textSprite('BROKEN',1.3,'#c0392b','#ffffff');f.brokeLab.position.set(0,1.75,0);f.brokeLab.visible=!!S.compBroken;g.add(f.brokeLab);
   box(0.12,0.3,0.12,0x111111,0,0.98,-0.2,g);box(0.8,0.03,0.3,0x222222,0,0.88,0.2,g);const l=textSprite('DELIVERIES',1.6);l.position.set(0,2.2,0);g.add(l);}
  else if(f.t==='rack'){const inner=new THREE.Group();inner.rotation.y=-Math.PI/2;inner.position.z=-0.25;g.add(inner);f.hooks={};
   box(0.12,2.4,4.4,GOLD,0,1.7,0,inner);box(0.14,2.2,4.2,0xc8a46e,0.02,1.7,0,inner);
@@ -750,7 +791,8 @@ function updDeliveries(dt){
  if(!S.computer)return;
  const t=tier();if(t!==lastTier){lastTier=t;rollTarget();}
  rollTimer+=dt;if(rollTimer>45){rollTimer=0;rollTarget();}
- if(S.deliveriesOn){reqTimer-=dt;if(reqTimer<=0){reqTimer=15;if(requests.length<reqTarget)requests.push(makeRoute());}
+ if(S.deliveriesOn&&!S.compBroken&&S.tut2===99&&S.time>480&&Math.random()<dt/600)breakComputer();
+ if(S.deliveriesOn&&!S.compBroken){reqTimer-=dt;if(reqTimer<=0){reqTimer=15;if(requests.length<reqTarget)requests.push(makeRoute());}
   for(const d of drivers){if(!d.busy&&requests.length&&freeTrucks()>0){const r=requests.shift();d.busy=true;d.r=r;d.total=r.stops.length*10;d.t=d.total;d.mesh.visible=false;refreshParked();}}}
  drivers.forEach((d,i)=>{if(!d.busy)return;d.t-=dt;if(d.t<=0)finishDriver(d,i);});}
 function finishDriver(d,i){const tips=d.r.stops.reduce(a=>a+ri(1,5),0);const amt=d.r.total+tips;addMoney(amt);addPop(1.5);S.routes++;S.stats.routes++;
@@ -859,6 +901,7 @@ function getInter(){const L=[];
  FURN.filter(f=>f.t==='bin').forEach(bf=>{const b=bf.c;L.push({x:bf.x,z:bf.z,r:1.8,lab:()=>P.carry<0?`${BIN_NAMES[b]} BIN<br><small>${S.bins[b]}/6</small>`:`SORT<br><small>into ${BIN_NAMES[b]}</small>`,ok:()=>P.carry>=0,act:()=>{if(P.carry===b){P.carry=-1;updCarry();sortPkg(b);}else{toast(`❌ Wrong bin! That's a ${BIN_NAMES[P.carry]} package.`);beep(200,0.15,'square',0.04);}}});});
  const cpf=furnOf('comp');if(cpf)L.push({x:cpf.x,z:cpf.z,r:2.4,lab:()=>'DELIVERY<br>COMPUTER',ok:()=>true,act:openComputer});
  const rkf=furnOf('rack');if(rkf){const rp=fw(rkf,0,0.8);L.push({x:rp.x,z:rp.z,r:2.8,lab:()=>canRestock()?'RESTOCK<br><small>pin board</small>':'PIN BOARD<br><small>buy supplies</small>',ok:()=>true,act:restock});}
+ if(REPAIR)L.push({x:REPAIR.x,z:REPAIR.z,r:2.6,lab:()=>S.compBroken?'FIX COMPUTER<br><small>$50</small>':'TECH<br>REPAIR',ok:()=>true,act:fixComputer});
  const cff=furnOf('coffee');if(cff)L.push({x:cff.x,z:cff.z,r:2.2,lab:()=>P.boost>0?`☕ BOOST<br><small>${Math.ceil(P.boost)}s</small>`:'GRAB<br>COFFEE',ok:()=>P.boost<=0,act:()=>{P.boost=20;toast('☕ Speed boost for 20 seconds!');beep(700,0.1,'triangle',0.05);}});
  return L;}
 let curInter=null;
@@ -899,8 +942,9 @@ function renderShop(){const tabs=['Store','Staff','Delivery','Supplies'];
 
 // ================= COMPUTER =================
 let compSig='';
-function compSignature(){return [S.deliveriesOn,requests.map(r=>r.id).join(','),drivers.map(d=>d.busy?1:0).join(''),freeTrucks(),mode].join('|');}
+function compSignature(){return [S.compBroken,S.deliveriesOn,requests.map(r=>r.id).join(','),drivers.map(d=>d.busy?1:0).join(''),freeTrucks(),mode].join('|');}
 function renderComputer(){compSig=compSignature();const t=tier();
+ if(S.compBroken){$('mBody').innerHTML=`<div class="tutin" style="background:#d23b2c;color:#fff">💥 The delivery computer is broken.</div><div class="cinfo">No new routes until it's fixed. Walk to <b>Tech Repair</b> across the street (on the right as you walk out the door) and pay <b>$50</b> at the counter. Drivers already out will finish their routes.</div>`;return;}
  let h=`<div class="crow"><div><b>Deliveries</b><br><small>${S.deliveriesOn?'Route requests are coming in':'Turn ON to get route requests'}</small></div><button class="tog ${S.deliveriesOn?'on':''}" data-a="tog">${S.deliveriesOn?'ON':'OFF'}</button></div>
  <div class="cinfo">Popularity: <b>${TIER[t]}</b> → ${['about 1 route','2–4 routes','4–5 routes','6–7 routes'][t]}<br>Free trucks: <b>${Math.max(0,freeTrucks())}/${S.trucks}</b> · Drivers: <b>${S.drivers}</b></div>`;
  if(drivers.length){h+=`<div class="sec">Drivers</div>`;drivers.forEach((d,i)=>{h+=`<div class="item"><div class="ic">🚚</div><div class="tx"><b>Driver ${i+1}</b><small data-dt="${i}">${d.busy?`${d.r.name} · ${d.r.stops.length} stops · ${Math.ceil(d.t)}s left`:(S.deliveriesOn?'Waiting for a route':'Idle (deliveries OFF)')}</small>${d.busy?`<div class="bar"><i data-db="${i}" style="width:${100*(1-d.t/d.total)}%"></i></div>`:''}</div></div>`;});}
@@ -966,6 +1010,7 @@ function updHud(force){hudT-=1;if(hudT>0&&!force)return;hudT=10;updTut();
  else if(drive){const r=drive.r;$('dTop').innerHTML=`<b>${r.name}</b><br>Stop ${Math.min(drive.idx+1,r.stops.length)} of ${r.stops.length} · Crashes ${drive.crashes}${r.fragile?`<br><span class="frag">FRAGILE: ${drive.crashes>=2?'no tips now':'2 crashes = no tips'}</span>`:''}`;
   $('speed').innerHTML=`${Math.round(Math.abs(T.v)*2.237)}<small>MPH</small>`;}}
 function hintText(){
+ if(S.compBroken)return 'The delivery computer is broken! Fix it at Tech Repair across the street ($50)';
  if(P.carry>=0)return `Take the ${BIN_NAMES[P.carry]} package to the ${BIN_NAMES[P.carry]} bin`;
  if(S.served<3&&S.day===1)return 'Walk up to the front desk and tap SERVE when a customer is waiting';
  if(S.pile.length>=5&&S.sorters===0)return 'Packages are piling up! Grab one from OUTGOING and sort it';
@@ -1152,7 +1197,7 @@ $('startBody').addEventListener('click',e=>{const t=e.target.closest('button');i
  if(t.dataset.load)startGame(+t.dataset.load,false);
  else if(t.dataset.new)showNewForm(+t.dataset.new);
  else if(t.dataset.del){if(t.dataset.sure){try{localStorage.removeItem(slotKey(+t.dataset.del));}catch(_){}renderStart();}else{t.dataset.sure='1';t.textContent='Delete?';t.classList.add('sure');}}});
-worldReady=true;drawName();renderStart();
+if(mkTech)mkTech();worldReady=true;drawName();renderStart();
 camera.position.set(0,1.65,5);camera.rotation.set(-0.08,0,0);
 requestAnimationFrame(loop);
 </script>
