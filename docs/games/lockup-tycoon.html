@@ -241,6 +241,7 @@ h3{margin:14px 0 8px;font:800 15px var(--disp);letter-spacing:.06em;text-transfo
   .toast{text-align:left}
   #tut{top:auto;bottom:calc(8px + var(--sb));width:calc(100vw - 20px);padding:8px 12px}
   body.tuton #joy{bottom:calc(112px + var(--sb))}body.tuton #acts{bottom:calc(112px + var(--sb))}
+  #carhp{left:calc(10px + var(--sl));transform:none;bottom:calc(182px + var(--sb))}body.tuton #carhp{bottom:calc(270px + var(--sb))}
   .hb em{display:block;font-size:8.5px;margin-top:2px}.hb span{font-size:17px}
   #event{top:calc(250px + var(--st));width:calc(100vw - 20px)}
   .it{width:104px}#bTool span{display:none}
@@ -1169,6 +1170,7 @@ function addBuilding(B, x0, z0, x1, z1, h, fac) {
   if (h > 25 && Math.random() < 0.6) { const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; B.box('dark', 'dark', cx - 2, h, cz - 2, cx + 2, h + 4, cz + 2); }
   COLL.boxes.push({ x0, x1, z0, z1, h });
 }
+const TREE_SETS = []; // every planted tree, so the camera can hide the ones in its way
 function plantTrees(list, parent) {
   const trunk = new T.CylinderGeometry(0.16, 0.24, 2.6, 6); trunk.translate(0, 1.3, 0);
   const crown = new T.IcosahedronGeometry(1.7, 1); crown.translate(0, 3.6, 0);
@@ -1176,6 +1178,8 @@ function plantTrees(list, parent) {
   const o = new T.Object3D(), col = new T.Color();
   list.forEach((p, i) => { o.position.set(p[0], 0.15, p[1]); const s = rnd(0.8, 1.25); o.scale.set(s, s * rnd(0.9, 1.15), s); o.rotation.y = rnd(TAU); o.updateMatrix(); tm.setMatrixAt(i, o.matrix); cm.setMatrixAt(i, o.matrix); cm.setColorAt(i, col.setHSL(0.27 + rnd(-0.04, 0.04), 0.45, 0.28 + rnd(0.08))); });
   tm.castShadow = cm.castShadow = true; parent.add(tm, cm);
+  const mats = []; for (let i = 0; i < list.length; i++) { const m = new T.Matrix4(); cm.getMatrixAt(i, m); mats.push(m); }
+  TREE_SETS.push({ list, tm, cm, mats, hid: new Set() });
   for (const p of list) COLL.boxes.push({ x0: p[0] - 0.35, x1: p[0] + 0.35, z0: p[1] - 0.35, z1: p[1] + 0.35, h: 3, tree: 1 });
 }
 function buildPark(r, B, city) {
@@ -4142,6 +4146,29 @@ function camAvoid(pos, tgt) { // pull the camera in front of buildings
   }
 }
 const _cv = new T.Vector3(), _ct = new T.Vector3();
+/* trees between the camera and you get hidden so they never block the view */
+const _zero = new T.Matrix4().makeScale(0.0001, 0.0001, 0.0001);
+function treeFade() {
+  const cx = camera.position.x, cz = camera.position.z, tx = PLAYER.x, tz = PLAYER.z, dx = tx - cx, dz = tz - cz, L2 = dx * dx + dz * dz || 1;
+  const build = MODE.cur === 'build';
+  for (const S of TREE_SETS) {
+    let changed = false;
+    for (let i = 0; i < S.list.length; i++) {
+      const [x, z] = S.list[i];
+      let block = false;
+      if (!build && Math.abs(x - cx) + Math.abs(z - cz) < Math.sqrt(L2) + 6) {
+        const t = clamp(((x - cx) * dx + (z - cz) * dz) / L2, 0, 1), px = cx + dx * t - x, pz = cz + dz * t - z;
+        block = t < 0.97 && px * px + pz * pz < 2.6 * 2.6;
+      }
+      if (block !== S.hid.has(i)) {
+        if (block) { S.hid.add(i); S.cm.setMatrixAt(i, _zero); S.tm.setMatrixAt(i, _zero); }
+        else { S.hid.delete(i); S.cm.setMatrixAt(i, S.mats[i]); S.tm.setMatrixAt(i, S.mats[i]); }
+        changed = true;
+      }
+    }
+    if (changed) { S.cm.instanceMatrix.needsUpdate = true; S.tm.instanceMatrix.needsUpdate = true; }
+  }
+}
 function updateCamera(dt) {
   if (MODE.cur === 'build') { buildCamera(dt); return; }
   const pl = PLAYER;
@@ -4161,6 +4188,7 @@ function updateCamera(dt) {
     camera.position.lerp(_cv, Math.min(1, dt * 8)); camera.lookAt(pl.x, 1.25, pl.z);
     if (Math.abs(camera.fov - 58) > 0.1) { camera.fov += (58 - camera.fov) * Math.min(1, dt * 4); camera.updateProjectionMatrix(); }
   }
+  treeFade();
   if (CAM.shake > 0) { camera.position.x += rnd(-1, 1) * CAM.shake; camera.position.y += rnd(-1, 1) * CAM.shake * 0.5; CAM.shake = Math.max(0, CAM.shake - dt * 1.5); }
 }
 function focusOn(p) {
