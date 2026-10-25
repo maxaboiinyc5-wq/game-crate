@@ -3447,13 +3447,13 @@ function removeOfficer(o) { o.car.remove(); const i = OFFICERS.indexOf(o); if (i
 function officerCap() { return Math.min(3, maxStars()); }
 function autoDispatchOfficer(cr) {
   if (cr.claimed || cr.stars > officerCap()) return false;
-  const o = OFFICERS.find(o => o.state === 'idle'); if (!o) return false;
+  const o = OFFICERS.find(o => o.state === 'idle' && !o.d.off); if (!o) return false;
   o.state = 'out'; o.crime = cr; cr.claimed = 'officer'; cr.officer = o;
   officerRoute(o, cr.x, cr.z);
   return true;
 }
 function officersRespond(p, n) { // escaped inmates
-  let k = 0; for (const o of OFFICERS) if (o.state === 'idle' && k < n) { o.state = 'out'; o.chase = p; officerRoute(o, p.x, p.z); k++; }
+  let k = 0; for (const o of OFFICERS) if (o.state === 'idle' && !o.d.off && k < n) { o.state = 'out'; o.chase = p; officerRoute(o, p.x, p.z); k++; }
 }
 function officerRoute(o, x, z) {
   const car = o.car; car.parked = false; car.siren = true;
@@ -3467,7 +3467,7 @@ function officerUpdate(o, dt) {
   if (o.state === 'idle') {
     car.thr = 0; car.brake = 1; car.siren = false;
     // take any crime still waiting (not the one you're on), nearest first
-    if ((o.look = (o.look || 0) - dt) <= 0) {
+    if (!o.d.off && (o.look = (o.look || 0) - dt) <= 0) {
       o.look = 3;
       const cr = CRIMES_ACTIVE.filter(c => !c.claimed && c.state === 'active' && c.stars <= officerCap() && c !== UI.target)
         .sort((a, b) => dist2(a.x, a.z, car.x, car.z) - dist2(b.x, b.z, car.x, car.z))[0];
@@ -3630,8 +3630,8 @@ const SHEETS = {
     const hire = Object.entries(STAFF_TYPES).map(([k, t]) => '<div class="row"><div class="grow"><b>' + t.n + '</b><small>' + t.d + ' Wage ' + money(t.wage) + '/day.</small></div><button class="btn pri" data-hire="' + k + '"' + (t.lvl && level() < t.lvl ? ' disabled' : '') + '>Hire ' + money(t.hire) + '</button></div>').join('');
     const duty = s => s.kind !== 'guard' ? '' : '<select class="sel" data-duty="' + s.uid + '">' + [['patrol', 'Patrol'], ['food', 'Food duty'], ['intake', 'Gate & intake']].map(([v, n]) => '<option value="' + v + '"' + (s.duty === v ? ' selected' : '') + '>' + n + '</option>').join('') + '</select>';
     const list = G.staff.map(s => {
-      const o = OFFICERS.find(x => x.d.uid === s.uid), st = o ? (o.state === 'idle' ? 'parked, ready' : o.state === 'return' ? 'bringing a suspect in' : 'out on a call') : '';
-      return '<div class="row"><div class="grow"><b>' + s.name + '</b><small>' + STAFF_TYPES[s.kind].n + (st ? ' · ' + st : '') + '</small></div>' + duty(s) + '<button class="btn" data-fire="' + s.uid + '">Fire</button></div>';
+      const o = OFFICERS.find(x => x.d.uid === s.uid), st = o ? (o.state === 'idle' ? (s.off ? 'off duty' : 'parked, ready') : o.state === 'return' ? 'bringing a suspect in' : 'out on a call') : '';
+      return '<div class="row"><div class="grow"><b>' + s.name + '</b><small>' + STAFF_TYPES[s.kind].n + (st ? ' · ' + st : '') + '</small></div>' + duty(s) + (s.kind === 'officer' ? '<button class="btn' + (s.off ? ' pri' : '') + '" data-off="' + s.uid + '">' + (s.off ? 'Start work' : 'Stop work') + '</button>' : '') + '<button class="btn" data-fire="' + s.uid + '">Fire</button></div>';
     }).join('');
     const g = G.staff.filter(s => s.kind === 'guard'), food = g.filter(s => s.duty === 'food').length;
     return '<h3>Your staff</h3>' + (list || '<p class="note">Nobody yet.</p>') +
@@ -3709,6 +3709,7 @@ function sheetClick(e) {
   if (d.brush) { UI.brush = d.brush; UI.renderSheet(); return; }
   if (d.sc) { const s = G.sched[UI.schedDay]; if (d.sc === 'all') for (let i = 0; i < 7; i++) G.sched[i] = s.slice(); if (d.sc === 'wk') for (let i = 0; i < 5; i++) G.sched[i] = s.slice(); if (d.sc === 'reset') G.sched[UI.schedDay] = defaultSchedule()[UI.schedDay]; SIM.lastAct = null; UI.renderSheet(); UI.toast('Schedule updated'); return; }
   if (d.hire) { if (hireStaff(d.hire)) UI.toast('Hired a new ' + STAFF_TYPES[d.hire].n.toLowerCase() + '.'); UI.refresh(); return; }
+  if (d.off) { const s = G.staff.find(x => x.uid === +d.off); if (s) { s.off = !s.off; const o = OFFICERS.find(x => x.d.uid === s.uid); UI.toast(s.off ? '👮 ' + s.name + (o && o.state !== 'idle' ? ' will stop after this call.' : ' stopped working.') : '👮 ' + s.name + ' is back on duty.'); } UI.refresh(); return; }
   if (d.fire) { fireStaff(+d.fire); UI.refresh(); return; }
   if (d.shake) { shakedown(); UI.renderSheet(); return; }
   if (d.search) { const m = INMATES.find(x => x.d.uid === +d.search); if (m) { if (!STAFF.some(s => s.d.kind === 'guard')) UI.toast('You need a guard to search inmates.', 'bad'); else { orderSearch(m); UI.toast('🔎 A guard is on the way to search ' + m.d.name + '.'); } } UI.renderSheet(); return; }
