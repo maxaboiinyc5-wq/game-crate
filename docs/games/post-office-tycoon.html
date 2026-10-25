@@ -514,40 +514,70 @@ const LMS=[];let REPAIR=null,mkTech=null;
   box(0.25,0.18,0.5,0xff2020,cx2-0.2,1.9,cz2-0.4);box(0.25,0.18,0.5,0x2050ff,cx2-0.2,1.9,cz2+0.4);addCol(cx2-2.2,cx2+2.2,cz2-1,cz2+1,true);}
  LMS.push({id:'jail',name:'the Country Jail',x0:PX0,x1:PX1,z0:PZ1,z1:PZ0,col:'#9a8f78'});
 }
-{ // Tech Repair: across the street from the post office, on the right as you walk out. Same look as Tech Repair Simulator
- const X0=-10.5,X1=-0.5,Z0=19.5,Z1=30.5,H=3.4,CX=(X0+X1)/2,SAGE=0x8fa19c,FRAME=0x2a2d31,LAM=0x22262b;
- const tf=canvasTex(256,256,(g,w,h)=>{const n=4,sz=w/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++){const v=128+((i*7+j*3)%5)*4;g.fillStyle=`rgb(${v},${v-3},${v-8})`;g.fillRect(i*sz,j*sz,sz,sz);}g.strokeStyle='rgba(90,86,80,.7)';g.lineWidth=3;for(let i=0;i<=n;i++){g.beginPath();g.moveTo(i*sz,0);g.lineTo(i*sz,h);g.stroke();g.beginPath();g.moveTo(0,i*sz);g.lineTo(w,i*sz);g.stroke();}});
- tf.wrapS=tf.wrapT=THREE.RepeatWrapping;tf.repeat.set(5,5.5);
- const fl=new THREE.Mesh(new THREE.PlaneGeometry(X1-X0,Z1-Z0),new THREE.MeshLambertMaterial({map:tf}));fl.rotation.x=-Math.PI/2;fl.position.set(CX,0.03,(Z0+Z1)/2);scene.add(fl);
- box(X1-X0,0.08,1.4,0xbdb6a8,CX,0.04,Z0-0.7); // sidewalk pad
- // walls (sage green), back and sides
- box(X1-X0+0.2,H,0.2,SAGE,CX,H/2,Z1);addCol(X0,X1,Z1-0.15,Z1+0.15,true);
- for(const x of [X0,X1]){box(0.2,H,Z1-Z0,SAGE,x,H/2,(Z0+Z1)/2);addCol(x-0.15,x+0.15,Z0,Z1,true);}
- // storefront: low wall, big glass windows in dark frames, glass door in the middle
- const D0=CX-0.8,D1=CX+0.8;
- for(const [a,b] of [[X0,D0],[D1,X1]]){const w=b-a,m=(a+b)/2;box(w,0.8,0.2,SAGE,m,0.4,Z0);box(w,0.55,0.2,SAGE,m,H-0.27,Z0);
-  const gl=new THREE.Mesh(new THREE.PlaneGeometry(w-0.1,H-1.35),new THREE.MeshLambertMaterial({color:0x9fb7c4,transparent:true,opacity:0.3,side:THREE.DoubleSide}));gl.position.set(m,0.8+(H-1.35)/2,Z0);scene.add(gl);
-  box(w,0.06,0.1,FRAME,m,0.8,Z0-0.06);box(w,0.06,0.1,FRAME,m,H-0.55,Z0-0.06);for(let k=0;k<=2;k++)box(0.08,H-1.35,0.1,FRAME,a+(w)*k/2,0.8+(H-1.35)/2,Z0-0.06);
-  addCol(a,b,Z0-0.15,Z0+0.15,true);}
- box(1.6,H-2.6,0.2,SAGE,CX,H-(H-2.6)/2,Z0);for(const x of [D0,D1])box(0.1,2.6,0.14,FRAME,x,1.3,Z0-0.05);box(1.7,0.1,0.14,FRAME,CX,2.6,Z0-0.05);
- // roof + ceiling lights
- box(X1-X0+0.4,0.25,Z1-Z0+0.4,0x2a2c2f,CX,H+0.12,(Z0+Z1)/2);
- for(const z of [22.5,25.5,28.5])box(1.6,0.04,0.35,new THREE.MeshBasicMaterial({color:0xfff8e8}),CX,H-0.03,z);
- // sign: TECH REPAIR, white and amber on dark, like the game's logo
- box(8.2,1.3,0.25,LAM,CX,H+0.9,Z0-0.05);
- const st=canvasTex(1024,160,(g,w,h)=>{g.fillStyle='#22262b';g.fillRect(0,0,w,h);g.font='700 104px "Chakra Petch","Arial Narrow",Arial,sans-serif';g.textBaseline='middle';
-  const a='TECH ',b='REPAIR',wa=g.measureText(a).width,wb=g.measureText(b).width,x=(w-wa-wb)/2;g.fillStyle='#f4f1ea';g.fillText(a,x,h/2+4);g.fillStyle='#ffb12e';g.fillText(b,x+wa,h/2+4);g.fillStyle='#ffb12e';g.fillRect(40,h-14,w-80,5);});
- const sm=new THREE.Mesh(new THREE.PlaneGeometry(8,1.25),new THREE.MeshBasicMaterial({map:st}));sm.position.set(CX,H+0.9,Z0-0.19);sm.rotation.y=Math.PI;scene.add(sm);
- // counter (dark laminate, wood top, amber strip), green repair mat, a phone on it, and the tech behind it
- const cz=26;box(3.4,0.96,0.78,LAM,CX,0.48,cz);box(3.5,0.05,0.9,0x8a5b36,CX,0.98,cz);box(3.3,0.03,0.02,new THREE.MeshBasicMaterial({color:0xffb12e}),CX,0.86,cz-0.4);
- box(0.6,0.01,0.45,0x2b6a4e,CX,1.01,cz);box(0.16,0.012,0.32,0x14181c,CX+0.05,1.02,cz);addCol(CX-1.75,CX+1.75,cz-0.45,cz+0.45,true);
- // back shelves with devices
- box(6,2,0.4,LAM,CX,1,Z1-0.35);for(let r=0;r<3;r++)for(let k=0;k<7;k++)box(0.3,0.45,0.08,[0x14181c,0x3a3f47,0xdfe3ea,0x1d7fe0][(r+k)%4],CX-2.4+k*0.8,0.35+r*0.62,Z1-0.6);
- addCol(CX-3,CX+3,Z1-0.6,Z1,true);
- mkTech=()=>{const tech=person(0x2b6a4e,0x2b2b3a,0xd9a47a,null);tech.position.set(CX,0,cz+1.1);tech.rotation.y=Math.PI;scene.add(tech);};
- const lab=textSprite('TECH REPAIR',1.6,'#22262b','#ffb12e');lab.position.set(CX,2.4,cz+0.2);scene.add(lab);
- REPAIR={x:CX,z:cz-1.2};
- LMS.push({id:'repair',name:'Tech Repair',x0:X0,x1:X1,z0:Z0,z1:Z1,col:'#8fa19c'});
+{ // Tech Repair: across the street from the post office, on the right as you walk out.
+ // Built in Tech Repair Simulator's own room coordinates (8 x 11 m, door at local z=7.5), turned to face the street.
+ const CX=-5.5,ZF=19.5,G=new THREE.Group();G.position.set(CX,0,ZF+7.5);G.rotation.y=Math.PI;scene.add(G);
+ const W=(x0,x1,z0,z1)=>addCol(CX-x1,CX-x0,ZF+7.5-z1,ZF+7.5-z0,true);
+ const SAGE=0x8fa19c,FRAME=0x2a2d31,LAM=0x22262b;
+ const lam=(c)=>mat(c);
+ // floor: grey tiles
+ const tf=canvasTex(256,256,(g,w,h)=>{const n=4,sz=w/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++){const v=128+((i*7+j*3)%6)*3;g.fillStyle=`rgb(${v},${v-3},${v-8})`;g.fillRect(i*sz,j*sz,sz,sz);}g.strokeStyle='rgba(90,86,80,.7)';g.lineWidth=3;for(let i=0;i<=n;i++){g.beginPath();g.moveTo(i*sz,0);g.lineTo(i*sz,h);g.stroke();g.beginPath();g.moveTo(0,i*sz);g.lineTo(w,i*sz);g.stroke();}});
+ tf.wrapS=tf.wrapT=THREE.RepeatWrapping;tf.repeat.set(6,7);
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(8,11),new THREE.MeshLambertMaterial({map:tf}));fl.rotation.x=-Math.PI/2;fl.position.set(0,0.03,2);G.add(fl);
+ box(10,0.08,1.6,0xbdb6a8,0,0.04,8.4,G); // sidewalk out front
+ // sage walls: left, right, back
+ box(0.15,3.2,11.15,SAGE,-4.07,1.6,2,G);box(0.15,3.2,11.15,SAGE,4.07,1.6,2,G);box(8.3,3.2,0.15,SAGE,0,1.6,-3.57,G);
+ W(-4.15,-4,-3.5,7.5);W(4,4.15,-3.5,7.5);W(-4.15,4.15,-3.65,-3.5);
+ // front wall exactly like the game: pillars, low walls, toppers, door header, two big windows and the glass door
+ const fwb=(w,h,x,y)=>box(w,h,0.12,SAGE,x,y,7.5,G);
+ fwb(0.5,3.2,-3.75,1.6);fwb(0.5,3.2,3.75,1.6);fwb(0.5,3.2,-0.85,1.6);fwb(0.5,3.2,0.85,1.6);
+ fwb(2.6,0.8,-2.3,0.4);fwb(2.6,0.8,2.3,0.4);fwb(2.6,0.55,-2.3,2.93);fwb(2.6,0.55,2.3,2.93);fwb(1.2,0.9,0,2.75);
+ const glassM=new THREE.MeshLambertMaterial({color:0x9fb7c4,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false});
+ [[-2.3,1.53,2.6,1.85],[2.3,1.53,2.6,1.85],[0,1.15,1.2,2.3]].forEach(([x,y,w,h])=>{const gl=new THREE.Mesh(new THREE.PlaneGeometry(w,h),glassM);gl.position.set(x,y,7.46);G.add(gl);box(w,0.04,0.06,FRAME,x,y+h/2,7.43,G);box(w,0.04,0.06,FRAME,x,y-h/2,7.43,G);});
+ W(-4,-0.6,7.44,7.56);W(0.6,4,7.44,7.56);
+ // outside: sign board over the door, TECH REPAIR like the game's logo
+ box(8.3,0.12,11.3,0x2a2c2f,0,3.26,2,G);
+ box(7.6,1.15,0.2,0x14181c,0,3.95,7.62,G);
+ const st=canvasTex(1024,160,(g,w,h)=>{g.fillStyle='#14181c';g.fillRect(0,0,w,h);g.font='700 104px "Chakra Petch","Arial Narrow",Arial,sans-serif';g.textBaseline='middle';
+  const a='TECH ',b2='REPAIR',wa=g.measureText(a).width,wb=g.measureText(b2).width,x=(w-wa-wb)/2;g.fillStyle='#f4f1ea';g.fillText(a,x,h/2+4);g.fillStyle='#ffb12e';g.fillText(b2,x+wa,h/2+4);});
+ const sm=new THREE.Mesh(new THREE.PlaneGeometry(7.4,1.1),new THREE.MeshBasicMaterial({map:st}));sm.position.set(0,3.95,7.73);G.add(sm);
+ // dark ceiling with three light strips
+ const ce=new THREE.Mesh(new THREE.PlaneGeometry(8,11),mat(0x2a2c2f));ce.rotation.x=Math.PI/2;ce.position.set(0,3.19,2);G.add(ce);
+ [-1.5,1.5,4.5].forEach(z=>box(1.6,0.03,0.35,new THREE.MeshBasicMaterial({color:0xfffbee}),0,3.17,z,G));
+ // the counter: dark laminate, wood top, amber light strip, kick plate
+ box(3.4,0.96,0.78,LAM,0,0.48,0.24,G);box(3.42,0.08,0.02,0x111315,0,0.04,0.64,G);box(3.3,0.012,0.012,new THREE.MeshBasicMaterial({color:0xffb12e}),0,0.86,0.64,G);
+ box(3.5,0.042,0.9,0x8a5b36,0,0.981,0.24,G);W(-1.75,1.75,-0.21,0.69);
+ // on the counter: green repair mat, a phone, screwdriver, parts bins, lamp, laptop (gBay) and a mug
+ box(0.5,0.006,0.4,0x2b6a4e,0,1.005,0.13,G);box(0.08,0.008,0.16,0x14181c,0.02,1.012,0.12,G);
+ const sd=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.011,0.09,10),mat(0xd23b2c));sd.rotation.z=Math.PI/2;sd.position.set(-0.33,1.014,0.05);G.add(sd);
+ [0xe8b33a,0x3a8be8,0xe8553a,0x5ac46e].forEach((c,i)=>box(0.07,0.04,0.09,c,-0.62,1.02,-0.02+i*0.1,G));
+ box(0.12,0.02,0.12,0x1b1d20,-0.64,1.01,-0.06,G);box(0.014,0.4,0.014,0x1b1d20,-0.64,1.21,-0.06,G);box(0.34,0.012,0.012,0x1b1d20,-0.47,1.41,-0.06,G);
+ const lh=new THREE.Mesh(new THREE.ConeGeometry(0.045,0.065,16,1,true),mat(0x1b1d20));lh.position.set(-0.3,1.38,-0.06);G.add(lh);
+ box(0.32,0.014,0.22,0xb9bec4,0.62,1.01,0.2,G);const lid=box(0.32,0.21,0.008,0xb9bec4,0.62,1.11,0.09,G);lid.rotation.x=-0.32;
+ const scr=canvasTex(256,165,(g,w,h)=>{g.fillStyle='#f4f6f8';g.fillRect(0,0,w,h);g.font='800 30px "Chakra Petch",sans-serif';g.fillStyle='#1d7fe0';g.fillText('g',10,32);g.fillStyle='#14181c';g.fillText('Bay',27,32);for(let i=0;i<3;i++){g.fillStyle='#d6dde4';g.fillRect(10+i*82,50,72,60);g.fillStyle='#14181c';g.fillRect(10+i*82,118,60,6);}});
+ const sc=new THREE.Mesh(new THREE.PlaneGeometry(0.29,0.18),new THREE.MeshBasicMaterial({map:scr}));sc.position.set(0.62,1.11,0.095);sc.rotation.x=-0.32;sc.rotation.y=Math.PI;sc.position.z=0.084;G.add(sc);
+ const mug=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.036,0.1,14),mat(0xf1efe8));mug.position.set(0.3,1.05,0.42);G.add(mug);
+ // white shelves of devices on the right wall
+ for(let i=0;i<4;i++){box(0.4,0.025,2.4,0xe6e6e2,3.78,0.6+i*0.5,2.6,G);for(let k=0;k<9;k++)box(0.09,0.17,0.2,[0xffffff,0xf5f5f5,0x222222,0x2c6fdb,0xe0424a,0xf2c230][(i*3+k)%6],3.7,0.6+i*0.5+0.1,1.55+k*0.24,G);}
+ W(3.55,4,1.4,3.8);
+ // left wall: orange SCREEN REPAIR poster, pink WE FIX IT neon, wall clock
+ const po=canvasTex(256,360,(g,w,h)=>{g.fillStyle='#ffb12e';g.fillRect(0,0,w,h);g.fillStyle='#151515';g.font='700 46px "Chakra Petch",sans-serif';g.fillText('SCREEN',15,70);g.fillText('REPAIR',15,118);g.font='600 23px Arial,sans-serif';g.fillText('from $79',17,160);g.font='500 15px Arial,sans-serif';g.fillText('Most phones same day',17,330);});
+ const pm=new THREE.Mesh(new THREE.PlaneGeometry(0.8,1.12),new THREE.MeshLambertMaterial({map:po}));pm.position.set(-3.98,1.7,1.8);pm.rotation.y=Math.PI/2;G.add(pm);
+ const ne=canvasTex(512,128,(g,w,h)=>{g.font='700 76px "Chakra Petch",sans-serif';g.textAlign='center';g.textBaseline='middle';g.shadowColor='#ff4fa3';g.shadowBlur=18;g.strokeStyle='#ffd1ea';g.lineWidth=4;g.strokeText('WE FIX IT',w/2,h/2);g.shadowBlur=34;g.strokeText('WE FIX IT',w/2,h/2);});
+ const nm=new THREE.Mesh(new THREE.PlaneGeometry(1.8,0.45),new THREE.MeshBasicMaterial({map:ne,transparent:true,depthWrite:false}));nm.position.set(-3.95,2.55,3.8);nm.rotation.y=Math.PI/2;G.add(nm);
+ const ck=canvasTex(128,128,(g)=>{g.fillStyle='#fafafa';g.beginPath();g.arc(64,64,62,0,7);g.fill();g.strokeStyle='#111';g.lineWidth=4;g.stroke();for(let i=0;i<12;i++){g.save();g.translate(64,64);g.rotate(i*Math.PI/6);g.fillStyle='#111';g.fillRect(-1.5,-56,3,9);g.restore();}g.lineWidth=4;g.beginPath();g.moveTo(64,64);g.lineTo(64,30);g.moveTo(64,64);g.lineTo(88,72);g.stroke();});
+ const cm=new THREE.Mesh(new THREE.CircleGeometry(0.22,24),new THREE.MeshLambertMaterial({map:ck}));cm.position.set(-3.98,2.3,5.6);cm.rotation.y=Math.PI/2;G.add(cm);
+ // waiting chairs and the terracotta plant by the door
+ for(let i=0;i<2;i++){const z=5.4+i*0.7;box(0.45,0.06,0.45,0x3c4b5c,-3.5,0.45,z,G);box(0.05,0.45,0.45,0x3c4b5c,-3.72,0.7,z,G);for(const [lx,lz] of [[-0.2,-0.2],[0.2,-0.2],[-0.2,0.2],[0.2,0.2]])box(0.03,0.43,0.03,0x222222,-3.5+lx,0.21,z+lz,G);}
+ W(-3.8,-3.2,5.1,6.4);
+ const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.14,0.36,14),mat(0xb0603a));pot.position.set(2.9,0.18,6.8);G.add(pot);
+ for(let i=0;i<10;i++){const lf=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,6),mat(0x2f6b33));lf.scale.set(0.6,1.6,0.25);lf.position.set(2.9+Math.sin(i*2.3)*0.1,0.55+(i%5)*0.09,6.8+Math.cos(i*1.7)*0.1);lf.rotation.set(Math.sin(i)*0.6,i,Math.cos(i)*0.6);G.add(lf);}
+ W(2.7,3.1,6.6,7);
+ // the tech behind the counter (added once people can be built)
+ mkTech=()=>{const tech=person(0x2b6a4e,0x2b2b3a,0xd9a47a,null);tech.position.set(0,0,-0.7);G.add(tech);};
+ const lab=textSprite('FIX DEVICES HERE',1.6,'#14181c','#ffb12e');lab.position.set(0,2.5,0.24);G.add(lab);
+ REPAIR={x:CX,z:ZF+7.5-1.5};
+ LMS.push({id:'repair',name:'Tech Repair',x0:CX-4,x1:CX+4,z0:ZF,z1:ZF+11,col:'#8fa19c'});
 }
 function updCompLook(){const f=furnOf('comp');if(!f||!f.screen)return;f.screen.material.color.setHex(S.compBroken?0xd23b2c:0x45c46a);f.brokeLab.visible=!!S.compBroken;}
 function breakComputer(){S.compBroken=true;requests=[];updCompLook();toast('💥 The delivery computer broke! Fix it at Tech Repair across the street ($50).');beep(120,0.4,'sawtooth',0.07);save();}
