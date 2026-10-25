@@ -1958,9 +1958,16 @@ function carMats() {
   CARM.tail = L({ color: 0x8a0d0d, emissive: 0xff1a1a, emissiveIntensity: 0.25 });
   CARM.plate = L({ color: 0xf2f2e8 });
   // headlight beam on the road: soft additive glow, fades in at night
-  const cv = document.createElement('canvas'); cv.width = 64; cv.height = 128; const x = cv.getContext('2d');
-  const gr = x.createRadialGradient(32, 128, 4, 32, 128, 128); gr.addColorStop(0, 'rgba(255,240,200,1)'); gr.addColorStop(0.5, 'rgba(255,236,190,0.45)'); gr.addColorStop(1, 'rgba(255,230,180,0)');
-  x.fillStyle = gr; x.beginPath(); x.moveTo(22, 128); x.lineTo(42, 128); x.lineTo(64, 0); x.lineTo(0, 0); x.closePath(); x.fill();
+  const cv = document.createElement('canvas'), BW = 64, BH = 128; cv.width = BW; cv.height = BH; const x = cv.getContext('2d'), id = x.createImageData(BW, BH);
+  for (let py = 0; py < BH; py++) {
+    const v = py / (BH - 1); // 0 at the car (canvas top ends up nearest the car), 1 far away
+    const half = 0.16 + v * 0.34, along = Math.min(1, v * 6) * Math.pow(1 - v, 1.6);
+    for (let px = 0; px < BW; px++) {
+      const u = Math.abs(px / (BW - 1) - 0.5), side = Math.max(0, 1 - u / half), a = along * side * side * (3 - 2 * side);
+      const o = (py * BW + px) * 4; id.data[o] = 255; id.data[o + 1] = 238; id.data[o + 2] = 196; id.data[o + 3] = Math.round(a * 255);
+    }
+  }
+  x.putImageData(id, 0, 0);
   const tx = new T.CanvasTexture(cv); tx.encoding = T.sRGBEncoding;
   CARM.beam = new T.MeshBasicMaterial({ map: tx, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false });
 }
@@ -1973,7 +1980,7 @@ function headLight() {
 }
 function carLightsNight(k) { // k: 0 day .. 1 full night
   if (!CARM.head) return;
-  CARM.head.emissiveIntensity = 0.3 + k * 2.4; CARM.tail.emissiveIntensity = 0.25 + k * 1.1; CARM.beam.opacity = k * 0.9;
+  CARM.head.emissiveIntensity = 0.3 + k * 2.4; CARM.tail.emissiveIntensity = 0.25 + k * 1.1; CARM.beam.opacity = k * 0.75;
   NIGHT.carK = k;
 }
 /* side-profile extrusion (x = length axis, y = up) */
