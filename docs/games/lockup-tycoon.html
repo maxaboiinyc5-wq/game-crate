@@ -1584,7 +1584,31 @@ function itemEdges(rt) {
   });
 }
 /* rebuild edges + block map after any change */
+/* tiles staff can walk to from the front gate; anyone outside it is cut off */
+const MAINR = { ver: -1, set: null };
+function mainRegion() {
+  if (MAINR.ver === J.navVer && MAINR.set) return MAINR.set;
+  const set = new Uint8Array(GW * GH), s = [GATE_I[0], 0], q = [s]; set[tid(s[0], s[1])] = 1;
+  while (q.length) {
+    const [i, j] = q.pop();
+    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const mi = i + di, mj = j + dj; if (!inGrid(mi, mj) || set[tid(mi, mj)] || J.block[tid(mi, mj)]) continue;
+      const e = J.edges.get(edgeBetween([i, j], [mi, mj])); if (e && !crossOk(e, [i, j], [mi, mj], 'staff')) continue;
+      set[tid(mi, mj)] = 1; q.push([mi, mj]);
+    }
+  }
+  MAINR.set = set; MAINR.ver = J.navVer; return set;
+}
+function unstick(p) { // walk a cut-off guard back to the nearest open tile
+  const [i, j] = p.tile(); if (!owned(i, j)) return false;
+  const set = mainRegion(); if (set[tid(i, j)]) return false;
+  let best = null, bd = 1e9;
+  for (let k = 0; k < set.length; k++) if (set[k]) { const a = k % GW, b = (k / GW) | 0; if (!owned(a, b)) continue; const d = (a - i) ** 2 + (b - j) ** 2; if (d < bd) { bd = d; best = [a, b]; } }
+  if (!best) return false;
+  p.goFree(tileX(best[0]), tileZ(best[1])); return true;
+}
 function rebuildNav() {
+  J.navVer = (J.navVer || 0) + 1;
   J.rev++;
   J.edges.clear();
   // perimeter fence
@@ -2687,6 +2711,7 @@ function staffUpdate(s, dt) {
   s.think -= dt;
   // jobs first (incidents, escorts)
   if (s.job) return staffJob(s, dt);
+  if (!p.path && !p.free && !p.spot && !p.spotRes && (s.stuckT = (s.stuckT || 0) - dt) <= 0) { s.stuckT = 2; if (unstick(p)) return; }
   if (d.kind === 'janitor') return janitorUpdate(s, dt);
   // guard duty
   const act = curAct();
