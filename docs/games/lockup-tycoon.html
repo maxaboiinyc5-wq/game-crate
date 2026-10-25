@@ -2142,12 +2142,13 @@ class Car {
       u.bar.r.forEach((mm, i) => mm.emissiveIntensity = on ? ((ph < 1) === (i === 0) ? 2.2 : 0.15) : 0.05);
       u.bar.b.forEach((mm, i) => mm.emissiveIntensity = on ? ((ph >= 1) === (i === 0) ? 2.2 : 0.15) : 0.05);
     }
-    if (u.beam) u.beam.visible = NIGHT.carK > 0.02 && (!this.parked || this === PLAYER.car) && this.hp > 0;
-    if (this === PLAYER.car) {
+    const pc = typeof PLAYER !== 'undefined' && PLAYER ? PLAYER.car : null;
+    if (u.beam) u.beam.visible = NIGHT.carK > 0.02 && (!this.parked || this === pc) && this.hp > 0;
+    if (pc && this === pc) {
       const L = headLight(), fx = Math.sin(this.ry), fz = Math.cos(this.ry), l2 = this.spec.len / 2;
       L.intensity = (NIGHT.carK || 0) * 7;
       L.position.set(this.x + fx * l2, 1.0, this.z + fz * l2); L.target.position.set(this.x + fx * 18, 0, this.z + fz * 18);
-    } else if (HEADL && !PLAYER.car) HEADL.intensity = 0;
+    } else if (HEADL && !pc) HEADL.intensity = 0;
     if (this.hp <= 0 && Math.random() < 0.3) spawnSmoke(this.x, 1.2, this.z);
   }
 }
