@@ -2332,6 +2332,7 @@ const HOUR_SECS = 24; // real seconds per game hour at 1x
 function simTick(dt) { // dt = real seconds * speed
   const prevH = Math.floor(G.hour);
   G.hour += dt / HOUR_SECS;
+  mealTick();
   if (G.hour >= 24) { G.hour -= 24; endOfDay(); }
   const h = Math.floor(G.hour);
   if (h !== prevH) onHour(h);
@@ -2357,12 +2358,23 @@ function payWorkHour() {
 }
 /* job stations make ALL work pay go up: washer dryer +10%, workshop bench +20% */
 function stationCount() { let n = 0; for (const rt of J.byUid.values()) if (rt.def.cat === 'work') n++; return n; }
+/* keep serving up to 30 min past mealtime while anyone is still waiting */
+function lateServe() {
+  if (curAct() === 'eat' || curAct(G.hour - 1) !== 'eat') return false;
+  return INMATES.some(m => m.ate !== SIM.mealId && !m.d.solo && !m.d.escaped && (m.state === 'idle' || !m.state));
+}
+const PREP = 0.4; // inmates line up this many game hours before a meal
+function mealSoon() { return curAct() !== 'eat' && curAct(G.hour + PREP) === 'eat'; }
+function mealTick() { // a new meal starts when the line-up starts
+  const on = curAct() === 'eat' || mealSoon();
+  if (on && !SIM.inMeal) { SIM.inMeal = true; SIM.mealId++; for (const m of INMATES) if (!m.p.spot || m.p.spot.tag !== 'bed') m.replan = true; }
+  else if (!on && curAct(G.hour - 1) !== 'eat') SIM.inMeal = false;
+}
 function stationBoost() { let b = 1; for (const rt of J.byUid.values()) if (rt.def.cat === 'work') b += rt.data.type === 'workbench' ? 0.2 : 0.1; return b; }
 function onHour(h) {
   const act = curAct();
   // pay for the work hour that just ended: every inmate who worked earns you money
   if (SIM.lastAct === 'work') payWorkHour();
-  if (act === 'eat' && SIM.lastAct !== 'eat') SIM.mealId++;
   if (act !== SIM.lastAct) { UI.actChanged(act); for (const m of INMATES) m.replan = true; }
   SIM.lastAct = act;
   hourlyMoods();
@@ -2586,7 +2598,7 @@ function securityScore() {
 function inmateThink(m) {
   const d = m.d, p = m.p;
   if (d.escaped || m.state === 'intake' || m.state === 'release' || m.state === 'escort' || m.state === 'caught' || m.state === 'fight' || m.state === 'riot' || m.state === 'climb' || m.state === 'escapee' || m.state === 'stunned') return;
-  const act = curAct();
+  const act0 = curAct(), act = act0 !== 'eat' && m.ate !== SIM.mealId && !d.solo && ((mealSoon() && act0 !== 'sleep') || lateServe()) ? 'eat' : act0;
   // solitary
   if (d.solo > 0) {
     const rt = solitaryFor(m);
@@ -2658,7 +2670,7 @@ function doEat(m) {
   const counters = [...J.byUid.values()].filter(r => r.data.type === 'counter' && !r.broken);
   if (!counters.length) { SIM.noFood = true; wander(m); return; }
   const s = freeSpot(['serve'], m);
-  if (s) { if (p.goSpot(s, () => { m.atCounter = s; m.useT = 2.5; })) return; }
+  if (s) { if (p.goSpot(s, () => { m.atCounter = s; m.useT = 1.2; })) return; }
   // queue: stand near a counter
   const c = counters[0].spots.find(x => x.tag === 'serve');
   if (c) p.goTile(c.ai, Math.max(0, c.aj - 1 - rint(0, 2)), () => { m.useT = 2; });
@@ -2672,7 +2684,7 @@ function inmateUpdate(m, dt) {
   if (p.spot) {
     const s = p.spot;
     if (s.tag === 'serve' && m.atCounter === s && m.useT <= 0) {
-      if (counterServed(s.item)) { m.ate = SIM.mealId; m.hasTray = true; holdProp(p.v, 'tray'); p.keepProp = 'tray'; m.atCounter = null; m.replan = true; dirtAt(s.ai, s.aj, 2); }
+      if (counterServed(s.item)) { m.ate = SIM.mealId; m.hasTray = true; holdProp(p.v, 'tray'); p.keepProp = 'tray'; m.atCounter = null; m.replan = true; dirtAt(s.ai, s.aj, 2); for (const q of INMATES) if (q !== m && q.ate !== SIM.mealId && !q.p.spot && !q.p.spotRes) q.replan = true; }
       else { m.useT = 3; m.waitFood = (m.waitFood || 0) + 1; if (m.waitFood > 4) { SIM.noFood = true; { const fg = G.staff.filter(x => x.kind === 'guard' && x.duty === 'food').length, nc = [...J.byUid.values()].filter(r => r.data.type === 'counter' && !r.broken).length;
           UI.alertOnce('nofood', fg === 0 ? '🍽 No guard is serving food. Set a guard to Food duty in Staff.' : SIM.foodBlocked ? "🍽 Food guards can't reach the back of a serving counter. Leave the tile behind it open." : fg < nc ? '🍽 ' + nc + ' counters but only ' + fg + ' food guard' + (fg === 1 ? '' : 's') + '. Inmates are waiting at an empty counter.' : '🍽 Food guards are busy (fights, searches). Inmates are waiting.'); } m.waitFood = 0; m.atCounter = null; wander(m); } }
     }
@@ -2683,7 +2695,7 @@ function inmateUpdate(m, dt) {
     if (s.tag === 'bed' && !SIM.locked && d.solo <= 0) m.replan = true;
   }
   if (m.eating && !p.spot && m.useT <= 0) { d.need.food = clamp(d.need.food + 50, 0, 100); m.eating = false; m.hasTray = false; p.keepProp = null; holdProp(p.v, null); p.poseOverride = null; m.replan = true; }
-  if (m.hasTray && !m.eating && curAct() !== 'eat' && !p.spotRes) eatStanding(m);
+  if (m.hasTray && !m.eating && curAct() !== 'eat' && !lateServe() && !mealSoon() && !p.spotRes) eatStanding(m);
   if (m.idleWait && m.useT <= 0 && !p.path) { m.idleWait = false; m.replan = true; }
   if (m.choring) { p.poseOverride = p.moving ? null : 'mop'; if (!p.moving && Math.random() < dt * 0.5) { const [ci, cj] = p.tile(); if (inGrid(ci, cj)) J.dirt[tid(ci, cj)] = Math.max(0, J.dirt[tid(ci, cj)] - 8); } }
   // escape climb attempt during outdoor time
@@ -2747,7 +2759,7 @@ function staffUpdate(s, dt) {
   if (d.kind === 'janitor') return janitorUpdate(s, dt);
   // guard duty
   const act = curAct();
-  if (d.duty === 'food' && act === 'eat') {
+  if (d.duty === 'food' && (act === 'eat' || curAct(G.hour + PREP + 0.3) === 'eat' || lateServe())) {
     if (!s.serving && !p.spotRes && (s.think <= 0 || !s.wasEat)) {
       s.wasEat = true; s.think = 3;
       // try every free counter, nearest first; skip ones we can't walk to
