@@ -489,10 +489,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   <section class="sec" id="secSoon" aria-labelledby="hSoon">
     <div class="sech pad"><h2 id="hSoon">Coming soon</h2><p>Games on the way to the shelf.</p></div>
     <div class="row" id="rowSoon">
-      <div class="tile soon" role="group" aria-label="Repair Shop Simulator, comes out Sunday, October 25. Hear each customer's story, figure out what's really wrong with their phone and fix it on the bench." style="--bgs:#1b1f24;--ac:#ffb12e;--ci:#1a1200;--font:'Russo One',Impact,sans-serif;--lfg:#fffaf0;--sz:1">
-        <span class="tim"><img src="art/repair-shop-simulator.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · shop sim</span><span class="sdate">OCT 25</span><span class="tnm">Repair Shop Simulator</span></span>
-        <span class="tmeta">Comes out <b>Sun, Oct 25</b> · Hear their story, then fix the phone.</span>
-      </div>
+      <p class="empty">Nothing announced right now. New games show up here first.</p>
     </div>
   </section>
  </div>
@@ -660,6 +657,11 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
     ['cc3','Midweek','Make it to Wednesday night',function(){var s=J('ccap_best');return s&&s.day>=3}],
     ['cc5','Perfect Week','Get every kid home on Friday',function(){var s=J('ccap_best');return s&&s.day>=5}],
     ['cc10','Safety First','Go 10 days without an incident',function(){return N('ccap_safe')>=10}]],
+   'repair-shop-simulator':[
+    ['rs3','Getting the Hang of It','Reach level 3',function(){var s=J('hairline-repair-v1');return s&&s.level>=3}],
+    ['rs6','Master Technician','Reach level 6',function(){var s=J('hairline-repair-v1');return s&&s.level>=6}],
+    ['rsg','First Flip','Sell a refurbished phone on gBay',function(){var s=J('hairline-repair-v1');return s&&s.gb&&s.gb.sold>=1}],
+    ['rsw','Open All Week','Finish 7 days at the shop',function(){var s=J('hairline-repair-v1');return s&&s.day>=8}]],
    'brokebox':[
     ['b1','Trophy Hunter','Earn a Brokebox trophy',function(){return bbTro()>=1}],
     ['b10','Trophy Case','Earn 10 Brokebox trophies',function(){return bbTro()>=10}],
@@ -754,6 +756,7 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
       list:[['W A S D','Move'],['Hold mouse + drag','Look around'],['Space','Jump'],['J or Shift','Headbutt'],['K or E','Lick'],['L or R','Flop']]},
     'brokebox':{list:[['Arrows or W A S D','Move / pick'],['Enter','Select'],['Esc','Back / pause'],['Q  E','Switch tabs'],['How to play','Each game lists its own keys'],['Controller','Plug one in, it just works']]},
     'crosswalk-captain':{list:[['Space','Raise / lower the STOP sign'],['Enter or G','Send the kids across'],['P or Esc','Pause'],['Mouse','Click the big buttons']]},
+    'repair-shop-simulator':{list:[['Mouse','Click buttons, screws and parts'],['Hold a button','Pry tool, heat gun'],['Drag','Pull the battery, scrub the port'],['P or Esc','Pause menu']]},
     'curb-cut':{list:[['Space or Up','Ollie (hold = higher)'],['X or Right','Flip trick in the air']]},
     'five-star-getaway':{hide:['.pad'],
       list:[['A D or Left Right','Steer'],['S or Down','Brake'],['Space, W or Up','Nitro']]},
@@ -884,6 +887,8 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
 <script>
 (()=>{
 const GAMES=[
+ {id:'repair-shop-simulator',name:'Repair Shop Simulator',kind:'3D · shop sim',blurb:"Hear their story, find what's really wrong and fix the phone. Flip trade-ins on gBay.",
+  font:"'Russo One',Impact,sans-serif",bg:'#1b1f24',fg:'#ffb12e',tx:'#eef1f2',ac:'#ffb12e',ci:'#1a1200',sz:.95},
  {id:'crosswalk-captain',name:'Crosswalk Captain',kind:'3D · arcade',audio:1,blurb:'Be the crossing guard. Raise the STOP sign at the right moment and get every kid across.',
   font:"'Lilita One','Arial Rounded MT Bold',sans-serif",bg:'#2b2e34',fg:'#f5b70a',tx:'#f3f1ea',ac:'#d6322b',ci:'#ffffff',sz:1.12},
  {id:'lockup-tycoon',name:'Lockup Tycoon',kind:'3D · tycoon',blurb:'Run the jail, patrol the city, lock them up.',
@@ -928,6 +933,7 @@ const GAMES=[
 
 /* [first made, last updated]. Badges work themselves out from these and drop off after 7 days. */
 const DATES={
+ 'repair-shop-simulator':['2026-10-25','2026-10-25'],
  'crosswalk-captain':['2026-10-24','2026-10-24'],
  'lockup-tycoon':['2026-10-19','2026-10-19'],
  'post-office-tycoon':['2026-10-15','2026-10-21'],
@@ -1033,7 +1039,7 @@ for(const g of GAMES){
   b.addEventListener('click',()=>{if(cur===g)launch(g,b);else select(g,true)});
   rack.appendChild(b);carts[g.id]=b;
 }
-const CATS={'crosswalk-captain':'Arcade','lockup-tycoon':'Sim','post-office-tycoon':'Sim','pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
+const CATS={'repair-shop-simulator':'Sim','crosswalk-captain':'Arcade','lockup-tycoon':'Sim','post-office-tycoon':'Sim','pocket-maker':'Arcade','aisle-nine-market':'Sim','last-gate':'Sim','stormline-royale':'Action','short-hop-air':'Sim','bad-goat-day':'Action',
  'brokebox':'Arcade','jetway-tycoon':'Sim','five-star-getaway':'Driving','lawn-guard':'Arcade','two-minute-drill':'Sports',
  'kickflip-island':'Sports','curb-cut':'Sports','puck-havoc':'Arcade','midnight-motorway':'Driving','zip-riot':'Arcade','wisp-hollow':'Action'};
 const FILTERS=['All','3D','2D','Arcade','Action','Sim','Sports','Driving'];
@@ -1426,7 +1432,7 @@ function renderJump(){
   const nNew=GAMES.filter(g=>tagsOf(g).isNew).length,nUpd=GAMES.filter(g=>tagsOf(g).isUpd).length,nFav=favs().length;
   const J=[['secAch','Achievements','<b'+(fresh?' class="hot"':'')+'>'+got+'/'+achAll()+'</b>'],['secLike','For you',''],['secRecent','Recently played',''],
     ['secNew','New games',nNew?'<b class="hot">'+nNew+'</b>':''],['secUpd','Recently updated',nUpd?'<b>'+nUpd+'</b>':''],['secFav','Favorites',nFav?'<b>'+nFav+'</b>':''],
-    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','<b>1</b>']];
+    ['secDaily','Daily challenge',dOk?'':'<i></i>'],['secStats','Your stats',''],['secTheme','Themes',''],['secSoon','Coming soon','']];
   const box=$('jump');box.textContent='';
   for(const [id,label,extra] of J){const b=document.createElement('button');b.type='button';b.className='jb';b.innerHTML='<span></span>'+extra;b.firstChild.textContent=label;
     b.addEventListener('click',()=>document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'}));box.append(b)}
@@ -1565,7 +1571,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-24-crate26';
+  var V='2026-10-25-crate-rss';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
