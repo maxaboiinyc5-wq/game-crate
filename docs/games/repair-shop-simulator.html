@@ -279,7 +279,7 @@ const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
 const KEY='hairline-repair-v1';
 function freshSave(){ return {v:1,cash:60,xp:0,level:1,day:1,rSum:0,rCount:0,reg:{},cards:[],bossDone:0,inv:[],gb:{rs:0,rc:0,sold:0,nid:1}}; }
 let save = (()=>{ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.v===1){ if(!s.inv) s.inv=[]; if(!s.gb) s.gb={rs:0,rc:0,sold:0,nid:1}; return s; } }catch(e){} return freshSave(); })();
-function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(save)); }catch(e){} }
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(save,(k,v)=>k==='photo'?undefined:v)); }catch(e){} }
 const xpNeed = l => 60 + l*40;
 
 /* ---------------- audio: everything is synthesized, no sound files ---------------- */

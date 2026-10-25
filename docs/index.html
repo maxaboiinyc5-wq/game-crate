@@ -683,13 +683,16 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   };
   function dailyDone(){var d=today();try{var a=JSON.parse(localStorage.getItem('gc.daily')||'[]')||[];if(a.indexOf(d)<0){a.push(d);localStorage.setItem('gc.daily',JSON.stringify(a.slice(-400)))}}catch(e){}}
   /* record anything newly earned. Returns the list of [game,achievement] that just unlocked */
+  var MEM=window.__gcMem||(window.__gcMem={});
   window.GC_GACH_CHECK=function(only){
     var got;try{got=JSON.parse(localStorage.getItem('gc.gach')||'{}')||{}}catch(e){got={}}
     var fresh=[];
     for(var g in A){if(only&&g!==only)continue;
       for(var i=0;i<A[g].length;i++){var a=A[g][i];if(got[g]&&got[g][a[0]])continue;
+        /* never pop the same one twice, even if saving fails (storage full) */
+        var mk=g+':'+a[0];if(MEM[mk])continue;
         var ok=false;try{ok=!!a[3]()}catch(e){}
-        if(ok){got[g]=got[g]||{};got[g][a[0]]={t:Date.now(),seen:0};fresh.push([g,a])}}}
+        if(ok){MEM[mk]=1;got[g]=got[g]||{};got[g][a[0]]={t:Date.now(),seen:0};fresh.push([g,a])}}}
     if(fresh.length)try{localStorage.setItem('gc.gach',JSON.stringify(got))}catch(e){}
     /* finishing today's challenge goal also finishes the daily challenge */
     var pk=window.GC_DAILY_PICK();
@@ -1571,7 +1574,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-25-crate-trs';
+  var V='2026-10-25-crate-ach1';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
