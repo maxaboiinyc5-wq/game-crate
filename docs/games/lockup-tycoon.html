@@ -3464,7 +3464,17 @@ function officerRoute(o, x, z) {
 }
 function officerUpdate(o, dt) {
   const car = o.car;
-  if (o.state === 'idle') { car.thr = 0; car.brake = 1; car.siren = false; return; }
+  if (o.state === 'idle') {
+    car.thr = 0; car.brake = 1; car.siren = false;
+    // take any crime still waiting (not the one you're on), nearest first
+    if ((o.look = (o.look || 0) - dt) <= 0) {
+      o.look = 3;
+      const cr = CRIMES_ACTIVE.filter(c => !c.claimed && c.state === 'active' && c.stars <= officerCap() && c !== UI.target)
+        .sort((a, b) => dist2(a.x, a.z, car.x, car.z) - dist2(b.x, b.z, car.x, car.z))[0];
+      if (cr) { autoDispatchOfficer(cr); UI.toast('👮 ' + o.d.name + ' is heading to the ' + cr.name.toLowerCase() + '.'); }
+    }
+    return;
+  }
   // follow route; at last node, drive straight to goal
   if (car.ai && car.ai.b == null) { car.ai = null; o.direct = true; }
   if (o.chase && !o.chase.dead) o.goal = { x: o.chase.x, z: o.chase.z };
