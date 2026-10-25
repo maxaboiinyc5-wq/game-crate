@@ -2617,7 +2617,8 @@ function inmateUpdate(m, dt) {
     const s = p.spot;
     if (s.tag === 'serve' && m.atCounter === s && m.useT <= 0) {
       if (counterServed(s.item)) { m.ate = SIM.mealId; m.hasTray = true; holdProp(p.v, 'tray'); p.keepProp = 'tray'; m.atCounter = null; m.replan = true; dirtAt(s.ai, s.aj, 2); }
-      else { m.useT = 3; m.waitFood = (m.waitFood || 0) + 1; if (m.waitFood > 4) { SIM.noFood = true; UI.alertOnce('nofood', '🍽 No guard is serving food. Set a guard to Food duty in Staff.'); m.waitFood = 0; m.atCounter = null; wander(m); } }
+      else { m.useT = 3; m.waitFood = (m.waitFood || 0) + 1; if (m.waitFood > 4) { SIM.noFood = true; { const fg = G.staff.filter(x => x.kind === 'guard' && x.duty === 'food').length, nc = [...J.byUid.values()].filter(r => r.data.type === 'counter' && !r.broken).length;
+          UI.alertOnce('nofood', fg === 0 ? '🍽 No guard is serving food. Set a guard to Food duty in Staff.' : SIM.foodBlocked ? "🍽 Food guards can't reach the back of a serving counter. Leave the tile behind it open." : fg < nc ? '🍽 ' + nc + ' counters but only ' + fg + ' food guard' + (fg === 1 ? '' : 's') + '. Inmates are waiting at an empty counter.' : '🍽 Food guards are busy (fights, searches). Inmates are waiting.'); } m.waitFood = 0; m.atCounter = null; wander(m); } }
     }
     if (s.tag === 'seat' && m.eating && m.useT <= 0) { d.need.food = clamp(d.need.food + 65, 0, 100); m.eating = false; m.hasTray = false; p.keepProp = null; holdProp(p.v, null); dirtAt(s.ai, s.aj, 4); m.replan = true; SIM.noFood = false; }
     if (s.tag === 'bed' && SIM.locked && d.plan === 'tunnel' && m.inCell()) { d.dig += dt / HOUR_SECS * (d.contra.includes('tool') ? 7 : 3) * (d.trait === 'artist' ? 1.5 : 1) * (1 - Math.min(0.6, detectorCount() * 0.2)); p.poseOverride = (Math.sin(m.p.t * 0.3) > 0.6) ? 'dig' : null; if (d.dig >= 100) tunnelEscape(m); }
@@ -2690,13 +2691,19 @@ function staffUpdate(s, dt) {
   // guard duty
   const act = curAct();
   if (d.duty === 'food' && act === 'eat') {
-    if (!s.serving) {
-      const sp = J.spots.find(x => x.tag === 'staff_food' && x.ok && (!x.by || x.by === p) && !x.item.broken);
-      if (sp && !p.spotRes && p.spot !== sp) { if (p.goSpot(sp, () => { s.serving = true; })) return; }
-      if (!sp && s.think <= 0) { s.think = 3; patrol(s); }
+    if (!s.serving && !p.spotRes && (s.think <= 0 || !s.wasEat)) {
+      s.wasEat = true; s.think = 3;
+      // try every free counter, nearest first; skip ones we can't walk to
+      const free = J.spots.filter(x => x.tag === 'staff_food' && x.ok && (!x.by || x.by === p) && !x.item.broken)
+        .sort((u, v) => dist2(u.x, u.z, p.x, p.z) - dist2(v.x, v.z, p.x, p.z));
+      for (const sp of free) if (p.goSpot(sp, () => { s.serving = true; })) return;
+      const open = J.spots.some(x => x.tag === 'staff_food' && !x.item.broken && (!x.by || x.by === p));
+      if (open) { SIM.foodBlocked = true; UI.alertOnce('foodblk', "🍽 Food guards can't reach the back of the serving counter. Leave the tile behind it open so a guard can stand there."); }
+      patrol(s);
     }
     return;
   }
+  s.wasEat = false;
   if (s.serving) { s.serving = false; p.leaveSpot(); }
   if (d.duty === 'intake') { if (!p.path && !p.free && s.think <= 0) { s.think = 4; const [i, j] = p.tile(); if (Math.abs(i - GATE_I[0]) > 2 || j > 3) p.goTile(GATE_I[0] + (Math.random() < 0.5 ? -1 : 2), 1); else p.faceTo(tileX(GATE_I[0]), LOT_Z0 - 5); } return; }
   while (SIM.searchQ.length) { const m = SIM.searchQ.shift(); if (m && !m.p.dead && !m.d.escaped && !m.searching) { s.job = { type: 'search', target: m }; m.searching = s; s.repath = 0; return; } }
