@@ -489,7 +489,10 @@ try{gcTheme(JSON.parse(localStorage.getItem('gc.theme')||'"amber"'))}catch(e){}
   <section class="sec" id="secSoon" aria-labelledby="hSoon">
     <div class="sech pad"><h2 id="hSoon">Coming soon</h2><p>Games on the way to the shelf.</p></div>
     <div class="row" id="rowSoon">
-      <p class="empty">Nothing announced right now. New games show up here first.</p>
+      <div class="tile soon" role="group" aria-label="Pinecrest Rivals. Coming Saturday, October 31. Genre: Sports, arcade golf." style="--bgs:#0f3b2a;--ac:#f5c542;--ci:#0f3b2a;--font:'Barlow Condensed','Arial Narrow',sans-serif;--fw:800;--tt:uppercase;--sz:1.3;--lfg:#f6f1e3">
+        <span class="tim"><img src="art/soon-pinecrest-rivals.jpg?1" alt="" loading="lazy" decoding="async"><span class="tkd">3D · golf</span><span class="sdate">SAT OCT 31</span><span class="tnm">Pinecrest Rivals</span></span>
+        <span class="tmeta">Genre: <b>Sports · arcade golf</b><br>Open-world golf against a rival who hates losing. Out <b>Sat, Oct 31</b></span>
+      </div>
     </div>
   </section>
  </div>
@@ -1574,7 +1577,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-10-25-crate-ach1';
+  var V='2026-10-28-soon-pinecrest';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
