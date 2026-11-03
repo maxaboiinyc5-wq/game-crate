@@ -1160,7 +1160,7 @@ rack.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))retu
    deep 808 bass, half-time trap drums, echoing lead) played by a tiny synth in the browser. No sound files. ---- */
 let AC=null,mTimer=0,mOn=true,mStep=0,mNext=0,mGain=null,nBuf=null,mDly=null;
 try{mOn=localStorage.getItem('maxcade.music')!=='0'}catch(e){}
-const hz=m=>440*Math.pow(2,(m-69)/12),SP=60/74/4;
+const hz=m=>440*Math.pow(2,(m-69)/12),SP=60/74/4,MK=1.5;
 const CH=[{r:36,c:[51,55,58,62]},{r:32,c:[51,55,56,60]},{r:29,c:[48,51,53,56]},{r:31,c:[50,53,56,59]}];
 const LA=[[[0,75,3],[4,74,3],[8,70,6]],[[0,72,3],[4,70,2],[6,67,8]],[[0,68,3],[4,67,2],[6,65,3],[10,63,4]],[[0,62,4],[6,65,2],[8,67,2],[10,71,5]]],
       LB=[[[0,79,4],[6,77,2],[8,75,6]],[[0,75,3],[4,74,2],[6,72,8]],[[0,72,2],[2,70,2],[4,68,4],[10,67,4]],[[0,67,12]]];
@@ -1236,7 +1236,10 @@ function sched(){
 function musicStart(){
   if(!mOn||busy)return;
   if(AC){if(AC.state!=='running'){try{AC.resume()}catch(e){}}return}
-  try{AC=new (window.AudioContext||window.webkitAudioContext)();mGain=AC.createGain();mGain.gain.value=.6;mGain.connect(AC.destination);
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();mGain=AC.createGain();mGain.gain.value=1;
+    /* loudness: squeeze the peaks, then turn the whole mix up */
+    const cmp=AC.createDynamicsCompressor(),mk=AC.createGain();cmp.threshold.value=-20;cmp.knee.value=8;cmp.ratio.value=5;cmp.attack.value=.004;cmp.release.value=.2;mk.gain.value=MK;
+    mGain.connect(cmp);cmp.connect(mk);mk.connect(AC.destination);
     mDly=AC.createDelay(1);mDly.delayTime.value=SP*3;const fb=AC.createGain(),lp=AC.createBiquadFilter(),wet=AC.createGain();
     fb.gain.value=.35;lp.type='lowpass';lp.frequency.value=2200;wet.gain.value=.35;
     mDly.connect(lp);lp.connect(fb);fb.connect(mDly);lp.connect(wet);wet.connect(mGain);
@@ -1596,7 +1599,7 @@ function launch(g,cart){
 <script>
 /* Game Crate: home-screen apps can't refresh, so check for a newer version of this page and load it */
 (function(){
-  var V='2026-11-02-crate26';
+  var V='2026-11-02-crate27';
   function check(){
     if(window.__maxcade)return;
     fetch('./?check='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
